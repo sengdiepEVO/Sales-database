@@ -669,6 +669,15 @@
       <div class="ms-logo"><div></div><div></div><div></div><div></div></div>
       Sign in with Microsoft
     </button>
+    <div style="margin-top:20px;text-align:left">
+      <label style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">Anthropic API Key</label>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <input type="password" id="api-key-field" placeholder="sk-ant-..." 
+          style="flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:4px;font-family:'IBM Plex Mono',monospace;font-size:12px;background:var(--bg);color:var(--ink);outline:none">
+        <button class="btn primary" onclick="saveApiKey()">Save</button>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:6px">Stored only in your browser. Never sent to GitHub.</div>
+    </div>
     <div class="login-note">Your data stays in OneDrive. This app reads and writes directly to <strong>sales DB - Claude.xlsx</strong></div>
   </div>
 </div>
@@ -802,7 +811,7 @@ const CLIENT_ID = 'cd53b987-59ab-4b81-9bfb-178cfa8ee5b2';
 const REDIRECT_URI = 'https://sengdiepevo.github.io/Sales-database/';
 const FILE_NAME = 'sales DB - Claude.xlsx';
 const SCOPES = ['Files.ReadWrite', 'User.Read'];
-const ANTHROPIC_KEY = ''; // ← Paste your Anthropic API key here
+const ANTHROPIC_KEY = () => sessionStorage.getItem('anthropic_key') || '';
 
 const msalConfig = {
   auth: {
@@ -830,6 +839,18 @@ let editRowIdx = -1;
 let fileId = null;
 let accessToken = null;
 let unsavedChanges = false;
+
+// ── API KEY ────────────────────────────────────────────
+function saveApiKey() {
+  const key = document.getElementById('api-key-field').value.trim();
+  if (!key.startsWith('sk-ant-')) {
+    toast('Invalid key — should start with sk-ant-', 'error');
+    return;
+  }
+  sessionStorage.setItem('anthropic_key', key);
+  toast('API key saved ✓', 'success');
+  document.getElementById('api-key-field').value = '••••••••••••••••';
+}
 
 // ── AUTH ───────────────────────────────────────────────
 async function signIn() {
@@ -1080,7 +1101,7 @@ function switchTab(name) {
 // ── REPORTS ────────────────────────────────────────────
 async function genReport(type) {
   if (!allData.length) { toast('No data loaded', 'error'); return; }
-  if (!ANTHROPIC_KEY) { toast('Add your Anthropic API key in the code', 'error'); return; }
+  if (!ANTHROPIC_KEY()) { toast('Add your Anthropic API key in the code', 'error'); return; }
 
   const prompts = {
     summary: 'Generate a comprehensive sales summary. Include total revenue, deal count, win rate, average deal size, and key insights.',
@@ -1098,7 +1119,7 @@ async function genReport(type) {
     const snap = dataSnapshot();
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01' },
+      headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY(), 'anthropic-version': '2023-06-01' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
@@ -1118,7 +1139,7 @@ async function sendChat() {
   const inp = document.getElementById('chat-input');
   const msg = inp.value.trim();
   if (!msg) return;
-  if (!ANTHROPIC_KEY) { toast('Add your Anthropic API key in the code to use chat', 'error'); return; }
+  if (!ANTHROPIC_KEY()) { toast('Add your Anthropic API key in the code to use chat', 'error'); return; }
   inp.value = '';
 
   addMsg('user', msg);
@@ -1127,7 +1148,7 @@ async function sendChat() {
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01' },
+      headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY(), 'anthropic-version': '2023-06-01' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
@@ -1215,6 +1236,12 @@ function toast(msg, type='') {
 
 // ── INIT ───────────────────────────────────────────────
 (async () => {
+  // Restore API key indicator if already saved
+  const savedKey = sessionStorage.getItem('anthropic_key');
+  if (savedKey) {
+    const f = document.getElementById('api-key-field');
+    if (f) f.value = '••••••••••••••••';
+  }
   try {
     const pca = await getMsal();
     // handleRedirectPromise catches the response when Microsoft redirects back
