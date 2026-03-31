@@ -917,7 +917,7 @@ async function graphGet(url) {
 async function loadFileFromOneDrive() {
   // Search for the file
   const encoded = encodeURIComponent(FILE_NAME);
-  const search = await graphGet(`https://graph.microsoft.com/v1.0/me/drive/root/search(q='${encoded}')`);
+  const search = await graphGet(`https://graph.microsoft.com/v1.0/me/drive/drive/search(q='${encoded}')`);
   const file = search.value?.find(f => f.name === FILE_NAME);
   if (!file) throw new Error(`Could not find "${FILE_NAME}" in your OneDrive. Make sure the file exists.`);
   fileId = file.id;
