@@ -1818,11 +1818,12 @@ function deskEditRow(idx) {
       const val = String(row[h] ?? '').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
       const bg = group.colour;
       const tc = group.textColour;
-      const labelBg = bg;
+      const labelBg = group.colour;
       const labelTc = group.textColour;
+      const fmtDisp = deskFormatDisplay(h, String(row[h] ?? ''));
       editHtml += `<tr id="d-row-${sid(h)}" onclick="deskStartEdit('${sid(h)}','${val}')" style="cursor:pointer">
-        <td style="padding:9px 16px;border-bottom:0.5px solid rgba(0,0,0,0.1);width:40%;font-size:12px;font-weight:500;background:${labelBg};color:${labelTc};user-select:none">${h.trim()}</td>
-        <td style="padding:9px 16px;border-bottom:0.5px solid var(--border);font-size:13px;color:var(--ink);background:var(--surface)" id="d-disp-${sid(h)}">${val || '<span style="color:var(--muted);font-style:italic">&#8212;</span>'}</td>
+        <td style="padding:9px 16px;border-bottom:0.5px solid rgba(0,0,0,0.1);white-space:nowrap;font-size:12px;font-weight:500;background:${labelBg};color:${labelTc};user-select:none">${h.trim()}</td>
+        <td style="padding:9px 16px;border-bottom:0.5px solid var(--border);font-size:13px;color:var(--ink);background:var(--surface)" id="d-disp-${sid(h)}">${fmtDisp}</td>
       </tr>`;
     });
   });
@@ -1832,9 +1833,10 @@ function deskEditRow(idx) {
 
     ungrouped.forEach(h => {
       const val = String(row[h] ?? '').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      const fmtDispU = deskFormatDisplay(h, String(row[h] ?? ''));
       editHtml += `<tr id="d-row-${sid(h)}" onclick="deskStartEdit('${sid(h)}','${val}')" style="cursor:pointer">
-        <td style="padding:9px 16px;border-bottom:0.5px solid rgba(0,0,0,0.1);width:40%;font-size:12px;font-weight:500;background:#e8e3d8;color:#1a1408;user-select:none">${h.trim()}</td>
-        <td style="padding:9px 16px;border-bottom:0.5px solid var(--border);font-size:13px;color:var(--ink);background:var(--surface)" id="d-disp-${sid(h)}">${val || '<span style="color:var(--muted);font-style:italic">&#8212;</span>'}</td>
+        <td style="padding:9px 16px;border-bottom:0.5px solid rgba(0,0,0,0.1);white-space:nowrap;font-size:12px;font-weight:500;background:#e8e3d8;color:#1a1408;user-select:none">${h.trim()}</td>
+        <td style="padding:9px 16px;border-bottom:0.5px solid var(--border);font-size:13px;color:var(--ink);background:var(--surface)" id="d-disp-${sid(h)}">${fmtDispU}</td>
       </tr>`;
     });
   }
@@ -1862,11 +1864,12 @@ function deskEditFromPanel() {
       const val = String(row[h] ?? '').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
       const bg = group.colour;
       const tc = group.textColour;
-      const labelBg = bg;
+      const labelBg = group.colour;
       const labelTc = group.textColour;
+      const fmtDisp = deskFormatDisplay(h, String(row[h] ?? ''));
       editHtml += `<tr id="d-row-${sid(h)}" onclick="deskStartEdit('${sid(h)}','${val}')" style="cursor:pointer">
-        <td style="padding:9px 16px;border-bottom:0.5px solid rgba(0,0,0,0.1);width:40%;font-size:12px;font-weight:500;background:${labelBg};color:${labelTc};user-select:none">${h.trim()}</td>
-        <td style="padding:9px 16px;border-bottom:0.5px solid var(--border);font-size:13px;color:var(--ink);background:var(--surface)" id="d-disp-${sid(h)}">${val || '<span style="color:var(--muted);font-style:italic">&#8212;</span>'}</td>
+        <td style="padding:9px 16px;border-bottom:0.5px solid rgba(0,0,0,0.1);white-space:nowrap;font-size:12px;font-weight:500;background:${labelBg};color:${labelTc};user-select:none">${h.trim()}</td>
+        <td style="padding:9px 16px;border-bottom:0.5px solid var(--border);font-size:13px;color:var(--ink);background:var(--surface)" id="d-disp-${sid(h)}">${fmtDisp}</td>
       </tr>`;
     });
   });
@@ -1876,9 +1879,10 @@ function deskEditFromPanel() {
 
     ungrouped.forEach(h => {
       const val = String(row[h] ?? '').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      const fmtDispU = deskFormatDisplay(h, String(row[h] ?? ''));
       editHtml += `<tr id="d-row-${sid(h)}" onclick="deskStartEdit('${sid(h)}','${val}')" style="cursor:pointer">
-        <td style="padding:9px 16px;border-bottom:0.5px solid rgba(0,0,0,0.1);width:40%;font-size:12px;font-weight:500;background:#e8e3d8;color:#1a1408;user-select:none">${h.trim()}</td>
-        <td style="padding:9px 16px;border-bottom:0.5px solid var(--border);font-size:13px;color:var(--ink);background:var(--surface)" id="d-disp-${sid(h)}">${val || '<span style="color:var(--muted);font-style:italic">&#8212;</span>'}</td>
+        <td style="padding:9px 16px;border-bottom:0.5px solid rgba(0,0,0,0.1);white-space:nowrap;font-size:12px;font-weight:500;background:#e8e3d8;color:#1a1408;user-select:none">${h.trim()}</td>
+        <td style="padding:9px 16px;border-bottom:0.5px solid var(--border);font-size:13px;color:var(--ink);background:var(--surface)" id="d-disp-${sid(h)}">${fmtDispU}</td>
       </tr>`;
     });
   }
@@ -1888,25 +1892,64 @@ function deskEditFromPanel() {
   deskShowScreen('edit');
 }
 
+const SALES_CONDITIONS = ['1. On Sale','2. Pending SA','3. Deposit','4. Exchanged','5. Settled','6. Unreleased','7. Withheld','8. Avantaus'];
+const SALES_COND_KEYS = new Set([sid('Sales Condition '), sid('Sales Condition')]);
+
+function deskFormatDisplay(h, rawVal) {
+  if (!rawVal || rawVal === '' || rawVal === 'NaN') return '<span style="color:var(--muted);font-style:italic">&#8212;</span>';
+  if (DATE_COLS.has(h)) return fmtDate(rawVal);
+  if (PHONE_COLS.has(h) || h.toLowerCase().includes('mobile') || h.toLowerCase().includes('phone')) return fmtPhone(rawVal);
+  if (CURRENCY_COLS.has(h) || h.includes('$') || h.toLowerCase().includes('price')) {
+    const n = Number(rawVal);
+    if (!isNaN(n)) return '$' + n.toLocaleString();
+  }
+  return rawVal;
+}
+
 function deskStartEdit(key, currentVal) {
   const row = document.getElementById('d-row-' + key);
   const disp = document.getElementById('d-disp-' + key);
-  if (!row || !disp || disp.tagName === 'INPUT') return;
+  if (!row || !disp || disp.querySelector('input,select')) return;
+  const rawVal = (currentVal === '&#8212;' || currentVal === '—') ? '' : currentVal;
+  disp.style.background = 'var(--accent-light)';
+  disp.innerHTML = '';
+  const inputStyle = 'width:100%;border:none;outline:none;font-size:13px;font-family:Aptos,sans-serif;background:transparent;padding:0;color:var(--ink)';
+
+  // Sales Condition dropdown
+  if (SALES_COND_KEYS.has(key)) {
+    const sel = document.createElement('select');
+    sel.style.cssText = inputStyle + ';cursor:pointer';
+    SALES_CONDITIONS.forEach(c => {
+      const o = document.createElement('option');
+      o.value = c; o.textContent = c;
+      if (c === rawVal) o.selected = true;
+      sel.appendChild(o);
+    });
+    disp.appendChild(sel);
+    sel.focus();
+    formDirty = true;
+    sel.addEventListener('change', () => { formDirty = true; });
+    sel.addEventListener('blur', () => {
+      disp.style.background = '';
+      disp.innerHTML = deskFormatDisplay(key, sel.value);
+      row.onclick = () => deskStartEdit(key, sel.value);
+    });
+    return;
+  }
+
   const input = document.createElement('input');
   input.type = 'text';
-  input.value = (currentVal === '&#8212;' || currentVal === '—') ? '' : currentVal;
+  input.value = rawVal;
   input.id = 'd-edit-' + key;
   input.setAttribute('autocorrect','off');
   input.setAttribute('autocapitalize','none');
-  input.style.cssText = 'width:100%;border:none;outline:none;font-size:13px;font-family:Aptos,sans-serif;background:var(--accent-light);padding:0;color:var(--ink)';
-  disp.innerHTML = '';
-  disp.style.background = 'var(--accent-light)';
+  input.style.cssText = inputStyle;
   disp.appendChild(input);
   input.focus();
   input.addEventListener('input', () => { formDirty = true; });
   input.addEventListener('blur', () => {
     disp.style.background = '';
-    disp.innerHTML = input.value || '<span style="color:var(--muted);font-style:italic">—</span>';
+    disp.innerHTML = deskFormatDisplay(key, input.value);
     row.onclick = () => deskStartEdit(key, input.value);
   });
 }
