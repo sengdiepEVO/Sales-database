@@ -844,11 +844,11 @@ async function saveEdit() {
     }
   });
   applyFilters(); updateStats();
-  showScreen('data');
   try {
     await syncToOneDrive();
+    showScreen('data');
   } catch(e) {
-    toast('Save failed: ' + e.message, 'error');
+    // Stay on edit screen so user can retry
   }
 }
 
