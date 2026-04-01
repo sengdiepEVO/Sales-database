@@ -345,7 +345,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
   <!-- DESKTOP TOP NAV -->
   <div class="desktop-nav" id="desktop-nav">
     <button class="desktop-navbtn active" id="dnav-data" onclick="deskShowScreen('data')">Data</button>
-    <button class="desktop-navbtn" id="dnav-chat" onclick="deskShowScreen('chat')">Ask Claude</button>
+    <button class="desktop-navbtn" id="dnav-chat" onclick="deskShowScreen('chat');checkKeyBanner()">Ask Claude</button>
     <button class="desktop-navbtn" id="dnav-reports" onclick="deskShowScreen('reports')">Reports</button>
     <div class="desktop-nav-right">
       <div class="sync-pill">
@@ -533,6 +533,14 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
         <span class="sub-title">Ask Claude</span>
         <button onclick="clearChat()" style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:Aptos,sans-serif">Clear</button>
       </div>
+      <div id="chat-key-banner" style="display:none;padding:10px 16px;background:#fff8e1;border-bottom:1px solid #ffe082;font-size:12px;color:#5d4037">
+        ⚠ API key missing or invalid.
+        <div style="display:flex;gap:6px;margin-top:6px">
+          <input id="chat-key-input" type="text" placeholder="Paste sk-ant-... key" autocorrect="off" autocapitalize="none" spellcheck="false"
+            style="flex:1;padding:6px 10px;border:1px solid #ccc;border-radius:6px;font-size:12px;font-family:Aptos,sans-serif">
+          <button onclick="saveChatKey()" style="padding:6px 12px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer">Save</button>
+        </div>
+      </div>
       <div class="chat-msgs" id="chat-msgs">
         <div class="msg system"><div class="msg-body">Sign in to start asking questions about your sales data.</div></div>
       </div>
@@ -572,7 +580,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
   <!-- PHONE BOTTOM NAV -->
   <nav class="bottom-nav">
     <div class="nav-item active" id="nav-data" onclick="showScreen('data')"><span class="nav-label">Data</span></div>
-    <div class="nav-item" id="nav-chat" onclick="showScreen('chat')"><span class="nav-label">Ask Claude</span></div>
+    <div class="nav-item" id="nav-chat" onclick="showScreen('chat');checkKeyBanner()"><span class="nav-label">Ask Claude</span></div>
     <div class="nav-item" id="nav-reports" onclick="showScreen('reports')"><span class="nav-label">Reports</span></div>
   </nav>
 
@@ -616,7 +624,12 @@ const CLIENT_ID = 'cd53b987-59ab-4b81-9bfb-178cfa8ee5b2';
 const REDIRECT_URI = 'https://SENDIE1.github.io/Sales-database/';
 const FILE_NAME = 'Sales DB - Claude.xlsx';
 const SCOPES = ['Files.ReadWrite', 'User.Read'];
-const ANTHROPIC_KEY = () => localStorage.getItem('anthropic_key') || '';
+const ANTHROPIC_KEY = () => {
+  const k = localStorage.getItem('anthropic_key') || '';
+  // Return empty string if it looks like the bullet placeholder or isn't a real key
+  if (!k.startsWith('sk-')) return '';
+  return k;
+};
 const msalConfig = { auth: { clientId: CLIENT_ID, authority: 'https://login.microsoftonline.com/ab54a23e-1458-4baf-a2f6-9b8164f032d1', redirectUri: REDIRECT_URI }, cache: { cacheLocation: 'sessionStorage' } };
 let msalInstance = null;
 async function getMsal() { if (!msalInstance) msalInstance = await msal.PublicClientApplication.createPublicClientApplication(msalConfig); return msalInstance; }
@@ -644,7 +657,11 @@ async function testApiKey() {
 
 function saveApiKey() {
   const key = document.getElementById('api-key-field').value.replace(/\s+/g, '').trim();
-  if (!key.startsWith('sk-')) { toast('Invalid key — should start with sk-', 'error'); return; }
+  // Reject placeholder bullets or anything that isn't a real key
+  if (!key || key.includes('•') || !key.startsWith('sk-')) {
+    toast('Please enter a valid API key (starts with sk-)', 'error');
+    return;
+  }
   localStorage.setItem('anthropic_key', key);
   toast('API key saved ✓', 'success');
   document.getElementById('api-key-field').value = '••••••••••••••••';
@@ -1516,7 +1533,7 @@ function showScreen(name) {
 
 async function genReport(type) {
   if (!allData.length) { toast('No data loaded', 'error'); return; }
-  if (!ANTHROPIC_KEY()) { toast('Add your Anthropic API key first', 'error'); return; }
+  if (!ANTHROPIC_KEY()) { toast('API key missing — re-enter it on the sign-in screen', 'error'); return; }
   const prompts = {
     summary: 'Generate a comprehensive sales summary. Include total lots, settled count, exchanged count, revenue, and key insights.',
     pipeline: 'Analyse the open sales pipeline. Which deals are at risk? What is the likely revenue from open deals?',
@@ -1537,10 +1554,27 @@ async function genReport(type) {
   } catch(e) { out.textContent = 'Error: ' + e.message; }
 }
 
+function saveChatKey() {
+  const inp = document.getElementById('chat-key-input');
+  const key = (inp?.value || '').replace(/\s+/g,'').trim();
+  if (!key || key.includes('•') || !key.startsWith('sk-')) {
+    toast('Invalid key — must start with sk-', 'error'); return;
+  }
+  localStorage.setItem('anthropic_key', key);
+  inp.value = '';
+  document.getElementById('chat-key-banner').style.display = 'none';
+  toast('API key saved ✓', 'success');
+}
+
+function checkKeyBanner() {
+  const banner = document.getElementById('chat-key-banner');
+  if (banner) banner.style.display = ANTHROPIC_KEY() ? 'none' : 'block';
+}
+
 async function sendChat() {
   const inp = document.getElementById('chat-input');
   const msg = inp.value.trim(); if (!msg) return;
-  if (!ANTHROPIC_KEY()) { toast('Add your Anthropic API key first', 'error'); return; }
+  if (!ANTHROPIC_KEY()) { toast('API key missing — re-enter it on the sign-in screen', 'error'); return; }
   inp.value = ''; addMsg('user', msg);
   const thinking = addThinking();
   try {
@@ -2229,7 +2263,7 @@ document.addEventListener('click', e => {
 async function deskSendChat() {
   const inp = document.getElementById('dchat-input');
   const msg = inp.value.trim(); if (!msg) return;
-  if (!ANTHROPIC_KEY()) { toast('Add your Anthropic API key first', 'error'); return; }
+  if (!ANTHROPIC_KEY()) { toast('API key missing — re-enter it on the sign-in screen', 'error'); return; }
   inp.value = '';
   deskAddMsg('user', msg);
   const thinking = deskAddThinking();
@@ -2263,7 +2297,7 @@ function deskUseSug(btn) { document.getElementById('dchat-input').value = btn.te
 // ── DESKTOP REPORTS ──
 async function deskGenReport(type) {
   if (!allData.length) { toast('No data loaded', 'error'); return; }
-  if (!ANTHROPIC_KEY()) { toast('Add your Anthropic API key first', 'error'); return; }
+  if (!ANTHROPIC_KEY()) { toast('API key missing — re-enter it on the sign-in screen', 'error'); return; }
   const prompts = {
     summary: 'Generate a comprehensive sales summary. Include total lots, settled count, exchanged count, revenue, and key insights.',
     pipeline: 'Analyse the open sales pipeline. Which deals are at risk? What is the likely revenue from open deals?',
