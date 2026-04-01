@@ -189,6 +189,8 @@ body { background: var(--bg); color: var(--ink); font-family: 'Aptos', sans-seri
         <button onclick="saveApiKey()">Save</button>
       </div>
       <div class="api-note">Stored in your browser only. Required for Chat and Reports.</div>
+    <button onclick="testApiKey()" style="margin-top:10px;width:100%;padding:9px;background:transparent;border:1px solid var(--border);border-radius:4px;font-family:'Aptos',sans-serif;font-size:12px;cursor:pointer;color:var(--muted)">Test API key</button>
+    <div id="api-test-result" style="font-size:11px;margin-top:6px;color:var(--muted)"></div>
     </div>
   </div>
 </div>
@@ -382,8 +384,26 @@ async function getMsal() { if (!msalInstance) msalInstance = await msal.PublicCl
 let allData = [], headers = [], filteredData = [], fileId = null, editRowIdx = -1, modalRowIdx = -1, filterDrawerOpen = false;
 const FILTER_MAP = { 'f-stage':'Stage', 'f-condition':'Sales Condition ', 'f-channel':'Sales Channel', 'f-partner':'Channel Partner', 'f-productline':'Product Line', 'f-market':'Channel Market', 'f-year':'Settled Year' };
 
+async function testApiKey() {
+  const key = localStorage.getItem('anthropic_key');
+  const result = document.getElementById('api-test-result');
+  if (!key) { result.textContent = 'No key saved.'; result.style.color = 'var(--danger)'; return; }
+  result.textContent = 'Testing key: ' + key.slice(0,12) + '...';
+  result.style.color = 'var(--muted)';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 10, messages: [{ role: 'user', content: 'Hi' }] })
+    });
+    const d = await res.json();
+    if (d.error) { result.textContent = 'Error: ' + d.error.message; result.style.color = 'var(--danger)'; }
+    else { result.textContent = '✓ Key is valid and working!'; result.style.color = 'var(--accent)'; }
+  } catch(e) { result.textContent = 'Error: ' + e.message; result.style.color = 'var(--danger)'; }
+}
+
 function saveApiKey() {
-  const key = document.getElementById('api-key-field').value.trim();
+  const key = document.getElementById('api-key-field').value.replace(/\s+/g, '').trim();
   if (!key.startsWith('sk-ant-')) { toast('Invalid key — should start with sk-ant-', 'error'); return; }
   localStorage.setItem('anthropic_key', key);
   toast('API key saved ✓', 'success');
