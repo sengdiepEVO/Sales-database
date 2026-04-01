@@ -2,975 +2,424 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Sales DB</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #f5f0e8;
-    --surface: #fff;
-    --surface2: #f0ebe0;
-    --border: #ddd5c0;
-    --ink: #1a1408;
-    --muted: #8a7d65;
-    --accent: #1a6b3a;
-    --accent-light: #e8f4ed;
-    --danger: #8b2020;
-    --danger-light: #fdf0f0;
-    --gold: #b8860b;
-    --gold-light: #fdf8e8;
-    --shadow: 0 2px 12px rgba(26,20,8,0.08);
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--ink);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 13px;
-    min-height: 100vh;
-  }
-
-  /* HEADER */
-  header {
-    background: var(--ink);
-    color: var(--bg);
-    padding: 0 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 56px;
-    position: sticky;
-    top: 0;
-    z-index: 50;
-  }
-
-  .logo {
-    font-family: 'Playfair Display', serif;
-    font-size: 22px;
-    font-style: italic;
-    letter-spacing: -0.5px;
-    color: #f5f0e8;
-  }
-
-  .logo strong { font-style: normal; color: #90d4a8; }
-
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .user-pill {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 20px;
-    padding: 5px 12px 5px 8px;
-    font-size: 11px;
-    color: #c8bfa8;
-  }
-
-  .user-avatar {
-    width: 22px; height: 22px;
-    border-radius: 50%;
-    background: var(--accent);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 10px;
-    color: white;
-    font-weight: 500;
-  }
-
-  .btn {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    padding: 7px 16px;
-    border-radius: 4px;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--ink);
-    cursor: pointer;
-    transition: all 0.15s;
-    letter-spacing: 0.3px;
-    white-space: nowrap;
-  }
-  .btn:hover { background: var(--surface2); border-color: var(--muted); }
-  .btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
-  .btn.primary:hover { background: #155a30; }
-  .btn.danger { background: var(--danger); color: white; border-color: var(--danger); }
-  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-  .btn-sm { padding: 5px 10px; font-size: 10px; }
-
-  /* LOGIN SCREEN */
-  #login-screen {
-    min-height: calc(100vh - 56px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 20px;
-  }
-
-  .login-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 48px 40px;
-    max-width: 420px;
-    width: 100%;
-    box-shadow: var(--shadow);
-    text-align: center;
-  }
-
-  .login-icon {
-    width: 64px; height: 64px;
-    background: var(--accent-light);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 24px;
-    font-size: 28px;
-  }
-
-  .login-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 26px;
-    font-weight: 700;
-    margin-bottom: 8px;
-  }
-
-  .login-sub {
-    color: var(--muted);
-    font-size: 12px;
-    line-height: 1.6;
-    margin-bottom: 32px;
-  }
-
-  .ms-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    width: 100%;
-    padding: 13px 20px;
-    background: #0078d4;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 13px;
-    cursor: pointer;
-    transition: background 0.2s;
-    letter-spacing: 0.3px;
-  }
-  .ms-btn:hover { background: #006abc; }
-
-  .ms-logo {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2px;
-    width: 18px; height: 18px;
-    flex-shrink: 0;
-  }
-  .ms-logo div { border-radius: 1px; }
-  .ms-logo div:nth-child(1) { background: #f25022; }
-  .ms-logo div:nth-child(2) { background: #7fba00; }
-  .ms-logo div:nth-child(3) { background: #00a4ef; }
-  .ms-logo div:nth-child(4) { background: #ffb900; }
-
-  .login-note {
-    margin-top: 20px;
-    font-size: 10px;
-    color: var(--muted);
-    line-height: 1.6;
-  }
-
-  /* APP LAYOUT */
-  #app-screen { display: none; }
-
-  .app-body {
-    display: grid;
-    grid-template-columns: 1fr 360px;
-    min-height: calc(100vh - 56px);
-  }
-
-  @media (max-width: 768px) {
-    .app-body { grid-template-columns: 1fr; }
-    .chat-panel { display: none; }
-    .chat-panel.mobile-open { display: flex; position: fixed; inset: 56px 0 0 0; z-index: 40; }
-  }
-
-  /* DATA PANEL */
-  .data-panel {
-    display: flex;
-    flex-direction: column;
-    border-right: 1px solid var(--border);
-    min-height: calc(100vh - 56px);
-  }
-
-  .panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 20px;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface);
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .panel-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 16px;
-    font-style: italic;
-  }
-
-  .panel-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-
-  /* TABS */
-  .tabs {
-    display: flex;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface2);
-    overflow-x: auto;
-  }
-
-  .tab {
-    padding: 11px 18px;
-    font-size: 11px;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    color: var(--muted);
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: all 0.15s;
-    white-space: nowrap;
-  }
-  .tab:hover { color: var(--ink); }
-  .tab.active { color: var(--accent); border-bottom-color: var(--accent); background: var(--surface); }
-
-  .tab-pane { display: none; flex: 1; flex-direction: column; overflow: hidden; }
-  .tab-pane.active { display: flex; }
-
-  /* TABLE */
-  .table-toolbar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface);
-  }
-
-  .search-box {
-    flex: 1;
-    padding: 8px 12px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    background: var(--bg);
-    color: var(--ink);
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .search-box:focus { border-color: var(--accent); }
-  .search-box::placeholder { color: var(--muted); }
-
-  .rec-count { font-size: 11px; color: var(--muted); white-space: nowrap; }
-
-  .table-wrap { overflow: auto; flex: 1; }
-
-  table { width: 100%; border-collapse: collapse; }
-  thead { position: sticky; top: 0; z-index: 2; }
-
-  th {
-    background: var(--surface2);
-    padding: 9px 14px;
-    text-align: left;
-    font-size: 10px;
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-    color: var(--muted);
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-    cursor: pointer;
-  }
-  th:hover { color: var(--ink); }
-
-  td {
-    padding: 10px 14px;
-    border-bottom: 1px solid #ede8dc;
-    font-size: 12px;
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  tr:hover td { background: var(--accent-light); }
-  tr.selected td { background: #dff0e8; }
-
-  .badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 3px;
-    font-size: 10px;
-    letter-spacing: 0.3px;
-    font-weight: 500;
-  }
-  .badge-won { background: var(--accent-light); color: var(--accent); }
-  .badge-lost { background: var(--danger-light); color: var(--danger); }
-  .badge-open { background: #e8f0fd; color: #1a3a8b; }
-  .badge-prospect { background: var(--gold-light); color: var(--gold); }
-
-  /* FORM */
-  .form-wrap {
-    padding: 24px;
-    overflow-y: auto;
-    flex: 1;
-  }
-
-  .form-section-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 18px;
-    font-style: italic;
-    margin-bottom: 20px;
-    color: var(--ink);
-  }
-
-  .form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-
-  @media (max-width: 500px) { .form-grid { grid-template-columns: 1fr; } }
-
-  .form-group { display: flex; flex-direction: column; gap: 5px; }
-  .form-group.full { grid-column: 1 / -1; }
-
-  label {
-    font-size: 10px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  input[type=text], input[type=number], input[type=date], select, textarea {
-    padding: 9px 12px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    background: var(--bg);
-    color: var(--ink);
-    outline: none;
-    transition: border-color 0.2s;
-    width: 100%;
-  }
-  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
-  textarea { resize: vertical; min-height: 80px; }
-
-  .form-actions { display: flex; gap: 10px; margin-top: 24px; flex-wrap: wrap; }
-
-  /* REPORTS */
-  .report-btns {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 16px;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface);
-  }
-
-  .report-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 20px;
-    font-size: 13px;
-    line-height: 1.8;
-    white-space: pre-wrap;
-  }
-
-  .report-placeholder {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--muted);
-    font-size: 12px;
-    font-style: italic;
-    font-family: 'Playfair Display', serif;
-  }
-
-  /* CHAT PANEL */
-  .chat-panel {
-    display: flex;
-    flex-direction: column;
-    background: var(--surface);
-    border-left: 1px solid var(--border);
-    height: calc(100vh - 56px);
-    position: sticky;
-    top: 56px;
-  }
-
-  .chat-top {
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--surface2);
-  }
-
-  .chat-top-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 15px;
-    font-style: italic;
-  }
-
-  .chat-msgs {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
-
-  .msg { display: flex; flex-direction: column; gap: 4px; animation: fadeUp 0.25s ease; }
-  @keyframes fadeUp { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
-
-  .msg-who { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
-
-  .msg-body {
-    padding: 10px 14px;
-    border-radius: 6px;
-    font-size: 12px;
-    line-height: 1.65;
-    white-space: pre-wrap;
-  }
-
-  .msg.user .msg-body {
-    background: var(--accent);
-    color: white;
-    align-self: flex-end;
-    max-width: 88%;
-    border-radius: 6px 6px 2px 6px;
-  }
-
-  .msg.assistant .msg-body {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--ink);
-  }
-
-  .msg.system .msg-body {
-    background: transparent;
-    border: 1px dashed var(--border);
-    color: var(--muted);
-    font-size: 11px;
-    font-style: italic;
-    font-family: 'Playfair Display', serif;
-  }
-
-  .typing {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-    padding: 12px 14px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    width: fit-content;
-  }
-  .typing span {
-    width: 5px; height: 5px;
-    border-radius: 50%;
-    background: var(--muted);
-    animation: blink 1.2s infinite;
-  }
-  .typing span:nth-child(2){animation-delay:.2s}
-  .typing span:nth-child(3){animation-delay:.4s}
-  @keyframes blink{0%,80%,100%{opacity:.3}40%{opacity:1}}
-
-  .chat-bottom {
-    padding: 12px;
-    border-top: 1px solid var(--border);
-    background: var(--surface2);
-  }
-
-  .suggestions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 10px;
-  }
-
-  .suggestion {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--muted);
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 10px;
-    cursor: pointer;
-    font-family: 'IBM Plex Mono', monospace;
-    transition: all 0.15s;
-  }
-  .suggestion:hover { border-color: var(--accent); color: var(--accent); }
-
-  .input-row { display: flex; gap: 8px; }
-
-  #chat-input {
-    flex: 1;
-    padding: 9px 12px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    background: var(--surface);
-    color: var(--ink);
-    outline: none;
-    resize: none;
-    height: 40px;
-    transition: border-color 0.2s;
-  }
-  #chat-input:focus { border-color: var(--accent); }
-  #chat-input::placeholder { color: var(--muted); }
-
-  /* LOADING OVERLAY */
-  #loading {
-    position: fixed; inset: 0;
-    background: rgba(245,240,232,0.9);
-    z-index: 100;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 16px;
-  }
-  #loading.show { display: flex; }
-  .spinner {
-    width: 36px; height: 36px;
-    border: 2px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  #loading p { color: var(--muted); font-size: 12px; font-style: italic; font-family: 'Playfair Display', serif; }
-
-  /* TOAST */
-  #toast {
-    position: fixed;
-    bottom: 24px; left: 50%;
-    transform: translateX(-50%) translateY(60px);
-    background: var(--ink);
-    color: var(--bg);
-    padding: 10px 20px;
-    border-radius: 4px;
-    font-size: 12px;
-    z-index: 200;
-    transition: transform 0.3s;
-    pointer-events: none;
-    white-space: nowrap;
-  }
-  #toast.show { transform: translateX(-50%) translateY(0); }
-  #toast.success { background: var(--accent); }
-  #toast.error { background: var(--danger); }
-
-  /* MOBILE CHAT TOGGLE */
-  .mobile-chat-btn {
-    display: none;
-    position: fixed;
-    bottom: 20px; right: 20px;
-    width: 48px; height: 48px;
-    border-radius: 50%;
-    background: var(--accent);
-    color: white;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    box-shadow: 0 4px 16px rgba(26,107,58,0.35);
-    z-index: 30;
-    align-items: center;
-    justify-content: center;
-  }
-  @media (max-width: 768px) { .mobile-chat-btn { display: flex; } }
-
-  /* SYNC STATUS */
-  .sync-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 10px;
-    padding: 3px 8px;
-    border-radius: 10px;
-    background: var(--accent-light);
-    color: var(--accent);
-  }
-  .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
-  .sync-badge.saving { background: var(--gold-light); color: var(--gold); }
-  .sync-badge.saving .sync-dot { background: var(--gold); animation: pulse 1s infinite; }
-  .sync-badge.error { background: var(--danger-light); color: var(--danger); }
-  .sync-badge.error .sync-dot { background: var(--danger); }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-  ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-  .empty-state {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: var(--muted);
-    gap: 12px;
-    padding: 40px;
-    text-align: center;
-  }
-  .empty-state .es-icon { font-size: 32px; opacity: 0.4; }
-  .empty-state p { font-size: 12px; line-height: 1.6; }
-
-  .filter-bar {
-    border-bottom: 1px solid var(--border);
-    background: var(--surface);
-    padding: 10px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .filter-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-
-  .filter-dropdowns {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .filter-select {
-    padding: 6px 10px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    background: var(--bg);
-    color: var(--ink);
-    outline: none;
-    cursor: pointer;
-    transition: border-color 0.2s;
-    max-width: 160px;
-  }
-  .filter-select:focus { border-color: var(--accent); }
-  .filter-select.active { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+:root {
+  --bg: #f5f0e8; --surface: #fff; --surface2: #f0ebe0; --border: #ddd5c0;
+  --ink: #1a1408; --muted: #8a7d65; --accent: #1a6b3a; --accent-light: #e8f4ed;
+  --danger: #8b2020; --gold: #b8860b; --gold-light: #fdf8e8;
+  --nav-h: 60px; --header-h: 52px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; }
+body { background: var(--bg); color: var(--ink); font-family: 'IBM Plex Mono', monospace; font-size: 13px; display: flex; flex-direction: column; }
+#loading { position: fixed; inset: 0; background: rgba(245,240,232,0.95); z-index: 200; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 14px; }
+#loading.show { display: flex; }
+.spinner { width: 32px; height: 32px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+#loading p { color: var(--muted); font-size: 12px; font-style: italic; font-family: 'Playfair Display', serif; }
+#toast { position: fixed; bottom: calc(var(--nav-h) + 12px); left: 50%; transform: translateX(-50%) translateY(60px); background: var(--ink); color: var(--bg); padding: 10px 20px; border-radius: 4px; font-size: 12px; z-index: 300; transition: transform 0.3s; pointer-events: none; white-space: nowrap; }
+#toast.show { transform: translateX(-50%) translateY(0); }
+#toast.success { background: var(--accent); }
+#toast.error { background: var(--danger); }
+.app-header { height: var(--header-h); background: var(--ink); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; flex-shrink: 0; }
+.header-logo { font-family: 'Playfair Display', serif; font-size: 20px; font-style: italic; color: #90d4a8; }
+.header-logo strong { font-style: normal; }
+.header-right { display: flex; align-items: center; gap: 10px; }
+.user-pill { display: flex; align-items: center; gap: 6px; }
+.user-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 11px; color: white; font-weight: 500; }
+.user-name { font-size: 11px; color: #c8bfa8; }
+.header-btn { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #c8bfa8; font-size: 11px; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-family: 'IBM Plex Mono', monospace; }
+.bottom-nav { height: var(--nav-h); background: var(--surface); border-top: 1px solid var(--border); display: flex; flex-shrink: 0; }
+.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; padding-bottom: 4px; border-top: 2px solid transparent; transition: all 0.15s; }
+.nav-item.active { border-top-color: var(--accent); }
+.nav-item.active .nav-label { color: var(--accent); }
+.nav-icon { font-size: 20px; line-height: 1; }
+.nav-label { font-size: 10px; color: var(--muted); letter-spacing: 0.3px; }
+.screens { flex: 1; overflow: hidden; position: relative; }
+.screen { position: absolute; inset: 0; display: none; flex-direction: column; overflow: hidden; }
+.screen.active { display: flex; }
+#screen-login { background: var(--bg); align-items: center; justify-content: center; padding: 24px; }
+.login-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 32px 24px; width: 100%; max-width: 380px; text-align: center; }
+.login-icon { width: 56px; height: 56px; background: var(--accent-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 24px; }
+.login-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+.login-sub { color: var(--muted); font-size: 12px; line-height: 1.6; margin-bottom: 24px; }
+.ms-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 12px; background: #0078d4; color: white; border: none; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; cursor: pointer; }
+.ms-logo { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; width: 16px; height: 16px; flex-shrink: 0; }
+.ms-logo div { border-radius: 1px; }
+.ms-logo div:nth-child(1){background:#f25022} .ms-logo div:nth-child(2){background:#7fba00}
+.ms-logo div:nth-child(3){background:#00a4ef} .ms-logo div:nth-child(4){background:#ffb900}
+.api-key-section { margin-top: 20px; text-align: left; }
+.api-key-section label { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px; }
+.api-key-row { display: flex; gap: 8px; }
+.api-key-row input { flex: 1; padding: 9px 12px; border: 1px solid var(--border); border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; background: var(--bg); color: var(--ink); outline: none; }
+.api-key-row button { padding: 9px 14px; background: var(--accent); color: white; border: none; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; cursor: pointer; }
+.api-note { font-size: 10px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+#screen-data { background: var(--bg); }
+.filter-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 14px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.search-input { flex: 1; padding: 8px 12px; border: 1px solid var(--border); border-radius: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; background: var(--surface2); color: var(--ink); outline: none; }
+.filter-toggle-btn { display: flex; align-items: center; gap: 5px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 20px; background: var(--surface); color: var(--ink); font-size: 12px; font-family: 'IBM Plex Mono', monospace; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+.filter-toggle-btn.has-filters { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+.filter-count-badge { background: var(--accent); color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 9px; display: flex; align-items: center; justify-content: center; }
+.filter-drawer { background: var(--surface2); border-bottom: 1px solid var(--border); padding: 10px 14px; display: none; flex-direction: column; gap: 8px; flex-shrink: 0; }
+.filter-drawer.open { display: flex; }
+.filter-drawer-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.filter-select { padding: 7px 10px; border: 1px solid var(--border); border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; background: var(--surface); color: var(--ink); outline: none; flex: 1; min-width: 130px; }
+.filter-select.active { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+.filter-clear-btn { padding: 7px 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--muted); font-size: 11px; font-family: 'IBM Plex Mono', monospace; cursor: pointer; white-space: nowrap; }
+.active-pills { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 14px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.active-pills:empty { display: none; }
+.pill { display: flex; align-items: center; gap: 4px; background: var(--accent-light); color: var(--accent); border-radius: 99px; padding: 3px 8px 3px 10px; font-size: 11px; }
+.pill-x { cursor: pointer; font-size: 13px; line-height: 1; color: var(--accent); }
+.rec-bar { padding: 6px 14px; font-size: 11px; color: var(--muted); background: var(--surface2); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.sync-bar { display: flex; align-items: center; gap: 6px; padding: 5px 14px; background: var(--surface); border-bottom: 1px solid var(--border); font-size: 10px; flex-shrink: 0; }
+.sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+.sync-bar.saving .sync-dot { background: var(--gold); animation: pulse 1s infinite; }
+.sync-bar.error .sync-dot { background: var(--danger); }
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.sync-text { font-size: 10px; color: var(--muted); }
+.lot-list { flex: 1; overflow-y: auto; }
+.lot-card { background: var(--surface); padding: 13px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; cursor: pointer; }
+.lot-card:active { background: var(--surface2); }
+.lot-num-box { width: 44px; height: 44px; border-radius: 8px; background: var(--surface2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; color: var(--ink); flex-shrink: 0; text-align: center; line-height: 1.2; }
+.lot-info { flex: 1; min-width: 0; }
+.lot-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+.lot-address { font-size: 12px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+.lot-value { font-size: 13px; font-weight: 500; color: var(--ink); flex-shrink: 0; }
+.lot-bottom { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.lot-stage { font-size: 10px; color: var(--muted); background: var(--surface2); border: 1px solid var(--border); padding: 1px 6px; border-radius: 3px; }
+.lot-partner { font-size: 10px; color: var(--muted); margin-left: auto; }
+.badge { display: inline-block; padding: 2px 7px; border-radius: 3px; font-size: 10px; font-weight: 500; }
+.badge-exc { background: var(--accent-light); color: var(--accent); }
+.badge-set { background: #eaf3de; color: #3b6d11; }
+.badge-dep { background: var(--gold-light); color: var(--gold); }
+.badge-on { background: #e8f0fd; color: #1a3a8b; }
+.badge-pen { background: #eeedfe; color: #534ab7; }
+.badge-oth { background: var(--surface2); color: var(--muted); }
+.empty-state { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 12px; padding: 40px; text-align: center; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(26,20,8,0.5); z-index: 100; display: none; align-items: flex-end; }
+.modal-overlay.open { display: flex; }
+.modal-sheet { background: var(--surface); border-radius: 16px 16px 0 0; width: 100%; max-height: 85vh; overflow-y: auto; padding-bottom: 20px; }
+.modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 12px auto 16px; }
+.modal-header { padding: 0 16px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-family: 'Playfair Display', serif; font-size: 18px; font-style: italic; }
+.modal-close { font-size: 24px; color: var(--muted); cursor: pointer; background: none; border: none; line-height: 1; }
+.modal-body { padding: 16px; }
+.detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); gap: 12px; }
+.detail-row:last-child { border-bottom: none; }
+.detail-label { font-size: 11px; color: var(--muted); flex-shrink: 0; max-width: 45%; }
+.detail-val { font-size: 12px; color: var(--ink); text-align: right; word-break: break-word; }
+.modal-actions { display: flex; gap: 10px; padding: 16px 16px 0; }
+.modal-btn { flex: 1; padding: 12px; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--ink); }
+.modal-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+.form-screen { flex: 1; overflow-y: auto; padding: 16px; }
+.form-group { margin-bottom: 14px; }
+.form-group label { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 5px; }
+.form-group input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; background: var(--bg); color: var(--ink); outline: none; }
+.form-group input:focus { border-color: var(--accent); }
+.form-actions { display: flex; gap: 10px; margin-top: 20px; padding-bottom: 20px; }
+.btn { padding: 12px 20px; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--ink); flex: 1; }
+.btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+.sub-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 16px; height: var(--header-h); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.back-btn { background: none; border: none; color: var(--accent); font-size: 13px; font-family: 'IBM Plex Mono', monospace; cursor: pointer; }
+.sub-title { font-family: 'Playfair Display', serif; font-style: italic; font-size: 16px; }
+#screen-chat { background: var(--bg); }
+.chat-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.chat-header-title { font-family: 'Playfair Display', serif; font-size: 16px; font-style: italic; }
+.chat-clear-btn { font-size: 11px; color: var(--muted); background: none; border: none; cursor: pointer; font-family: 'IBM Plex Mono', monospace; }
+.chat-msgs { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.msg { display: flex; flex-direction: column; gap: 3px; animation: fadeUp 0.2s ease; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+.msg-who { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.msg-body { padding: 10px 13px; border-radius: 8px; font-size: 13px; line-height: 1.6; white-space: pre-wrap; }
+.msg.user { align-items: flex-end; }
+.msg.user .msg-body { background: var(--accent); color: white; border-radius: 12px 12px 3px 12px; max-width: 88%; }
+.msg.assistant .msg-body { background: var(--surface); border: 1px solid var(--border); border-radius: 3px 12px 12px 12px; }
+.msg.system .msg-body { background: transparent; border: 1px dashed var(--border); color: var(--muted); font-size: 12px; font-style: italic; font-family: 'Playfair Display', serif; border-radius: 8px; }
+.typing { display: flex; gap: 4px; align-items: center; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 3px 12px 12px 12px; width: fit-content; }
+.typing span { width: 5px; height: 5px; border-radius: 50%; background: var(--muted); animation: blink 1.2s infinite; }
+.typing span:nth-child(2){animation-delay:.2s} .typing span:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.3}40%{opacity:1}}
+.suggestions { display: flex; gap: 6px; flex-wrap: wrap; padding: 8px 14px 0; }
+.sug-btn { background: var(--surface); border: 1px solid var(--border); color: var(--muted); padding: 5px 10px; border-radius: 12px; font-size: 11px; cursor: pointer; font-family: 'IBM Plex Mono', monospace; }
+.chat-input-area { padding: 10px 14px 14px; border-top: 1px solid var(--border); background: var(--surface); flex-shrink: 0; }
+.chat-input-row { display: flex; gap: 8px; margin-top: 8px; }
+.chat-textarea { flex: 1; padding: 10px 13px; border: 1px solid var(--border); border-radius: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; background: var(--surface2); color: var(--ink); outline: none; resize: none; height: 42px; }
+.chat-send { width: 42px; height: 42px; border-radius: 50%; background: var(--accent); color: white; border: none; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+#screen-reports { background: var(--bg); overflow-y: auto; }
+.reports-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 16px; flex-shrink: 0; }
+.reports-header-title { font-family: 'Playfair Display', serif; font-size: 18px; font-style: italic; }
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 14px; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+.stat-label { font-size: 10px; color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 6px; }
+.stat-val { font-size: 22px; font-weight: 500; color: var(--ink); font-family: 'Playfair Display', serif; }
+.section-title { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); padding: 4px 16px 8px; }
+.report-btn-card { margin: 0 14px 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; display: flex; align-items: center; gap: 14px; cursor: pointer; }
+.report-btn-card:active { background: var(--surface2); }
+.report-icon { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.report-info { flex: 1; }
+.report-title { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
+.report-sub { font-size: 11px; color: var(--muted); }
+.report-chevron { color: var(--muted); font-size: 16px; }
+.report-output-area { margin: 0 14px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; font-size: 13px; line-height: 1.8; white-space: pre-wrap; color: var(--ink); display: none; }
+::-webkit-scrollbar { width: 3px; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 </style>
 </head>
 <body>
 
-<!-- LOADING -->
-<div id="loading">
-  <div class="spinner"></div>
-  <p id="loading-msg">Connecting to OneDrive...</p>
-</div>
-
-<!-- HEADER -->
-<header>
-  <div class="logo">Sales<strong>DB</strong></div>
-  <div class="header-right">
-    <div class="user-pill" id="user-pill" style="display:none">
-      <div class="user-avatar" id="user-avatar">?</div>
-      <span id="user-name">Loading...</span>
-    </div>
-    <button class="btn btn-sm" id="sync-btn" onclick="syncToOneDrive()" style="display:none;background:#1a2a1a;color:#90d4a8;border-color:#2a4a2a">↑ Save to OneDrive</button>
-    <button class="btn btn-sm" id="signout-btn" onclick="signOut()" style="display:none;background:rgba(255,255,255,0.08);color:#c8bfa8;border-color:rgba(255,255,255,0.15)">Sign out</button>
-  </div>
-</header>
+<div id="loading"><div class="spinner"></div><p id="loading-msg">Loading...</p></div>
+<div id="toast"></div>
 
 <!-- LOGIN -->
-<div id="login-screen">
+<div id="screen-login" class="screen active" style="position:relative;display:flex;">
   <div class="login-card">
     <div class="login-icon">📊</div>
-    <div class="login-title">Sales Database</div>
-    <div class="login-sub">Sign in with your Microsoft account to access and manage your sales data directly from OneDrive.</div>
+    <div class="login-title">Sales DB</div>
+    <div class="login-sub">Sign in with your Microsoft account to access your OneDrive sales data.</div>
     <button class="ms-btn" onclick="signIn()">
       <div class="ms-logo"><div></div><div></div><div></div><div></div></div>
       Sign in with Microsoft
     </button>
-    <div style="margin-top:20px;text-align:left">
-      <label style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">Anthropic API Key</label>
-      <div style="display:flex;gap:8px;margin-top:6px">
-        <input type="password" id="api-key-field" placeholder="sk-ant-..." 
-          style="flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:4px;font-family:'IBM Plex Mono',monospace;font-size:12px;background:var(--bg);color:var(--ink);outline:none">
-        <button class="btn primary" onclick="saveApiKey()">Save</button>
+    <div class="api-key-section">
+      <label>Anthropic API Key</label>
+      <div class="api-key-row">
+        <input type="password" id="api-key-field" placeholder="sk-ant-...">
+        <button onclick="saveApiKey()">Save</button>
       </div>
-      <div style="font-size:10px;color:var(--muted);margin-top:6px">Stored only in your browser. Never sent to GitHub.</div>
+      <div class="api-note">Stored in your browser only. Required for Chat and Reports.</div>
     </div>
-    <div class="login-note">Your data stays in OneDrive. This app reads and writes directly to <strong>sales DB - Claude.xlsx</strong></div>
   </div>
 </div>
 
 <!-- APP -->
-<div id="app-screen">
-  <div class="app-body">
+<div id="app-wrapper" style="display:none;flex-direction:column;height:100%;">
+  <div class="app-header">
+    <div class="header-logo">Sales<strong>DB</strong></div>
+    <div class="header-right">
+      <div class="user-pill">
+        <div class="user-avatar" id="user-avatar">?</div>
+        <span class="user-name" id="user-name"></span>
+      </div>
+      <button class="header-btn" onclick="signOut()">Sign out</button>
+    </div>
+  </div>
 
-    <!-- DATA PANEL -->
-    <div class="data-panel">
-      <div class="panel-header">
-        <div>
-          <div class="panel-title">sales DB — Claude.xlsx</div>
-          <div id="sync-status" class="sync-badge" style="margin-top:4px">
-            <div class="sync-dot"></div>
-            <span id="sync-text">Synced with OneDrive</span>
-          </div>
+  <div class="screens">
+
+    <!-- DATA -->
+    <div id="screen-data" class="screen active">
+      <div class="filter-header">
+        <input type="text" class="search-input" id="search-input" placeholder="Search (e.g. Realtisan, 2B)..." oninput="applyFilters()">
+        <button class="filter-toggle-btn" id="filter-toggle-btn" onclick="toggleFilterDrawer()">
+          Filters <span id="filter-count-badge" class="filter-count-badge" style="display:none">0</span>
+        </button>
+      </div>
+      <div class="filter-drawer" id="filter-drawer">
+        <div class="filter-drawer-row">
+          <select class="filter-select" id="f-stage" onchange="applyFilters()"><option value="">All stages</option></select>
+          <select class="filter-select" id="f-condition" onchange="applyFilters()"><option value="">All conditions</option></select>
+          <select class="filter-select" id="f-channel" onchange="applyFilters()"><option value="">All channels</option></select>
+          <select class="filter-select" id="f-partner" onchange="applyFilters()"><option value="">All partners</option></select>
         </div>
-        <div class="panel-actions">
-          <button class="btn btn-sm" onclick="refreshFromOneDrive()">↻ Refresh</button>
-          <button class="btn btn-sm primary" onclick="switchTab('add')">+ Add Record</button>
+        <div class="filter-drawer-row">
+          <select class="filter-select" id="f-productline" onchange="applyFilters()"><option value="">All product lines</option></select>
+          <select class="filter-select" id="f-market" onchange="applyFilters()"><option value="">All markets</option></select>
+          <select class="filter-select" id="f-year" onchange="applyFilters()"><option value="">All years</option></select>
+          <button class="filter-clear-btn" onclick="clearFilters()">✕ Clear</button>
         </div>
       </div>
-
-      <div class="tabs">
-        <div class="tab active" onclick="switchTab('view')">View Data</div>
-        <div class="tab" onclick="switchTab('add')">Add Record</div>
-        <div class="tab" onclick="switchTab('edit')">Edit Record</div>
-        <div class="tab" onclick="switchTab('reports')">Reports</div>
+      <div class="active-pills" id="active-pills"></div>
+      <div class="sync-bar" id="sync-bar">
+        <div class="sync-dot" id="sync-dot"></div>
+        <span class="sync-text" id="sync-text">Synced with OneDrive</span>
+        <span style="margin-left:auto"><button style="font-size:11px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:'IBM Plex Mono',monospace" onclick="refreshFromOneDrive()">↻ Refresh</button></span>
       </div>
-
-      <!-- VIEW -->
-      <div class="tab-pane active" id="pane-view">
-        <div class="filter-bar">
-          <div class="filter-row">
-            <input type="text" class="search-box" placeholder="Search (comma separated, e.g. Sapphire, Exchanged)..." id="search-input" oninput="filterTable()">
-            <span class="rec-count" id="rec-count">— records</span>
-            <button class="btn btn-sm" onclick="clearFilters()">✕ Clear</button>
-          </div>
-          <div class="filter-row filter-dropdowns" id="filter-dropdowns">
-            <select class="filter-select" id="filter-stage" onchange="filterTable()">
-              <option value="">All Stages</option>
-            </select>
-            <select class="filter-select" id="filter-condition" onchange="filterTable()">
-              <option value="">All Conditions</option>
-            </select>
-            <select class="filter-select" id="filter-channel" onchange="filterTable()">
-              <option value="">All Channels</option>
-            </select>
-            <select class="filter-select" id="filter-partner" onchange="filterTable()">
-              <option value="">All Partners</option>
-            </select>
-            <select class="filter-select" id="filter-productline" onchange="filterTable()">
-              <option value="">All Product Lines</option>
-            </select>
-            <select class="filter-select" id="filter-market" onchange="filterTable()">
-              <option value="">All Markets</option>
-            </select>
-            <select class="filter-select" id="filter-year" onchange="filterTable()">
-              <option value="">All Years</option>
-            </select>
-          </div>
-        </div>
-        <div class="table-wrap">
-          <div class="empty-state" id="empty-state">
-            <div class="es-icon">📂</div>
-            <p>Your sales data will appear here<br>after signing in.</p>
-          </div>
-          <table id="data-table" style="display:none">
-            <thead id="tbl-head"></thead>
-            <tbody id="tbl-body"></tbody>
-          </table>
-        </div>
+      <div class="rec-bar">
+        <span id="rec-count">— records</span>
+        <button style="font-size:11px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:'IBM Plex Mono',monospace" onclick="showAddRecord()">+ Add record</button>
       </div>
-
-      <!-- ADD -->
-      <div class="tab-pane" id="pane-add">
-        <div class="form-wrap">
-          <div class="form-section-title">Add New Record</div>
-          <div class="form-grid" id="add-fields"></div>
-          <div class="form-actions">
-            <button class="btn primary" onclick="addRecord()">Add & Save to OneDrive</button>
-            <button class="btn" onclick="switchTab('view')">Cancel</button>
-          </div>
-        </div>
+      <div class="lot-list" id="lot-list">
+        <div class="empty-state">Your sales data will appear here after signing in.</div>
       </div>
-
-      <!-- EDIT -->
-      <div class="tab-pane" id="pane-edit">
-        <div class="form-wrap">
-          <div class="form-section-title">Edit Record</div>
-          <p style="color:var(--muted);font-size:12px;margin-bottom:16px" id="edit-hint">← Select a row in View Data to edit it.</p>
-          <div class="form-grid" id="edit-fields"></div>
-          <div class="form-actions" id="edit-actions" style="display:none">
-            <button class="btn primary" onclick="saveEdit()">Save & Sync to OneDrive</button>
-            <button class="btn" onclick="cancelEdit()">Cancel</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- REPORTS -->
-      <div class="tab-pane" id="pane-reports">
-        <div class="report-btns">
-          <button class="btn" onclick="genReport('summary')">📊 Summary</button>
-          <button class="btn" onclick="genReport('top')">🏆 Top Performers</button>
-          <button class="btn" onclick="genReport('pipeline')">🔮 Pipeline</button>
-          <button class="btn" onclick="genReport('trends')">📈 Trends</button>
-        </div>
-        <div class="report-placeholder" id="report-placeholder">
-          <span style="font-family:'Playfair Display',serif;font-style:italic">Select a report above</span>
-        </div>
-        <div class="report-body" id="report-body" style="display:none"></div>
-      </div>
-
     </div>
 
-    <!-- CHAT PANEL -->
-    <div class="chat-panel" id="chat-panel">
-      <div class="chat-top">
-        <div class="chat-top-title">Ask Claude</div>
-        <button class="btn btn-sm" onclick="clearChat()">Clear</button>
+    <!-- ADD -->
+    <div id="screen-add" class="screen">
+      <div class="sub-header">
+        <button class="back-btn" onclick="showScreen('data')">← Back</button>
+        <span class="sub-title">Add record</span>
+        <div style="width:50px"></div>
+      </div>
+      <div class="form-screen">
+        <div id="add-fields"></div>
+        <div class="form-actions">
+          <button class="btn" onclick="showScreen('data')">Cancel</button>
+          <button class="btn primary" onclick="addRecord()">Add & Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDIT -->
+    <div id="screen-edit" class="screen">
+      <div class="sub-header">
+        <button class="back-btn" onclick="showScreen('data')">← Back</button>
+        <span class="sub-title">Edit record</span>
+        <div style="width:50px"></div>
+      </div>
+      <div class="form-screen">
+        <div id="edit-fields"></div>
+        <div class="form-actions">
+          <button class="btn" onclick="showScreen('data')">Cancel</button>
+          <button class="btn primary" onclick="saveEdit()">Save & Sync</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHAT -->
+    <div id="screen-chat" class="screen">
+      <div class="chat-header">
+        <div class="chat-header-title">Ask Claude</div>
+        <button class="chat-clear-btn" onclick="clearChat()">Clear</button>
       </div>
       <div class="chat-msgs" id="chat-msgs">
-        <div class="msg system">
-          <div class="msg-body">Sign in to start asking questions about your sales data.</div>
-        </div>
+        <div class="msg system"><div class="msg-body">Sign in to start asking questions about your sales data.</div></div>
       </div>
-      <div class="chat-bottom">
+      <div class="chat-input-area">
         <div class="suggestions">
-          <button class="suggestion" onclick="useSug(this)">Total revenue?</button>
-          <button class="suggestion" onclick="useSug(this)">Top 3 deals?</button>
-          <button class="suggestion" onclick="useSug(this)">Open pipeline value?</button>
-          <button class="suggestion" onclick="useSug(this)">Win rate?</button>
-          <button class="suggestion" onclick="useSug(this)">Deals closing this month?</button>
+          <button class="sug-btn" onclick="useSug(this)">Total revenue?</button>
+          <button class="sug-btn" onclick="useSug(this)">Top channel partners?</button>
+          <button class="sug-btn" onclick="useSug(this)">Open pipeline value?</button>
+          <button class="sug-btn" onclick="useSug(this)">Settled this year?</button>
         </div>
-        <div class="input-row">
-          <textarea id="chat-input" placeholder="Ask about your data..." onkeydown="handleKey(event)"></textarea>
-          <button class="btn primary" onclick="sendChat()">→</button>
+        <div class="chat-input-row">
+          <textarea class="chat-textarea" id="chat-input" placeholder="Ask about your data..." onkeydown="handleKey(event)"></textarea>
+          <button class="chat-send" onclick="sendChat()">→</button>
         </div>
       </div>
+    </div>
+
+    <!-- REPORTS -->
+    <div id="screen-reports" class="screen">
+      <div class="reports-header"><div class="reports-header-title">Reports</div></div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Total lots</div><div class="stat-val" id="stat-total">—</div></div>
+        <div class="stat-card"><div class="stat-label">Settled</div><div class="stat-val" id="stat-settled">—</div></div>
+        <div class="stat-card"><div class="stat-label">Exchanged</div><div class="stat-val" id="stat-exchanged">—</div></div>
+        <div class="stat-card"><div class="stat-label">Settled value</div><div class="stat-val" id="stat-value">—</div></div>
+      </div>
+      <div class="section-title">Generate AI reports</div>
+      <div class="report-btn-card" onclick="genReport('summary')">
+        <div class="report-icon" style="background:#e8f4ed">📊</div>
+        <div class="report-info"><div class="report-title">Sales summary</div><div class="report-sub">Revenue, counts, key insights</div></div>
+        <span class="report-chevron">›</span>
+      </div>
+      <div class="report-btn-card" onclick="genReport('pipeline')">
+        <div class="report-icon" style="background:#eeedfe">🔮</div>
+        <div class="report-info"><div class="report-title">Pipeline forecast</div><div class="report-sub">Open deals & risk assessment</div></div>
+        <span class="report-chevron">›</span>
+      </div>
+      <div class="report-btn-card" onclick="genReport('channel')">
+        <div class="report-icon" style="background:#faeeda">🏆</div>
+        <div class="report-info"><div class="report-title">Channel performance</div><div class="report-sub">By partner & channel</div></div>
+        <span class="report-chevron">›</span>
+      </div>
+      <div class="report-btn-card" onclick="genReport('monthly')">
+        <div class="report-icon" style="background:#eaf3de">📈</div>
+        <div class="report-info"><div class="report-title">Monthly revenue</div><div class="report-sub">Settled by month & year</div></div>
+        <span class="report-chevron">›</span>
+      </div>
+      <div class="report-output-area" id="report-output"></div>
     </div>
 
   </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item active" id="nav-data" onclick="showScreen('data')">
+      <span class="nav-icon">☰</span>
+      <span class="nav-label">Data</span>
+    </div>
+    <div class="nav-item" id="nav-chat" onclick="showScreen('chat')">
+      <span class="nav-icon">💬</span>
+      <span class="nav-label">Ask Claude</span>
+    </div>
+    <div class="nav-item" id="nav-reports" onclick="showScreen('reports')">
+      <span class="nav-icon">📊</span>
+      <span class="nav-label">Reports</span>
+    </div>
+  </nav>
 </div>
 
-<button class="mobile-chat-btn" onclick="toggleMobileChat()">💬</button>
-<div id="toast"></div>
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Lot detail</div>
+      <button class="modal-close" onclick="closeModalDirect()">×</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-actions">
+      <button class="modal-btn" onclick="closeModalDirect()">Close</button>
+      <button class="modal-btn primary" onclick="editFromModal()">Edit record</button>
+    </div>
+  </div>
+</div>
 
-<!-- SheetJS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<!-- MSAL -->
 <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.10.0/lib/msal-browser.min.js"></script>
-
 <script>
-// ── CONFIG ─────────────────────────────────────────────
 const CLIENT_ID = 'cd53b987-59ab-4b81-9bfb-178cfa8ee5b2';
 const REDIRECT_URI = 'https://SENDIE1.github.io/Sales-database/';
 const FILE_NAME = 'Sales DB - Claude.xlsx';
 const SCOPES = ['Files.ReadWrite', 'User.Read'];
 const ANTHROPIC_KEY = () => sessionStorage.getItem('anthropic_key') || '';
-
-const msalConfig = {
-  auth: {
-    clientId: CLIENT_ID,
-    authority: 'https://login.microsoftonline.com/ab54a23e-1458-4baf-a2f6-9b8164f032d1',
-    redirectUri: REDIRECT_URI,
-  },
-  cache: { cacheLocation: 'sessionStorage' }
-};
-
+const msalConfig = { auth: { clientId: CLIENT_ID, authority: 'https://login.microsoftonline.com/ab54a23e-1458-4baf-a2f6-9b8164f032d1', redirectUri: REDIRECT_URI }, cache: { cacheLocation: 'sessionStorage' } };
 let msalInstance = null;
-async function getMsal() {
-  if (!msalInstance) {
-    msalInstance = await msal.PublicClientApplication.createPublicClientApplication(msalConfig);
-  }
-  return msalInstance;
-}
+async function getMsal() { if (!msalInstance) msalInstance = await msal.PublicClientApplication.createPublicClientApplication(msalConfig); return msalInstance; }
 
-// ── STATE ──────────────────────────────────────────────
-let allData = [];
-let headers = [];
-let filteredData = [];
-let selectedRowIdx = -1;
-let editRowIdx = -1;
-let fileId = null;
-let accessToken = null;
-let unsavedChanges = false;
+let allData = [], headers = [], filteredData = [], fileId = null, editRowIdx = -1, modalRowIdx = -1, filterDrawerOpen = false;
+const FILTER_MAP = { 'f-stage':'Stage', 'f-condition':'Sales Condition ', 'f-channel':'Sales Channel', 'f-partner':'Channel Partner', 'f-productline':'Product Line', 'f-market':'Channel Market', 'f-year':'Settled Year' };
 
-// ── API KEY ────────────────────────────────────────────
 function saveApiKey() {
   const key = document.getElementById('api-key-field').value.trim();
-  if (!key.startsWith('sk-ant-')) {
-    toast('Invalid key — should start with sk-ant-', 'error');
-    return;
-  }
+  if (!key.startsWith('sk-ant-')) { toast('Invalid key — should start with sk-ant-', 'error'); return; }
   sessionStorage.setItem('anthropic_key', key);
   toast('API key saved ✓', 'success');
   document.getElementById('api-key-field').value = '••••••••••••••••';
 }
 
-// ── AUTH ───────────────────────────────────────────────
 async function signIn() {
-  try {
-    showLoading('Redirecting to Microsoft login...');
-    const pca = await getMsal();
-    await pca.loginRedirect({ scopes: SCOPES });
-    // Page will redirect — execution continues in init after return
-  } catch(e) {
-    hideLoading();
-    toast('Sign in failed: ' + e.message, 'error');
-  }
+  try { showLoading('Redirecting to Microsoft...'); const pca = await getMsal(); await pca.loginRedirect({ scopes: SCOPES }); }
+  catch(e) { hideLoading(); toast('Sign in failed: ' + e.message, 'error'); }
 }
 
 async function afterSignIn(account) {
   showLoading('Loading your sales data...');
   try {
-    // Get user info
     const me = await graphGet('https://graph.microsoft.com/v1.0/me');
-    const initials = (me.displayName || 'U').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const initials = (me.displayName||'U').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
     document.getElementById('user-avatar').textContent = initials;
-    document.getElementById('user-name').textContent = me.displayName || me.userPrincipalName;
-    document.getElementById('user-pill').style.display = 'flex';
-    document.getElementById('sync-btn').style.display = 'inline-flex';
-    document.getElementById('signout-btn').style.display = 'inline-flex';
-
-    // Find & load the file
+    document.getElementById('user-name').textContent = me.displayName?.split(' ')[0] || '';
     await loadFileFromOneDrive();
-
-    // Show app
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app-screen').style.display = 'block';
-
-    addMsg('system', `Connected! Loaded ${allData.length} records from "${FILE_NAME}". Ask me anything about your sales data.`);
+    document.getElementById('screen-login').style.display = 'none';
+    document.getElementById('app-wrapper').style.display = 'flex';
+    addMsg('system', `Connected! Loaded ${allData.length} records from OneDrive. Ask me anything about your sales data.`);
     hideLoading();
-  } catch(e) {
-    hideLoading();
-    toast('Error loading data: ' + e.message, 'error');
-  }
+  } catch(e) { hideLoading(); toast('Error: ' + e.message, 'error'); }
 }
 
-async function signOut() {
-  const pca = await getMsal();
-  await pca.logoutRedirect();
-}
+async function signOut() { const pca = await getMsal(); await pca.logoutRedirect(); }
 
 async function getToken() {
   const pca = await getMsal();
   const accounts = pca.getAllAccounts();
   if (!accounts.length) throw new Error('Not signed in');
   const result = await pca.acquireTokenSilent({ scopes: SCOPES, account: accounts[0] });
-  accessToken = result.accessToken;
-  return accessToken;
+  return result.accessToken;
 }
 
-// ── ONEDRIVE / GRAPH ───────────────────────────────────
 async function graphGet(url) {
   const token = await getToken();
   const res = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
@@ -979,481 +428,286 @@ async function graphGet(url) {
 }
 
 async function loadFileFromOneDrive() {
+  const token = await getToken();
+  let itemId = null, driveId = null;
+  showLoading('Locating file...');
   try {
-    const token = await getToken();
-
-    // Step 0: Try direct path first (fastest)
-    showLoading('Locating file...');
+    const r = await graphGet('https://graph.microsoft.com/v1.0/me/drive/root:/Sales%20DB/Sales%20DB%20-%20Claude.xlsx');
+    if (r?.id) { itemId = r.id; driveId = r.parentReference?.driveId; }
+  } catch(e) {}
+  if (!itemId) {
     try {
-      const direct = await graphGet("https://graph.microsoft.com/v1.0/me/drive/root:/Sales%20DB/Sales%20DB%20-%20Claude.xlsx");
-      console.log('Direct path result:', JSON.stringify(direct));
-      if (direct && direct.id) {
-        fileId = direct.id;
-        await downloadAndLoad(token, fileId, direct.parentReference?.driveId);
-        return;
-      }
-    } catch(e) { console.log('Direct path failed:', e.message); }
-
-    // Step 1: List all drives accessible to this user
-    showLoading('Finding available drives...');
-    const drivesRes = await graphGet('https://graph.microsoft.com/v1.0/me/drives');
-    console.log('My drives:', JSON.stringify(drivesRes));
-
-    // Step 2: Also check shared drives
-    const sharedRes = await graphGet('https://graph.microsoft.com/v1.0/me/drive/sharedWithMe');
-    console.log('Shared with me:', JSON.stringify(sharedRes));
-
-    // Step 3: Try searching each drive
-    const allDriveIds = [null, ...(drivesRes.value||[]).map(d=>d.id)];
-    
-    for (const driveId of allDriveIds) {
-      showLoading(`Searching drive ${driveId || 'default'}...`);
-      try {
-        const searchUrl = driveId
-          ? `https://graph.microsoft.com/v1.0/drives/${driveId}/search(q='Sales DB - Claude')`
-          : `https://graph.microsoft.com/v1.0/me/drive/search(q='Sales DB - Claude')`;
-        const r = await graphGet(searchUrl);
-        console.log(`Drive ${driveId} search:`, JSON.stringify(r));
-        const file = (r.value||[]).find(f => f.name === FILE_NAME);
-        if (file) {
-          console.log('FOUND!', file.name, 'in drive:', driveId);
-          fileId = file.id;
-          await downloadAndLoad(token, fileId, file.parentReference?.driveId || driveId);
-          return;
-        }
-      } catch(e) { console.log(`Drive ${driveId} search failed:`, e.message); }
-    }
-
-    // Step 4: Check shared items for the file directly
-    const shared = sharedRes.value || [];
-    console.log('Shared items:', shared.map(f=>f.name).join(', '));
-    const sharedFile = shared.find(f => f.name === FILE_NAME);
-    if (sharedFile) {
-      console.log('Found in shared!', sharedFile.name);
-      fileId = sharedFile.id;
-      await downloadAndLoad(token, fileId, sharedFile.parentReference?.driveId);
-      return;
-    }
-
-    throw new Error(`Could not locate "${FILE_NAME}". Check console for full details.`);
-  } catch(err) {
-    console.error('Error:', err);
-    throw err;
+      const r = await graphGet(`https://graph.microsoft.com/v1.0/me/drive/search(q='Sales DB - Claude.xlsx')`);
+      const f = (r.value||[]).find(f => f.name === FILE_NAME);
+      if (f) { itemId = f.id; driveId = f.parentReference?.driveId; }
+    } catch(e) {}
   }
-}
-
-async function downloadAndLoad(token, itemId, driveId) {
-  showLoading('Downloading file...');
-  const downloadUrl = driveId
-    ? `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}/content`
-    : `https://graph.microsoft.com/v1.0/me/drive/items/${itemId}/content`;
-
-  console.log('Downloading from:', downloadUrl);
-  const contentRes = await fetch(downloadUrl, { headers: { Authorization: 'Bearer ' + token } });
-  if (!contentRes.ok) throw new Error(`Download failed: ${contentRes.status}`);
-
-  const arrayBuffer = await contentRes.arrayBuffer();
-  const wb = XLSX.read(arrayBuffer, { type: 'array' });
+  if (!itemId) throw new Error(`Could not find "${FILE_NAME}" in OneDrive.`);
+  fileId = itemId;
+  showLoading('Downloading...');
+  const url = driveId ? `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}/content` : `https://graph.microsoft.com/v1.0/me/drive/items/${itemId}/content`;
+  const res = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+  if (!res.ok) throw new Error(`Download failed: ${res.status}`);
+  const buf = await res.arrayBuffer();
+  const wb = XLSX.read(buf, { type: 'array' });
   const ws = wb.Sheets[wb.SheetNames[0]];
   const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
-
   if (!json.length) throw new Error('File is empty');
   headers = Object.keys(json[0]);
   allData = json;
   filteredData = [...allData];
-
-  renderTable();
   populateDropdowns();
-  buildForms();
+  renderLotList();
+  buildAddForm();
+  updateStats();
   setSyncStatus('synced');
 }
 
 async function refreshFromOneDrive() {
-  try {
-    showLoading('Refreshing from OneDrive...');
-    await loadFileFromOneDrive();
-    hideLoading();
-    toast('Refreshed from OneDrive', 'success');
-  } catch(e) {
-    hideLoading();
-    toast('Refresh failed: ' + e.message, 'error');
-  }
+  try { showLoading('Refreshing...'); await loadFileFromOneDrive(); hideLoading(); toast('Refreshed ✓', 'success'); }
+  catch(e) { hideLoading(); toast('Refresh failed: ' + e.message, 'error'); }
 }
 
 async function syncToOneDrive() {
-  if (!fileId) { toast('No file loaded', 'error'); return; }
+  if (!fileId) return;
   setSyncStatus('saving');
   try {
     const token = await getToken();
     const ws = XLSX.utils.json_to_sheet(allData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Sales');
-    const wbOut = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([wbOut], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-
-    const res = await fetch(`https://graph.microsoft.com/v1.0/me/drive/items/${fileId}/content`, {
-      method: 'PUT',
-      headers: {
-        Authorization: 'Bearer ' + token,
-        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      },
-      body: blob
-    });
-
-    if (!res.ok) throw new Error('Upload failed: ' + res.status);
-    unsavedChanges = false;
+    const out = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([out], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const res = await fetch(`https://graph.microsoft.com/v1.0/me/drive/items/${fileId}/content`, { method: 'PUT', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }, body: blob });
+    if (!res.ok) throw new Error('Upload failed');
     setSyncStatus('synced');
     toast('Saved to OneDrive ✓', 'success');
-  } catch(e) {
-    setSyncStatus('error');
-    toast('Save failed: ' + e.message, 'error');
-  }
-}
-
-// ── TABLE ──────────────────────────────────────────────
-function renderTable() {
-  document.getElementById('empty-state').style.display = 'none';
-  document.getElementById('data-table').style.display = 'table';
-  filteredData = [...allData];
-
-  // Head
-  document.getElementById('tbl-head').innerHTML =
-    '<tr>' + headers.map(h => `<th onclick="sortBy('${h}')">${h} ↕</th>`).join('') + '</tr>';
-
-  buildBody();
-  document.getElementById('rec-count').textContent = `${filteredData.length} records`;
-}
-
-function buildBody() {
-  document.getElementById('tbl-body').innerHTML = filteredData.map((row, i) => {
-    const cells = headers.map(h => `<td title="${row[h]}">${fmtCell(h, row[h])}</td>`).join('');
-    return `<tr onclick="selectRow(${i})" class="${i===selectedRowIdx?'selected':''}">${cells}</tr>`;
-  }).join('');
-}
-
-function fmtCell(h, v) {
-  const hl = h.toLowerCase(), vs = String(v ?? '');
-  if (hl.includes('status') || hl.includes('stage')) {
-    const vl = vs.toLowerCase();
-    if (vl.includes('won')) return `<span class="badge badge-won">${vs}</span>`;
-    if (vl.includes('lost')) return `<span class="badge badge-lost">${vs}</span>`;
-    if (vl.includes('prospect') || vl.includes('lead')) return `<span class="badge badge-prospect">${vs}</span>`;
-    return `<span class="badge badge-open">${vs}</span>`;
-  }
-  if ((hl.includes('amount')||hl.includes('value')||hl.includes('revenue')||hl.includes('price')) && !isNaN(v) && v!=='') {
-    return '$' + Number(v).toLocaleString();
-  }
-  return vs;
+  } catch(e) { setSyncStatus('error'); toast('Save failed: ' + e.message, 'error'); }
 }
 
 function populateDropdowns() {
-  const dropdowns = [
-    { id: 'filter-stage', col: 'Stage' },
-    { id: 'filter-condition', col: 'Sales Condition ' },
-    { id: 'filter-channel', col: 'Sales Channel' },
-    { id: 'filter-partner', col: 'Channel Partner' },
-    { id: 'filter-productline', col: 'Product Line' },
-    { id: 'filter-market', col: 'Channel Market' },
-    { id: 'filter-year', col: 'Settled Year' },
-  ];
-
-  dropdowns.forEach(({ id, col }) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const first = el.options[0];
-    el.innerHTML = '';
-    el.appendChild(first);
-    const vals = [...new Set(allData.map(r => r[col]).filter(v => v !== null && v !== undefined && String(v).trim() !== '' && String(v).trim() !== 'NaN'))].sort();
-    vals.forEach(v => {
-      const opt = document.createElement('option');
-      opt.value = String(v).trim();
-      opt.textContent = String(v).trim();
-      el.appendChild(opt);
-    });
+  Object.entries(FILTER_MAP).forEach(([id, col]) => {
+    const el = document.getElementById(id); if (!el) return;
+    const first = el.options[0]; el.innerHTML = ''; el.appendChild(first);
+    const vals = [...new Set(allData.map(r => String(r[col]||'').trim()).filter(v => v && v !== 'NaN'))].sort();
+    vals.forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; el.appendChild(o); });
   });
 }
 
-function filterTable() {
-  // Search terms (comma separated)
-  const rawQ = document.getElementById('search-input').value;
-  const terms = rawQ.split(',').map(t => t.trim().toLowerCase()).filter(t => t);
-
-  // Dropdown values
-  const stage = document.getElementById('filter-stage')?.value || '';
-  const condition = document.getElementById('filter-condition')?.value || '';
-  const channel = document.getElementById('filter-channel')?.value || '';
-  const partner = document.getElementById('filter-partner')?.value || '';
-  const productline = document.getElementById('filter-productline')?.value || '';
-  const market = document.getElementById('filter-market')?.value || '';
-  const year = document.getElementById('filter-year')?.value || '';
-
-  // Highlight active dropdowns
-  ['filter-stage','filter-condition','filter-channel','filter-partner','filter-productline','filter-market','filter-year'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.classList.toggle('active', el.value !== '');
+function applyFilters() {
+  const terms = document.getElementById('search-input').value.split(',').map(t=>t.trim().toLowerCase()).filter(Boolean);
+  const dropVals = {}; let activeCount = 0;
+  Object.entries(FILTER_MAP).forEach(([id, col]) => {
+    const el = document.getElementById(id); dropVals[col] = el?.value || '';
+    el?.classList.toggle('active', !!el?.value); if (el?.value) activeCount++;
   });
-
   filteredData = allData.filter(row => {
-    // Search: ALL terms must match somewhere in the row
-    if (terms.length) {
-      const rowText = headers.map(h => String(row[h] ?? '')).join(' ').toLowerCase();
-      if (!terms.every(t => rowText.includes(t))) return false;
-    }
-    // Dropdowns: exact match
-    if (stage && String(row['Stage'] ?? '').trim() !== stage) return false;
-    if (condition && String(row['Sales Condition '] ?? '').trim() !== condition) return false;
-    if (channel && String(row['Sales Channel'] ?? '').trim() !== channel) return false;
-    if (partner && String(row['Channel Partner'] ?? '').trim() !== partner) return false;
-    if (productline && String(row['Product Line'] ?? '').trim() !== productline) return false;
-    if (market && String(row['Channel Market'] ?? '').trim() !== market) return false;
-    if (year && String(row['Settled Year'] ?? '').trim() !== year) return false;
-    return true;
+    if (terms.length) { const text = Object.values(row).join(' ').toLowerCase(); if (!terms.every(t => text.includes(t))) return false; }
+    return Object.entries(dropVals).every(([col, val]) => !val || String(row[col]||'').trim() === val);
   });
+  const total = activeCount + (terms.length ? 1 : 0);
+  const badge = document.getElementById('filter-count-badge');
+  badge.style.display = total ? 'flex' : 'none'; badge.textContent = total;
+  document.getElementById('filter-toggle-btn').classList.toggle('has-filters', total > 0);
+  renderActivePills(terms, dropVals);
+  renderLotList();
+}
 
-  buildBody();
+function renderActivePills(terms, dropVals) {
+  const c = document.getElementById('active-pills'); c.innerHTML = '';
+  terms.forEach(t => { const p = document.createElement('div'); p.className = 'pill'; p.innerHTML = `"${t}" <span class="pill-x" onclick="removeSearchTerm('${t}')">×</span>`; c.appendChild(p); });
+  Object.entries(dropVals).forEach(([col, val]) => {
+    if (!val) return;
+    const id = Object.entries(FILTER_MAP).find(([,c])=>c===col)?.[0];
+    const p = document.createElement('div'); p.className = 'pill';
+    p.innerHTML = `${val} <span class="pill-x" onclick="clearDropdown('${id}')">×</span>`; c.appendChild(p);
+  });
+}
+
+function removeSearchTerm(term) {
+  const input = document.getElementById('search-input');
+  input.value = input.value.split(',').map(t=>t.trim()).filter(t=>t.toLowerCase()!==term.toLowerCase()).join(', ');
+  applyFilters();
+}
+function clearDropdown(id) { const el = document.getElementById(id); if (el) { el.value = ''; el.classList.remove('active'); } applyFilters(); }
+function clearFilters() { document.getElementById('search-input').value = ''; Object.keys(FILTER_MAP).forEach(id => { const el = document.getElementById(id); if (el) { el.value = ''; el.classList.remove('active'); } }); applyFilters(); }
+function toggleFilterDrawer() { filterDrawerOpen = !filterDrawerOpen; document.getElementById('filter-drawer').classList.toggle('open', filterDrawerOpen); }
+
+function renderLotList() {
+  const list = document.getElementById('lot-list');
   document.getElementById('rec-count').textContent = `${filteredData.length} of ${allData.length} records`;
+  if (!filteredData.length) { list.innerHTML = '<div class="empty-state">No records match your filters.</div>'; return; }
+  list.innerHTML = filteredData.map((row, i) => {
+    const lotNum = row['Lot #'] || row['Lot#'] || '—';
+    const address = row['Property Address'] || '';
+    const val = row['$VAL '] || row['$VAL'] || '';
+    const valFmt = val && !isNaN(val) ? '$' + Number(val).toLocaleString() : (val || '—');
+    const stage = row['Stage'] || '';
+    const cond = String(row['Sales Condition '] || row['Sales Condition'] || '');
+    const partner = row['Channel Partner'] || '';
+    return `<div class="lot-card" onclick="openModal(${i})">
+      <div class="lot-num-box">Lot<br>${lotNum}</div>
+      <div class="lot-info">
+        <div class="lot-top"><span class="lot-address">${address || 'Lot ' + lotNum}</span><span class="lot-value">${valFmt}</span></div>
+        <div class="lot-bottom"><span class="lot-stage">${stage}</span><span class="badge ${badgeClass(cond)}">${cond}</span><span class="lot-partner">${partner}</span></div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
-function clearFilters() {
-  document.getElementById('search-input').value = '';
-  ['filter-stage','filter-condition','filter-channel','filter-partner','filter-productline','filter-market','filter-year'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) { el.value = ''; el.classList.remove('active'); }
+function badgeClass(cond) {
+  const c = String(cond).toLowerCase();
+  if (c.includes('exchanged')) return 'badge-exc';
+  if (c.includes('settled')) return 'badge-set';
+  if (c.includes('deposit')) return 'badge-dep';
+  if (c.includes('on sale')) return 'badge-on';
+  if (c.includes('pending')) return 'badge-pen';
+  return 'badge-oth';
+}
+
+function updateStats() {
+  const settled = allData.filter(r => String(r['Sales Condition ']||r['Sales Condition']||'').includes('Settled')).length;
+  const exchanged = allData.filter(r => String(r['Sales Condition ']||r['Sales Condition']||'').includes('Exchanged')).length;
+  const settledVal = allData.filter(r => String(r['Sales Condition ']||r['Sales Condition']||'').includes('Settled')).reduce((s,r) => s + (Number(r['CfS Settled Price ($)'])||0), 0);
+  document.getElementById('stat-total').textContent = allData.length;
+  document.getElementById('stat-settled').textContent = settled;
+  document.getElementById('stat-exchanged').textContent = exchanged;
+  document.getElementById('stat-value').textContent = settledVal ? '$' + (settledVal/1000000).toFixed(1) + 'M' : '—';
+}
+
+function openModal(idx) {
+  modalRowIdx = allData.indexOf(filteredData[idx]);
+  const row = filteredData[idx];
+  const lotNum = row['Lot #'] || row['Lot#'] || '—';
+  document.getElementById('modal-title').textContent = 'Lot ' + lotNum;
+  const priority = ['Lot #','Property Address','Stage','Sales Condition ','$VAL ','Channel Partner','Sales Channel','Product Line','Channel Market','Exchanged Date','Settled Date','CfS Settled Price ($)','Vendors Agency','Vendors Agency Agent'];
+  let html = '';
+  priority.forEach(k => {
+    const v = row[k]; if (v === undefined || v === '' || v === null) return;
+    const display = (k.includes('$') || k.includes('Price')) && !isNaN(v) && v !== '' ? '$' + Number(v).toLocaleString() : String(v);
+    html += `<div class="detail-row"><span class="detail-label">${k.trim()}</span><span class="detail-val">${display}</span></div>`;
   });
-  filterTable();
+  document.getElementById('modal-body').innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('open');
 }
 
-let sortDir = {};
-function sortBy(col) {
-  sortDir[col] = !sortDir[col];
-  filteredData.sort((a,b) => {
-    const av = a[col], bv = b[col];
-    if (!isNaN(av) && !isNaN(bv)) return sortDir[col] ? av-bv : bv-av;
-    return sortDir[col] ? String(av).localeCompare(String(bv)) : String(bv).localeCompare(String(av));
-  });
-  buildBody();
-}
-
-function selectRow(idx) {
-  selectedRowIdx = idx;
-  buildBody();
-  editRowIdx = allData.indexOf(filteredData[idx]);
-  populateEditForm(filteredData[idx]);
-}
-
-// ── FORMS ──────────────────────────────────────────────
-function buildForms() {
-  document.getElementById('add-fields').innerHTML = headers.map(h => `
-    <div class="form-group">
-      <label>${h}</label>
-      <input type="text" id="add-${sid(h)}" placeholder="${h}">
-    </div>`).join('');
-}
+function closeModal(e) { if (e.target === document.getElementById('modal-overlay')) closeModalDirect(); }
+function closeModalDirect() { document.getElementById('modal-overlay').classList.remove('open'); }
+function editFromModal() { closeModalDirect(); editRowIdx = modalRowIdx; populateEditForm(allData[editRowIdx]); }
 
 function populateEditForm(row) {
-  document.getElementById('edit-hint').style.display = 'none';
-  document.getElementById('edit-actions').style.display = 'flex';
-  document.getElementById('edit-fields').innerHTML = headers.map(h => `
-    <div class="form-group">
-      <label>${h}</label>
-      <input type="text" id="edit-${sid(h)}" value="${row[h] ?? ''}">
-    </div>`).join('');
-  switchTab('edit');
+  document.getElementById('edit-fields').innerHTML = headers.map(h => `<div class="form-group"><label>${h}</label><input type="text" id="edit-${sid(h)}" value="${String(row[h]??'').replace(/"/g,'&quot;')}"></div>`).join('');
+  showScreen('edit');
+}
+
+function buildAddForm() {
+  document.getElementById('add-fields').innerHTML = headers.map(h => `<div class="form-group"><label>${h}</label><input type="text" id="add-${sid(h)}" placeholder="${h}"></div>`).join('');
 }
 
 function addRecord() {
-  const row = {};
-  headers.forEach(h => { row[h] = document.getElementById('add-' + sid(h))?.value ?? ''; });
-  allData.push(row);
-  renderTable();
-  markUnsaved();
-  syncToOneDrive();
-  toast('Record added & saved!', 'success');
-  switchTab('view');
+  const row = {}; headers.forEach(h => { row[h] = document.getElementById('add-'+sid(h))?.value ?? ''; });
+  allData.push(row); applyFilters(); updateStats(); syncToOneDrive(); showScreen('data'); toast('Record added ✓', 'success');
 }
 
 function saveEdit() {
   if (editRowIdx < 0) return;
-  headers.forEach(h => { allData[editRowIdx][h] = document.getElementById('edit-' + sid(h))?.value ?? ''; });
-  renderTable();
-  markUnsaved();
-  syncToOneDrive();
-  toast('Record updated & saved!', 'success');
-  switchTab('view');
+  headers.forEach(h => { allData[editRowIdx][h] = document.getElementById('edit-'+sid(h))?.value ?? ''; });
+  applyFilters(); updateStats(); syncToOneDrive(); showScreen('data'); toast('Record updated ✓', 'success');
 }
 
-function cancelEdit() { editRowIdx = -1; selectedRowIdx = -1; switchTab('view'); }
+function showAddRecord() { buildAddForm(); showScreen('add'); }
 function sid(s) { return s.replace(/[^a-zA-Z0-9]/g,'_'); }
 
-// ── TABS ───────────────────────────────────────────────
-function switchTab(name) {
-  const names = ['view','add','edit','reports'];
-  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', names[i]===name));
-  document.querySelectorAll('.tab-pane').forEach((p,i) => p.classList.toggle('active', names[i]===name));
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  ['data','chat','reports'].forEach(n => { document.getElementById('nav-' + n)?.classList.toggle('active', n === name); });
 }
 
-// ── REPORTS ────────────────────────────────────────────
 async function genReport(type) {
   if (!allData.length) { toast('No data loaded', 'error'); return; }
-  if (!ANTHROPIC_KEY()) { toast('Add your Anthropic API key in the code', 'error'); return; }
-
+  if (!ANTHROPIC_KEY()) { toast('Add your Anthropic API key first', 'error'); return; }
   const prompts = {
-    summary: 'Generate a comprehensive sales summary. Include total revenue, deal count, win rate, average deal size, and key insights.',
-    top: 'Who are the top performing sales reps or accounts? Rank them with numbers and highlight what sets them apart.',
-    pipeline: 'Analyse the open sales pipeline. Estimate likely revenue, identify at-risk deals, and highlight opportunities.',
-    trends: 'What trends do you see in this sales data? What is growing, declining, or needs attention?'
+    summary: 'Generate a comprehensive sales summary. Include total lots, settled count, exchanged count, revenue, and key insights.',
+    pipeline: 'Analyse the open sales pipeline. Which deals are at risk? What is the likely revenue from open deals?',
+    channel: 'Analyse channel partner performance. Who are the top performers? Any trends worth noting?',
+    monthly: 'Analyse settled revenue by month and year. Show trends and highlight strong or weak periods.',
   };
-
-  document.getElementById('report-placeholder').style.display = 'none';
-  const body = document.getElementById('report-body');
-  body.style.display = 'block';
-  body.textContent = 'Generating report...';
-
+  const out = document.getElementById('report-output');
+  out.style.display = 'block'; out.textContent = 'Generating report...';
+  out.scrollIntoView({ behavior: 'smooth' });
   try {
-    const snap = dataSnapshot();
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY(), 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: `You are a sales analyst. Analyse this data:\n\n${snap}`,
-        messages: [{ role: 'user', content: prompts[type] }]
-      })
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, system: `You are a property sales analyst. Data:\n\n${dataSnapshot()}`, messages: [{ role: 'user', content: prompts[type] }] })
     });
     const d = await res.json();
-    body.textContent = d.content?.find(b=>b.type==='text')?.text || 'No report generated.';
-  } catch(e) {
-    body.textContent = 'Error: ' + e.message;
-  }
+    out.textContent = d.content?.find(b=>b.type==='text')?.text || 'No report generated.';
+  } catch(e) { out.textContent = 'Error: ' + e.message; }
 }
 
-// ── CHAT ───────────────────────────────────────────────
 async function sendChat() {
   const inp = document.getElementById('chat-input');
-  const msg = inp.value.trim();
-  if (!msg) return;
-  if (!ANTHROPIC_KEY()) { toast('Add your Anthropic API key in the code to use chat', 'error'); return; }
-  inp.value = '';
-
-  addMsg('user', msg);
+  const msg = inp.value.trim(); if (!msg) return;
+  if (!ANTHROPIC_KEY()) { toast('Add your Anthropic API key first', 'error'); return; }
+  inp.value = ''; addMsg('user', msg);
   const thinking = addThinking();
-
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY(), 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: `You are a sales data analyst. The user's sales database contains:\n\n${dataSnapshot()}\n\nAnswer questions concisely. Format numbers nicely. Be direct and helpful.`,
-        messages: [{ role: 'user', content: msg }]
-      })
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, system: `You are a property sales analyst. Database: ${allData.length} lots.\n\n${dataSnapshot()}\n\nBe concise, format numbers nicely.`, messages: [{ role: 'user', content: msg }] })
     });
-    const d = await res.json();
-    thinking.remove();
+    const d = await res.json(); thinking.remove();
     if (d.error) { addMsg('system', 'Error: ' + d.error.message); return; }
     addMsg('assistant', d.content?.find(b=>b.type==='text')?.text || 'No response.');
-  } catch(e) {
-    thinking.remove();
-    addMsg('system', 'Network error. Check your API key.');
-  }
+  } catch(e) { thinking.remove(); addMsg('system', 'Network error. Check your API key.'); }
 }
 
 function dataSnapshot() {
   const preview = allData.slice(0, 150);
-  const rows = preview.map(r => headers.map(h=>r[h]).join(' | ')).join('\n');
-  return `Columns: ${headers.join(', ')}\nTotal: ${allData.length} records\n\n${headers.join(' | ')}\n${rows}`;
+  return `Columns: ${headers.join(', ')}\nTotal: ${allData.length} records\n\n${headers.join(' | ')}\n${preview.map(r => headers.map(h=>r[h]).join(' | ')).join('\n')}`;
 }
 
 function addMsg(role, text) {
   const c = document.getElementById('chat-msgs');
-  const d = document.createElement('div');
-  d.className = `msg ${role}`;
+  const d = document.createElement('div'); d.className = `msg ${role}`;
   d.innerHTML = `<div class="msg-who">${role==='user'?'You':role==='assistant'?'Claude':'Info'}</div><div class="msg-body">${text}</div>`;
-  c.appendChild(d);
-  c.scrollTop = c.scrollHeight;
-  return d;
+  c.appendChild(d); c.scrollTop = c.scrollHeight; return d;
 }
 
 function addThinking() {
   const c = document.getElementById('chat-msgs');
-  const d = document.createElement('div');
-  d.className = 'msg assistant';
+  const d = document.createElement('div'); d.className = 'msg assistant';
   d.innerHTML = `<div class="msg-who">Claude</div><div class="typing"><span></span><span></span><span></span></div>`;
-  c.appendChild(d);
-  c.scrollTop = c.scrollHeight;
-  return d;
+  c.appendChild(d); c.scrollTop = c.scrollHeight; return d;
 }
 
-function clearChat() {
-  document.getElementById('chat-msgs').innerHTML = '<div class="msg system"><div class="msg-body">Chat cleared. Ask me anything about your data.</div></div>';
-}
-
+function clearChat() { document.getElementById('chat-msgs').innerHTML = '<div class="msg system"><div class="msg-body">Chat cleared.</div></div>'; }
 function handleKey(e) { if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); } }
 function useSug(btn) { document.getElementById('chat-input').value = btn.textContent; sendChat(); }
 
-// ── MOBILE ─────────────────────────────────────────────
-function toggleMobileChat() {
-  document.getElementById('chat-panel').classList.toggle('mobile-open');
-}
-
-// ── SYNC STATUS ────────────────────────────────────────
 function setSyncStatus(state) {
-  const badge = document.getElementById('sync-status');
+  const bar = document.getElementById('sync-bar');
   const text = document.getElementById('sync-text');
-  badge.className = 'sync-badge' + (state==='saving'?' saving':state==='error'?' error':'');
+  bar.className = 'sync-bar' + (state==='saving'?' saving':state==='error'?' error':'');
   text.textContent = state==='saving'?'Saving to OneDrive...':state==='error'?'Save failed':'Synced with OneDrive';
 }
 
-function markUnsaved() {
-  unsavedChanges = true;
-  setSyncStatus('saving');
-}
+function showLoading(msg) { document.getElementById('loading-msg').textContent = msg||'Loading...'; document.getElementById('loading').classList.add('show'); }
+function hideLoading() { document.getElementById('loading').classList.remove('show'); }
+function toast(msg, type='') { const el = document.getElementById('toast'); el.textContent = msg; el.className = `show ${type}`; setTimeout(() => el.className = '', 3000); }
 
-// ── LOADING ────────────────────────────────────────────
-function showLoading(msg) {
-  document.getElementById('loading-msg').textContent = msg || 'Loading...';
-  document.getElementById('loading').classList.add('show');
-}
-function hideLoading() {
-  document.getElementById('loading').classList.remove('show');
-}
-
-// ── TOAST ──────────────────────────────────────────────
-function toast(msg, type='') {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = `show ${type}`;
-  setTimeout(() => el.className = '', 3000);
-}
-
-// ── INIT ───────────────────────────────────────────────
 (async () => {
-  // Restore API key indicator if already saved
-  const savedKey = sessionStorage.getItem('anthropic_key');
-  if (savedKey) {
-    const f = document.getElementById('api-key-field');
-    if (f) f.value = '••••••••••••••••';
-  }
+  const saved = sessionStorage.getItem('anthropic_key');
+  if (saved) { const f = document.getElementById('api-key-field'); if (f) f.value = '••••••••••••••••'; }
   try {
     const pca = await getMsal();
-    // handleRedirectPromise catches the response when Microsoft redirects back
     const response = await pca.handleRedirectPromise();
-    if (response && response.account) {
-      // Just came back from Microsoft login
-      await afterSignIn(response.account);
-    } else {
-      // Check if already signed in from a previous session
-      const accounts = pca.getAllAccounts();
-      if (accounts.length) {
-        await afterSignIn(accounts[0]);
-      }
-    }
-  } catch(e) {
-    console.error('Init error:', e);
-    toast('Login error: ' + e.message, 'error');
-  }
+    if (response?.account) { await afterSignIn(response.account); }
+    else { const accounts = pca.getAllAccounts(); if (accounts.length) await afterSignIn(accounts[0]); }
+  } catch(e) { console.error(e); toast('Login error: ' + e.message, 'error'); }
 })();
 </script>
 </body>
