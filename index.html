@@ -211,13 +211,13 @@ body { background: var(--bg); color: var(--ink); font-family: 'Aptos', sans-seri
   /* Spreadsheet table */
   .lot-list { display: none; }
   .screens { flex: 1; overflow: hidden; min-height: 0; }
-  #screen-data { height: 100%; display: flex; flex-direction: column; }
+  #screen-data { height: calc(100dvh - var(--header-h) - 40px); overflow: hidden; }
   #desktop-table-wrap {
     display: block;
     overflow: auto;
     background: white;
-    flex: 1;
-    min-height: 0;
+    height: calc(100dvh - var(--header-h) - 40px - 30px);
+    width: 100%;
   }
   table.dt {
     border-collapse: collapse;
