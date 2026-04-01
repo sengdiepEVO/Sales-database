@@ -745,7 +745,7 @@ async function sendChat() {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY(), 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1000, system: `You are a property sales analyst. Database: ${allData.length} lots.\n\n${dataSnapshot()}\n\nBe concise, format numbers nicely.`, messages: [{ role: 'user', content: msg }] })
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1000, system: `You are a property sales analyst assistant for a mobile app. Database: ${allData.length} lots.\n\n${dataSnapshot()}\n\nIMPORTANT FORMATTING RULES:\n- Never use markdown tables or pipe characters\n- Never use ** for bold\n- Use plain conversational text\n- For lists, just use simple line breaks\n- Keep answers concise and easy to read on a phone screen\n- When listing lots, format as: Lot 2001 — Exchanged — $980,000\n- Use plain numbers and short sentences`, messages: [{ role: 'user', content: msg }] })
     });
     const d = await res.json(); thinking.remove();
     if (d.error) { addMsg('system', 'Error: ' + d.error.message); return; }
@@ -790,7 +790,16 @@ function dataSnapshot() {
 }
 
 function renderMarkdown(text) {
-  return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  // Strip markdown tables
+  text = text.replace(/[|]/g, ' ').replace(/^[-|: ]+$/gm, '');
+  let t = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  t = t.replace(/[*][*]([^*\n]+)[*][*]/g,'<strong>$1</strong>');
+  t = t.replace(/[*]([^*\n]+)[*]/g,'<em>$1</em>');
+  t = t.replace(/^#{1,3} (.+)$/gm,'<div style="font-weight:600;font-size:14px;margin:8px 0 4px">$1</div>');
+  t = t.replace(/^[-] (.+)$/gm,'<div style="padding-left:12px;margin:2px 0">&bull; $1</div>');
+  t = t.replace(/^[0-9]+[.] (.+)$/gm,'<div style="padding-left:12px;margin:2px 0">$1</div>');
+  t = t.split('\n\n').join('<br><br>').split('\n').join('<br>');
+  return t;
 }
 
 function addMsg(role, text) {
