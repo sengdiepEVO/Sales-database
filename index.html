@@ -582,8 +582,10 @@ function openModal(idx) {
   document.getElementById('modal-title').textContent = 'Lot ' + lotNum;
   let html = '';
   headers.forEach(k => {
-    const v = row[k]; if (v === undefined || v === '' || v === null || String(v).trim() === '' || String(v) === 'NaN') return;
-    const display = (k.includes('$') || k.includes('Price')) && !isNaN(v) && v !== '' ? '$' + Number(v).toLocaleString() : String(v);
+    const v = row[k];
+    const vs = String(v ?? '').trim();
+    if (vs === '' || vs === 'NaN' || vs === 'undefined' || vs === 'null') return;
+    const display = (k.includes('$') || k.toLowerCase().includes('price')) && !isNaN(v) && vs !== '' ? '$' + Number(v).toLocaleString() : vs;
     html += `<div class="detail-row"><span class="detail-label">${k.trim()}</span><span class="detail-val">${display}</span></div>`;
   });
   document.getElementById('modal-body').innerHTML = html;
