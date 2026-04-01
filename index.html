@@ -41,7 +41,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 .header-btn{background:transparent;border:1px solid rgba(255,255,255,0.2);color:#c8bfa8;font-size:11px;padding:5px 10px;border-radius:4px;cursor:pointer;font-family:"Aptos",sans-serif}
 
 /* ── LOGIN ── */
-#screen-login{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg)}
+#screen-login{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg);z-index:150}
 .login-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:32px 24px;width:100%;max-width:380px;text-align:center}
 .login-icon{width:56px;height:56px;background:var(--accent-light);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:24px}
 .login-title{font-size:24px;font-weight:700;margin-bottom:8px}
@@ -174,7 +174,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 
 /* ── SHARED PHONE STYLES (show on mobile only) ── */
 @media(min-width:768px){
-  #screen-login{position:fixed}
+
   .desktop-nav,.desktop-content,.desktop-screen,.cf-popup,.dt-panel{display:none}
   .desktop-nav.visible{display:flex}
 }
@@ -332,7 +332,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 </div>
 
 <!-- APP -->
-<div id="app-wrapper">
+<div id="app-wrapper" style="display:none">
   <div class="app-header">
     <div class="header-logo">Sales<strong>DB</strong><span class="header-version">v2.7</span></div>
     <div class="header-right">
