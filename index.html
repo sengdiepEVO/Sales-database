@@ -1073,7 +1073,9 @@ function startEdit(key, currentVal) {
 }
 
 function buildAddForm() {
-  document.getElementById('add-fields').innerHTML = headers.map(h => `<div class="form-group"><label>${h}</label><input type="text" id="add-${sid(h)}" placeholder="${h}"></div>`).join('');
+  const el = document.getElementById('add-fields');
+  if (!el) return;
+  el.innerHTML = headers.map(h => `<div class="form-group"><label>${h}</label><input type="text" id="add-${sid(h)}" placeholder="${h}"></div>`).join('');
 }
 
 async function addRecord() {
@@ -1518,7 +1520,7 @@ window.addEventListener('popstate', function(e) {
 });
 
 window.addEventListener('resize', function() {
-  if (isDesktop()) fixDesktopScroll();
+  if (isDesktop() && allData.length) renderDesktopTable();
 });
 
 (async () => {
