@@ -74,6 +74,13 @@ body { background: var(--bg); color: var(--ink); font-family: 'Aptos', sans-seri
 .pill { display: flex; align-items: center; gap: 4px; background: var(--accent-light); color: var(--accent); border-radius: 99px; padding: 3px 8px 3px 10px; font-size: 11px; }
 .pill-x { cursor: pointer; font-size: 13px; line-height: 1; color: var(--accent); }
 .rec-bar { padding: 6px 14px; font-size: 11px; color: var(--muted); background: var(--surface2); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.quick-filters { display: flex; gap: 6px; padding: 8px 14px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.quick-filters::-webkit-scrollbar { display: none; }
+.qf-btn { padding: 5px 12px; border-radius: 99px; font-size: 11px; font-weight: 500; cursor: pointer; border: 1.5px solid transparent; white-space: nowrap; font-family: "Aptos", sans-serif; transition: all 0.15s; background: var(--surface2); color: var(--muted); border-color: var(--border); }
+.qf-btn.active-pen { background: #eeedfe; color: #534ab7; border-color: #534ab7; }
+.qf-btn.active-dep { background: #e8f0fd; color: #1a3a8b; border-color: #1a3a8b; }
+.qf-btn.active-exc { background: #fff0e0; color: #c45f00; border-color: #c45f00; }
+.qf-btn.active-set { background: #fde8e8; color: #a01a1a; border-color: #a01a1a; }
 .sync-bar { display: flex; align-items: center; gap: 6px; padding: 5px 14px; background: var(--surface); border-bottom: 1px solid var(--border); font-size: 10px; flex-shrink: 0; }
 .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
 .sync-bar.saving .sync-dot { background: var(--gold); animation: pulse 1s infinite; }
@@ -241,6 +248,12 @@ body { background: var(--bg); color: var(--ink); font-family: 'Aptos', sans-seri
         <span style="margin-left:auto"><button style="font-size:11px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:'Aptos',sans-serif" onclick="refreshFromOneDrive()">↻ Refresh</button></span>
       </div>
       <div class="rec-bar"><span id="rec-count">— records</span></div>
+      <div class="quick-filters">
+        <button class="qf-btn" id="qf-pending" onclick="toggleQuickFilter(this, '2. Pending SA')">Pending SA</button>
+        <button class="qf-btn" id="qf-deposit" onclick="toggleQuickFilter(this, '3. Deposit')">Deposit</button>
+        <button class="qf-btn" id="qf-exchange" onclick="toggleQuickFilter(this, '4. Exchanged')">Exchanged</button>
+        <button class="qf-btn" id="qf-settled" onclick="toggleQuickFilter(this, '5. Settled')">Settled</button>
+      </div>
       <div class="lot-list" id="lot-list">
         <div class="empty-state">Your sales data will appear here after signing in.</div>
       </div>
@@ -514,6 +527,21 @@ function populateDropdowns() {
   });
 }
 
+let activeQuickFilter = '';
+
+function toggleQuickFilter(btn, condition) {
+  if (activeQuickFilter === condition) {
+    activeQuickFilter = '';
+    document.querySelectorAll('.qf-btn').forEach(b => b.className = 'qf-btn');
+  } else {
+    activeQuickFilter = condition;
+    document.querySelectorAll('.qf-btn').forEach(b => b.className = 'qf-btn');
+    const cls = condition.includes('Pending') ? 'active-pen' : condition.includes('Deposit') ? 'active-dep' : condition.includes('Exchanged') ? 'active-exc' : 'active-set';
+    btn.className = 'qf-btn ' + cls;
+  }
+  applyFilters();
+}
+
 function applyFilters() {
   const terms = document.getElementById('search-input').value.split(',').map(t=>t.trim().toLowerCase()).filter(Boolean);
   const dropVals = {}; let activeCount = 0;
@@ -522,6 +550,10 @@ function applyFilters() {
     el?.classList.toggle('active', !!el?.value); if (el?.value) activeCount++;
   });
   filteredData = allData.filter(row => {
+    if (activeQuickFilter) {
+      const cond = String(row['Sales Condition ']||row['Sales Condition']||'').trim();
+      if (cond !== activeQuickFilter) return false;
+    }
     if (terms.length) { const text = Object.values(row).join(' ').toLowerCase(); if (!terms.every(t => text.includes(t))) return false; }
     return Object.entries(dropVals).every(([col, val]) => !val || String(row[col]||'').trim() === val);
   });
@@ -644,6 +676,7 @@ function openModal(idx) {
   });
   document.getElementById('modal-body').innerHTML = html;
   document.getElementById('modal-overlay').classList.add('open');
+  history.pushState({ modal: true }, '');
 }
 
 function closeModal(e) { if (e.target === document.getElementById('modal-overlay')) closeModalDirect(); }
@@ -789,6 +822,14 @@ function setSyncStatus(state) {
 function showLoading(msg) { document.getElementById('loading-msg').textContent = msg||'Loading...'; document.getElementById('loading').classList.add('show'); }
 function hideLoading() { document.getElementById('loading').classList.remove('show'); }
 function toast(msg, type='') { const el = document.getElementById('toast'); el.textContent = msg; el.className = `show ${type}`; setTimeout(() => el.className = '', 3000); }
+
+window.addEventListener('popstate', function(e) {
+  const modal = document.getElementById('modal-overlay');
+  if (modal.classList.contains('open')) {
+    modal.classList.remove('open');
+    history.pushState({ modal: false }, '');
+  }
+});
 
 (async () => {
   const saved = localStorage.getItem('anthropic_key');
