@@ -688,8 +688,46 @@ async function sendChat() {
 }
 
 function dataSnapshot() {
-  const preview = allData.slice(0, 150);
-  return `Columns: ${headers.join(', ')}\nTotal: ${allData.length} records\n\n${headers.join(' | ')}\n${preview.map(r => headers.map(h=>r[h]).join(' | ')).join('\n')}`;
+  // Send a compact summary instead of raw rows to stay within token limits
+  const total = allData.length;
+  const conditions = {};
+  const partners = {};
+  const channels = {};
+  const stages = {};
+  let totalVal = 0, valCount = 0;
+
+  allData.forEach(r => {
+    const cond = String(r['Sales Condition ']||r['Sales Condition']||'Unknown').trim();
+    const partner = String(r['Channel Partner']||'Unknown').trim();
+    const channel = String(r['Sales Channel']||'Unknown').trim();
+    const stage = String(r['Stage']||'Unknown').trim();
+    const val = Number(r['$VAL ']||r['$VAL']||0);
+    conditions[cond] = (conditions[cond]||0) + 1;
+    partners[partner] = (partners[partner]||0) + 1;
+    channels[channel] = (channels[channel]||0) + 1;
+    stages[stage] = (stages[stage]||0) + 1;
+    if (val) { totalVal += val; valCount++; }
+  });
+
+  const fmt = obj => Object.entries(obj).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${k}: ${v}`).join(', ');
+
+  // Include last 20 rows as recent examples
+  const recent = allData.slice(-20).map(r => {
+    const key = ['Lot #','Stage','Sales Condition ','$VAL ','Channel Partner','Sales Channel','Property Address'];
+    return key.map(k => `${k.trim()}=${String(r[k]||'').trim()}`).join(' | ');
+  }).join('\n');
+
+  return `SALES DATABASE SUMMARY (${total} total lots)
+Columns available: ${headers.join(', ')}
+
+BY CONDITION: ${fmt(conditions)}
+BY STAGE: ${fmt(stages)}
+BY CHANNEL: ${fmt(channels)}
+BY PARTNER: ${fmt(partners)}
+TOTAL VALUE: $${totalVal.toLocaleString()} across ${valCount} lots (avg $${valCount ? Math.round(totalVal/valCount).toLocaleString() : 0})
+
+RECENT 20 RECORDS:
+${recent}`;
 }
 
 function addMsg(role, text) {
