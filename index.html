@@ -20,8 +20,8 @@ body { background: var(--bg); color: var(--ink); font-family: 'Aptos', sans-seri
 .spinner { width: 32px; height: 32px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 #loading p { color: var(--muted); font-size: 12px; font-style: italic; font-family: 'Aptos', sans-serif; }
-#toast { position: fixed; bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 12px); left: 50%; transform: translateX(-50%) translateY(60px); background: var(--ink); color: var(--bg); padding: 10px 20px; border-radius: 4px; font-size: 12px; z-index: 300; transition: transform 0.3s; pointer-events: none; white-space: nowrap; }
-#toast.show { transform: translateX(-50%) translateY(0); }
+#toast { position: fixed; bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 12px); left: 50%; transform: translateX(-50%) translateY(100px); background: var(--ink); color: var(--bg); padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; z-index: 300; transition: transform 0.3s, opacity 0.3s; pointer-events: none; max-width: 85%; text-align: center; opacity: 0; }
+#toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 #toast.success { background: var(--accent); }
 #toast.error { background: var(--danger); }
 .app-header { height: var(--header-h); background: var(--ink); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; flex-shrink: 0; }
@@ -219,11 +219,11 @@ body { background: var(--bg); color: var(--ink); font-family: 'Aptos', sans-seri
     overflow-y: auto;
   }
   #screen-data { display: flex; flex-direction: column; height: calc(100dvh - var(--header-h) - 40px); }
-  table.dt { border-collapse: collapse; font-size: 12px; white-space: nowrap; table-layout: fixed; }
+  table.dt { border-collapse: collapse; font-size: 12px; white-space: nowrap; table-layout: auto; width: max-content; min-width: 100%; }
   table.dt thead { position: sticky; top: 0; z-index: 5; }
   table.dt th {
     background: #e8e3d8;
-    padding: 6px 10px;
+    padding: 0 10px;
     text-align: left;
     font-size: 11px;
     font-weight: 600;
@@ -234,7 +234,9 @@ body { background: var(--bg); color: var(--ink); font-family: 'Aptos', sans-seri
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    min-width: 100px;
+    height: 32px;
+    line-height: 32px;
+    min-width: 80px;
   }
   table.dt th:hover { background: #d8d3c8; }
   table.dt th.col-lot { min-width: 60px; width: 60px; position: sticky; left: 0; z-index: 6; background: #e8e3d8; }
@@ -251,8 +253,8 @@ body { background: var(--bg); color: var(--ink); font-family: 'Aptos', sans-seri
     text-overflow: ellipsis;
     white-space: nowrap;
     height: 28px;
+    max-height: 28px;
     line-height: 28px;
-    max-width: 0;
     vertical-align: middle;
   }
   table.dt td.td-val { text-align: right; }
@@ -265,13 +267,8 @@ body { background: var(--bg); color: var(--ink); font-family: 'Aptos', sans-seri
   table.dt tr:nth-child(even):hover td { background: #f0f7f3; }
   table.dt tr:nth-child(even) td.td-lot { background: #f5f0e8; }
 
-  /* Desktop filter bar */
-  .desktop-filters { display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--border); flex-wrap: wrap; flex-shrink: 0; }
-  .desktop-filters input { padding: 6px 12px; border: 1px solid var(--border); border-radius: 4px; font-family: "Aptos", sans-serif; font-size: 12px; background: var(--bg); color: var(--ink); outline: none; width: 220px; }
-  .desktop-filters input:focus { border-color: var(--accent); }
-  .desktop-filters select { padding: 6px 10px; border: 1px solid var(--border); border-radius: 4px; font-family: "Aptos", sans-serif; font-size: 12px; background: var(--bg); color: var(--ink); outline: none; }
-  .desktop-filters select.active { border-color: var(--accent); color: var(--accent); }
-  .desktop-rec-count { font-size: 11px; color: var(--muted); margin-left: auto; white-space: nowrap; }
+  .desktop-rec-count { font-size: 11px; color: var(--muted); white-space: nowrap; }
+  #desktop-filters { display: flex; align-items: center; padding: 6px 16px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; justify-content: flex-end; }
 
   /* Hide phone-specific elements */
   .filter-header, .filter-drawer, .active-pills, .sync-bar, .rec-bar, .quick-filters { display: none !important; }
@@ -290,6 +287,82 @@ body { background: var(--bg); color: var(--ink); font-family: 'Aptos', sans-seri
 @media (max-width: 767px) {
   .desktop-topnav, #desktop-table-wrap, .desktop-panel, .desktop-filters { display: none !important; }
 }
+
+  /* Column header filter popup */
+  .col-filter-popup {
+    position: fixed;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    z-index: 100;
+    min-width: 220px;
+    max-height: 320px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .col-filter-header {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface2);
+  }
+  .col-filter-search {
+    margin: 8px;
+    padding: 5px 10px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: "Aptos", sans-serif;
+    font-size: 12px;
+    outline: none;
+    width: calc(100% - 16px);
+  }
+  .col-filter-search:focus { border-color: var(--accent); }
+  .col-filter-list {
+    overflow-y: auto;
+    flex: 1;
+    padding: 4px 0;
+  }
+  .col-filter-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--ink);
+  }
+  .col-filter-item:hover { background: var(--accent-light); }
+  .col-filter-item input[type=checkbox] { cursor: pointer; accent-color: var(--accent); }
+  .col-filter-actions {
+    padding: 8px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 6px;
+  }
+  .col-filter-actions button {
+    flex: 1;
+    padding: 6px;
+    border-radius: 4px;
+    font-family: "Aptos", sans-serif;
+    font-size: 11px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink);
+  }
+  .col-filter-actions button.primary {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  table.dt th.filtered { background: #d4e8d4; color: var(--accent); }
 </style>
 </head>
 <body>
@@ -346,19 +419,7 @@ body { background: var(--bg); color: var(--ink); font-family: 'Aptos', sans-seri
     </div>
   </div>
 
-  <!-- Desktop filter bar -->
-  <div class="desktop-filters" id="desktop-filters" style="display:none">
-    <input type="text" id="dt-search" placeholder="Search (comma separated)..." oninput="applyFilters()">
-    <select class="filter-select" id="dt-f-stage" onchange="applyFilters()"><option value="">All stages</option></select>
-    <select class="filter-select" id="dt-f-condition" onchange="applyFilters()"><option value="">All conditions</option></select>
-    <select class="filter-select" id="dt-f-channel" onchange="applyFilters()"><option value="">All channels</option></select>
-    <select class="filter-select" id="dt-f-partner" onchange="applyFilters()"><option value="">All partners</option></select>
-    <select class="filter-select" id="dt-f-productline" onchange="applyFilters()"><option value="">All product lines</option></select>
-    <select class="filter-select" id="dt-f-market" onchange="applyFilters()"><option value="">All markets</option></select>
-    <select class="filter-select" id="dt-f-year" onchange="applyFilters()"><option value="">All years</option></select>
-    <button class="filter-clear-btn" onclick="clearFilters()">✕ Clear</button>
-    <span class="desktop-rec-count" id="dt-rec-count">— records</span>
-  </div>
+  <div id="desktop-filters" style="display:none"><span class="desktop-rec-count" id="dt-rec-count">— records</span></div>
 
   <!-- Desktop spreadsheet table -->
   <div id="desktop-table-wrap" style="display:none">
@@ -544,6 +605,19 @@ body { background: var(--bg); color: var(--ink); font-family: 'Aptos', sans-seri
 </div>
 
 
+
+<div id="col-filter-popup" class="col-filter-popup" style="display:none">
+  <div class="col-filter-header">
+    <span id="col-filter-title">Filter</span>
+    <span onclick="closeColFilter()" style="cursor:pointer;font-size:16px;color:var(--muted)">×</span>
+  </div>
+  <input type="text" class="col-filter-search" id="col-filter-search" placeholder="Search..." oninput="filterColList()">
+  <div class="col-filter-list" id="col-filter-list"></div>
+  <div class="col-filter-actions">
+    <button onclick="clearColFilter()">Clear</button>
+    <button class="primary" onclick="applyColFilter()">Apply</button>
+  </div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.10.0/lib/msal-browser.min.js"></script>
@@ -983,15 +1057,23 @@ async function addRecord() {
 }
 
 function cancelEditCheck() {
+  const restore = () => {
+    if (isDesktop()) {
+      document.getElementById('desktop-topnav').style.display = 'flex';
+      document.getElementById('desktop-filters').style.display = 'flex';
+      document.getElementById('desktop-table-wrap').style.display = 'block';
+    }
+    showScreen('data');
+  };
   if (formDirty) {
     if (confirm('You have unsaved changes. Save before leaving?')) {
       saveEdit();
     } else {
       formDirty = false;
-      showScreen('data');
+      restore();
     }
   } else {
-    showScreen('data');
+    restore();
   }
 }
 
@@ -1012,7 +1094,15 @@ async function saveEdit() {
   applyFilters(); updateStats();
   try {
     await syncToOneDrive();
-    showScreen('data');
+    if (isDesktop()) {
+      showScreen('data');
+      document.getElementById('desktop-topnav').style.display = 'flex';
+      document.getElementById('desktop-filters').style.display = 'flex';
+      document.getElementById('desktop-table-wrap').style.display = 'block';
+      renderDesktopTable();
+    } else {
+      showScreen('data');
+    }
   } catch(e) {
     // Stay on edit screen so user can retry
   }
@@ -1020,6 +1110,116 @@ async function saveEdit() {
 
 function showAddRecord() { buildAddForm(); showScreen('add'); }
 function sid(s) { return s.replace(/[^a-zA-Z0-9]/g,'_'); }
+
+
+// Column header filters
+let activeColFilters = {}; // { colName: Set of selected values }
+let currentFilterCol = null;
+let allColValues = [];
+
+function openColFilter(event, colName) {
+  event.stopPropagation();
+  currentFilterCol = colName;
+  const popup = document.getElementById('col-filter-popup');
+  document.getElementById('col-filter-title').textContent = colName.trim();
+  document.getElementById('col-filter-search').value = '';
+
+  // Get all unique values for this column
+  allColValues = [...new Set(allData.map(r => String(r[colName] ?? '').trim()).filter(v => v && v !== 'NaN'))].sort();
+
+  renderColList(allColValues);
+
+  // Position popup near the header
+  const rect = event.target.getBoundingClientRect();
+  popup.style.display = 'flex';
+  popup.style.top = (rect.bottom + 2) + 'px';
+  let left = rect.left;
+  if (left + 220 > window.innerWidth) left = window.innerWidth - 230;
+  popup.style.left = left + 'px';
+
+  document.getElementById('col-filter-search').focus();
+}
+
+function renderColList(vals) {
+  const selected = activeColFilters[currentFilterCol] || new Set();
+  document.getElementById('col-filter-list').innerHTML = vals.map(v =>
+    `<label class="col-filter-item">
+      <input type="checkbox" value="${v.replace(/"/g,'&quot;')}" ${selected.has(v) ? 'checked' : ''}>
+      <span>${v}</span>
+    </label>`
+  ).join('');
+}
+
+function filterColList() {
+  const q = document.getElementById('col-filter-search').value.toLowerCase();
+  const filtered = allColValues.filter(v => v.toLowerCase().includes(q));
+  renderColList(filtered);
+}
+
+function applyColFilter() {
+  const checked = [...document.getElementById('col-filter-list').querySelectorAll('input:checked')].map(i => i.value);
+  if (checked.length === 0 || checked.length === allColValues.length) {
+    delete activeColFilters[currentFilterCol];
+  } else {
+    activeColFilters[currentFilterCol] = new Set(checked);
+  }
+  closeColFilter();
+  applyAllFilters();
+}
+
+function clearColFilter() {
+  delete activeColFilters[currentFilterCol];
+  document.getElementById('col-filter-list').querySelectorAll('input').forEach(i => i.checked = false);
+  closeColFilter();
+  applyAllFilters();
+}
+
+function closeColFilter() {
+  document.getElementById('col-filter-popup').style.display = 'none';
+  currentFilterCol = null;
+}
+
+function applyAllFilters() {
+  // Apply column filters on top of existing search/dropdown filters
+  const terms = document.getElementById('search-input')?.value.split(',').map(t=>t.trim().toLowerCase()).filter(Boolean) || [];
+  const dropVals = {};
+  Object.entries(FILTER_MAP).forEach(([id, col]) => {
+    const mob = document.getElementById(id);
+    const dsk = document.getElementById('dt-' + id);
+    dropVals[col] = isDesktop() ? (dsk?.value || '') : (mob?.value || '');
+  });
+
+  filteredData = allData.filter(row => {
+    if (terms.length) {
+      const text = Object.values(row).join(' ').toLowerCase();
+      if (!terms.every(t => text.includes(t))) return false;
+    }
+    if (!Object.entries(dropVals).every(([col, val]) => !val || String(row[col]||'').trim() === val)) return false;
+    // Apply column filters
+    for (const [col, vals] of Object.entries(activeColFilters)) {
+      if (!vals.has(String(row[col] ?? '').trim())) return false;
+    }
+    return true;
+  });
+
+  renderLotList();
+  renderDesktopTable();
+
+  // Update header styling
+  document.querySelectorAll('table.dt th').forEach(th => {
+    const col = th.dataset.col;
+    if (col && activeColFilters[col]) th.classList.add('filtered');
+    else th.classList.remove('filtered');
+  });
+
+  document.getElementById('dt-rec-count').textContent = filteredData.length + ' of ' + allData.length + ' records';
+}
+
+// Close popup when clicking outside
+document.addEventListener('click', function(e) {
+  const popup = document.getElementById('col-filter-popup');
+  if (popup && !popup.contains(e.target) && currentFilterCol) closeColFilter();
+});
 
 function isDesktop() { return window.innerWidth >= 768; }
 
@@ -1040,7 +1240,7 @@ function renderDesktopTable() {
     return;
   }
   document.getElementById('dt-head').innerHTML = '<tr>' + headers.map(h =>
-    `<th class="${colClass(h)}" onclick="sortBy('${h}')" title="${h.trim()}">${h.trim()} ↕</th>`
+    `<th class="${colClass(h)}" data-col="${h}" title="Click to filter ${h.trim()}" onclick="openColFilter(event,'${h}')">${h.trim()} ▾</th>`
   ).join('') + '</tr>';
 
   document.getElementById('dt-body').innerHTML = filteredData.map((row, i) => {
@@ -1059,9 +1259,14 @@ function renderDesktopTable() {
       }
       return `<td class="${cls}" title="${vs}">${display}</td>`;
     }).join('');
-    return `<tr onclick="openDesktopPanel(${i})" id="dtr-${i}">${cells}</tr>`;
+    return `<tr onclick="selectDesktopRow(${i})" ondblclick="openDesktopPanel(${i})" id="dtr-${i}">${cells}</tr>`;
   }).join('');
   document.getElementById('dt-rec-count').textContent = filteredData.length + ' of ' + allData.length + ' records';
+}
+
+function selectDesktopRow(idx) {
+  document.querySelectorAll('#dt-body tr').forEach(r => r.classList.remove('dt-selected'));
+  document.getElementById('dtr-' + idx)?.classList.add('dt-selected');
 }
 
 function openDesktopPanel(idx) {
@@ -1085,8 +1290,11 @@ function openDesktopPanel(idx) {
 function closeDesktopPanel() { document.getElementById('desktop-panel').classList.remove('open'); }
 
 function editFromDesktop() {
-  closeDesktopPanel();
   editRowIdx = modalRowIdx;
+  closeDesktopPanel();
+  document.getElementById('desktop-table-wrap').style.display = 'none';
+  document.getElementById('desktop-topnav').style.display = 'none';
+  document.getElementById('desktop-filters').style.display = 'none';
   populateEditForm(allData[editRowIdx]);
 }
 
