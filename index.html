@@ -219,7 +219,7 @@ body { background: var(--bg); color: var(--ink); font-family: 'Aptos', sans-seri
     overflow-y: auto;
   }
   #screen-data { display: flex; flex-direction: column; height: calc(100dvh - var(--header-h) - 40px); }
-  table.dt { border-collapse: collapse; font-size: 12px; white-space: nowrap; table-layout: auto; width: max-content; min-width: 100%; }
+  table.dt { border-collapse: collapse; font-size: 12px; table-layout: auto; width: max-content; }
   table.dt thead { position: sticky; top: 0; z-index: 5; }
   table.dt th {
     background: #e8e3d8;
@@ -231,11 +231,9 @@ body { background: var(--bg); color: var(--ink); font-family: 'Aptos', sans-seri
     border: 1px solid #c8c0b0;
     cursor: pointer;
     user-select: none;
-    overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
-    height: 32px;
-    line-height: 32px;
+    height: 30px;
+    line-height: 30px;
     min-width: 80px;
   }
   table.dt th:hover { background: #d8d3c8; }
@@ -251,14 +249,15 @@ body { background: var(--bg); color: var(--ink); font-family: 'Aptos', sans-seri
     color: var(--ink);
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
+    white-space: nowrap !important;
     height: 28px;
     max-height: 28px;
     line-height: 28px;
     vertical-align: middle;
+    max-width: 200px;
   }
   table.dt td.td-val { text-align: right; }
-  table.dt td.td-lot { font-weight: 600; position: sticky; left: 0; background: var(--surface); z-index: 2; border-right: 2px solid #c8c0b0; }
+  table.dt td.td-lot { font-weight: 600; position: sticky; left: 0; background: #fff; z-index: 2; border-right: 2px solid #c8c0b0; min-width: 60px; }
   table.dt tr:hover td { background: #f0f7f3; cursor: pointer; }
   table.dt tr:hover td.td-lot { background: #e8f4ed; }
   table.dt tr.dt-selected td { background: #dff0e8; }
@@ -1245,19 +1244,19 @@ function renderDesktopTable() {
 
   document.getElementById('dt-body').innerHTML = filteredData.map((row, i) => {
     const cond = String(row['Sales Condition ']||row['Sales Condition']||'');
-    const cells = headers.map(h => {
+    const cells = headers.map((h, hi) => {
       const v = row[h];
       const vs = String(v ?? '');
       let display = vs;
       let cls = '';
-      if (h === 'Lot #') cls = 'td-lot';
+      if (hi === 0) cls = 'td-lot';
       if (h === 'Sales Condition ' || h === 'Sales Condition') {
         display = `<span class="badge ${badgeClass(cond)}">${cond}</span>`;
       } else if ((h.includes('$') || h.toLowerCase().includes('price')) && !isNaN(v) && vs !== '' && vs !== 'NaN') {
         display = '$' + Number(v).toLocaleString();
         cls += ' td-val';
       }
-      return `<td class="${cls}" title="${vs}">${display}</td>`;
+      return `<td class="${cls.trim()}" title="${vs}">${display||'—'}</td>`;
     }).join('');
     return `<tr onclick="selectDesktopRow(${i})" ondblclick="openDesktopPanel(${i})" id="dtr-${i}">${cells}</tr>`;
   }).join('');
