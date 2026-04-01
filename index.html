@@ -641,8 +641,8 @@ async function genReport(type) {
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY(), 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, system: `You are a property sales analyst. Data:\n\n${dataSnapshot()}`, messages: [{ role: 'user', content: prompts[type] }] })
+      headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY(), 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1000, system: `You are a property sales analyst. Data:\n\n${dataSnapshot()}`, messages: [{ role: 'user', content: prompts[type] }] })
     });
     const d = await res.json();
     out.textContent = d.content?.find(b=>b.type==='text')?.text || 'No report generated.';
@@ -658,13 +658,13 @@ async function sendChat() {
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY(), 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, system: `You are a property sales analyst. Database: ${allData.length} lots.\n\n${dataSnapshot()}\n\nBe concise, format numbers nicely.`, messages: [{ role: 'user', content: msg }] })
+      headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY(), 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1000, system: `You are a property sales analyst. Database: ${allData.length} lots.\n\n${dataSnapshot()}\n\nBe concise, format numbers nicely.`, messages: [{ role: 'user', content: msg }] })
     });
     const d = await res.json(); thinking.remove();
     if (d.error) { addMsg('system', 'Error: ' + d.error.message); return; }
     addMsg('assistant', d.content?.find(b=>b.type==='text')?.text || 'No response.');
-  } catch(e) { thinking.remove(); addMsg('system', 'Network error. Check your API key.'); }
+  } catch(e) { thinking.remove(); addMsg('system', 'Error: ' + e.message + '\n\nIf this is a CORS error, the Anthropic API does not allow direct browser calls. This is a known limitation.'); console.error('Chat error:', e); }
 }
 
 function dataSnapshot() {
