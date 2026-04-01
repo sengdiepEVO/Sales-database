@@ -173,10 +173,8 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 }
 
 /* ── SHARED PHONE STYLES (show on mobile only) ── */
-@media(min-width:768px){
-
-  .desktop-nav,.desktop-content,.desktop-screen,.cf-popup,.dt-panel{display:none}
-  .desktop-nav.visible{display:flex}
+@media(max-width:767px){
+  .desktop-nav,.desktop-content,.desktop-screen,.cf-popup,.dt-panel{display:none !important}
 }
 
 /* ── PHONE DATA SCREEN ── */
@@ -674,6 +672,11 @@ async function afterSignIn(account) {
       initDesktop();
       deskAddMsg('system', msg);
     } else {
+      // Explicitly force desktop elements hidden so inline styles don't bleed through
+      ['desktop-nav','desktop-content','desktop-main'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
       addMsg('system', msg);
     }
     hideLoading();
@@ -1663,6 +1666,13 @@ window.addEventListener('resize', function() {
 });
 
 (async () => {
+  // On mobile, immediately force desktop elements hidden in case of stale inline styles from redirect
+  if (window.innerWidth < 768) {
+    ['desktop-nav','desktop-content','desktop-main'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+  }
   const saved = localStorage.getItem('anthropic_key');
   if (saved) { const f = document.getElementById('api-key-field'); if (f) f.value = '••••••••••••••••'; }
   try {
@@ -1698,9 +1708,8 @@ function deskShowScreen(name) {
 }
 
 function initDesktop() {
-  document.getElementById('desktop-nav').style.display = 'flex';
-  document.getElementById('desktop-content').style.display = 'flex';
-  document.getElementById('desktop-main').style.display = 'flex';
+  // Don't set inline display styles — let CSS media query handle visibility.
+  // Just render the data.
   renderDesktopTable();
   updateDeskStats();
 }
