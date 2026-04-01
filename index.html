@@ -918,35 +918,48 @@ async function loadFileFromOneDrive() {
   try {
     const token = await getToken();
 
-    // Try direct path first
-    showLoading('Locating file on OneDrive...');
-    const FILE_PATH = "Sales%20%26%20Marketing/01_Sales/018%20-%20Sales%20DB/Sales%20DB%20-%20Claude.xlsx";
+    // Step 1: List all drives accessible to this user
+    showLoading('Finding available drives...');
+    const drivesRes = await graphGet('https://graph.microsoft.com/v1.0/me/drives');
+    console.log('My drives:', JSON.stringify(drivesRes));
+
+    // Step 2: Also check shared drives
+    const sharedRes = await graphGet('https://graph.microsoft.com/v1.0/me/drive/sharedWithMe');
+    console.log('Shared with me:', JSON.stringify(sharedRes));
+
+    // Step 3: Try searching each drive
+    const allDriveIds = [null, ...(drivesRes.value||[]).map(d=>d.id)];
     
-    try {
-      const r1 = await graphGet(`https://graph.microsoft.com/v1.0/me/drive/root:/${FILE_PATH}`);
-      console.log('Path lookup:', JSON.stringify(r1));
-      if (r1 && r1.id) {
-        fileId = r1.id;
-        const driveId = r1.parentReference?.driveId;
-        await downloadAndLoad(token, fileId, driveId);
-        return;
-      }
-    } catch(e) { console.log('Path lookup failed:', e.message); }
+    for (const driveId of allDriveIds) {
+      showLoading(`Searching drive ${driveId || 'default'}...`);
+      try {
+        const searchUrl = driveId
+          ? `https://graph.microsoft.com/v1.0/drives/${driveId}/search(q='Sales DB')`
+          : `https://graph.microsoft.com/v1.0/me/drive/search(q='Sales DB')`;
+        const r = await graphGet(searchUrl);
+        console.log(`Drive ${driveId} search:`, JSON.stringify(r));
+        const file = (r.value||[]).find(f => f.name === FILE_NAME);
+        if (file) {
+          console.log('FOUND!', file.name, 'in drive:', driveId);
+          fileId = file.id;
+          await downloadAndLoad(token, fileId, file.parentReference?.driveId || driveId);
+          return;
+        }
+      } catch(e) { console.log(`Drive ${driveId} search failed:`, e.message); }
+    }
 
-    // Try search
-    showLoading('Searching OneDrive...');
-    try {
-      const r2 = await graphGet(`https://graph.microsoft.com/v1.0/me/drive/search(q='Sales DB - Claude.xlsx')`);
-      console.log('Search result:', JSON.stringify(r2));
-      const file = (r2.value||[]).find(f => (f.name||'').toLowerCase() === FILE_NAME.toLowerCase());
-      if (file) {
-        fileId = file.id;
-        await downloadAndLoad(token, fileId, file.parentReference?.driveId);
-        return;
-      }
-    } catch(e) { console.log('Search failed:', e.message); }
+    // Step 4: Check shared items for the file directly
+    const shared = sharedRes.value || [];
+    console.log('Shared items:', shared.map(f=>f.name).join(', '));
+    const sharedFile = shared.find(f => f.name === FILE_NAME);
+    if (sharedFile) {
+      console.log('Found in shared!', sharedFile.name);
+      fileId = sharedFile.id;
+      await downloadAndLoad(token, fileId, sharedFile.parentReference?.driveId);
+      return;
+    }
 
-    throw new Error(`Could not locate "${FILE_NAME}". Check console for details.`);
+    throw new Error(`Could not locate "${FILE_NAME}". Check console for full details.`);
   } catch(err) {
     console.error('Error:', err);
     throw err;
