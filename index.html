@@ -311,6 +311,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
   <div class="login-card">
     <div class="login-icon">&#128202;</div>
     <div class="login-title">Sales DB</div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">v2.9</div>
     <div class="login-sub">Sign in with your Microsoft account to access your OneDrive sales data.</div>
     <button class="ms-btn" onclick="signIn()">
       <div class="ms-logo"><div></div><div></div><div></div><div></div></div>
@@ -323,6 +324,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
         <button type="button" onclick="saveApiKey()">Save</button>
       </div>
       <div class="api-note">Stored in your browser only. Required for Chat and Reports.</div>
+      <div id="api-key-status" style="font-size:12px;margin-top:8px;min-height:18px"></div>
     </div>
     <button type="button" class="test-btn" onclick="testApiKey()">Test API key</button>
     <div id="api-test-result"></div>
