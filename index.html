@@ -1527,6 +1527,15 @@ window.addEventListener('popstate', function(e) {
   history.pushState({ app: true }, '');
 });
 
+window.addEventListener('resize', function() {
+  if (isDesktop()) {
+    const wrap = document.getElementById('desktop-table-wrap');
+    if (wrap && wrap.style.display !== 'none') {
+      wrap.style.height = (window.innerHeight - 52 - 40 - 30) + 'px';
+    }
+  }
+});
+
 (async () => {
   const saved = localStorage.getItem('anthropic_key');
   if (saved) { const f = document.getElementById('api-key-field'); if (f) f.value = '••••••••••••••••'; }
