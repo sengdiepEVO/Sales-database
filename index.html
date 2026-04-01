@@ -91,6 +91,8 @@ body { background: var(--bg); color: var(--ink); font-family: 'Aptos', sans-seri
 .lot-bottom { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .lot-stage { font-size: 10px; color: var(--muted); background: var(--surface2); border: 1px solid var(--border); padding: 1px 6px; border-radius: 3px; }
 .lot-partner { font-size: 10px; color: var(--muted); margin-left: auto; }
+.lot-extras { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+.lot-extra { font-size: 10px; color: var(--muted); background: var(--surface2); border: 1px solid var(--border); padding: 2px 7px; border-radius: 3px; white-space: nowrap; }
 .badge { display: inline-block; padding: 2px 7px; border-radius: 3px; font-size: 10px; font-weight: 500; }
 .badge-exc { background: var(--accent-light); color: var(--accent); }
 .badge-set { background: #eaf3de; color: #3b6d11; }
@@ -238,10 +240,7 @@ body { background: var(--bg); color: var(--ink); font-family: 'Aptos', sans-seri
         <span class="sync-text" id="sync-text">Synced with OneDrive</span>
         <span style="margin-left:auto"><button style="font-size:11px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:'Aptos',sans-serif" onclick="refreshFromOneDrive()">↻ Refresh</button></span>
       </div>
-      <div class="rec-bar">
-        <span id="rec-count">— records</span>
-        <button style="font-size:11px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:'Aptos',sans-serif" onclick="showAddRecord()">+ Add record</button>
-      </div>
+      <div class="rec-bar"><span id="rec-count">— records</span></div>
       <div class="lot-list" id="lot-list">
         <div class="empty-state">Your sales data will appear here after signing in.</div>
       </div>
@@ -554,23 +553,51 @@ function clearDropdown(id) { const el = document.getElementById(id); if (el) { e
 function clearFilters() { document.getElementById('search-input').value = ''; Object.keys(FILTER_MAP).forEach(id => { const el = document.getElementById(id); if (el) { el.value = ''; el.classList.remove('active'); } }); applyFilters(); }
 function toggleFilterDrawer() { filterDrawerOpen = !filterDrawerOpen; document.getElementById('filter-drawer').classList.toggle('open', filterDrawerOpen); }
 
+function fmtDate(v) {
+  if (!v || String(v).trim() === '' || String(v) === 'NaN') return null;
+  const d = new Date(v);
+  if (isNaN(d)) return String(v);
+  return d.toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function conditionExtra(cond, row) {
+  const c = String(cond).toLowerCase();
+  const items = [];
+  if (c.includes('pending')) {
+    if (row['Pending S/A Date'] && String(row['Pending S/A Date']).trim() && String(row['Pending S/A Date']) !== 'NaN') items.push('S/A Date: ' + fmtDate(row['Pending S/A Date']));
+    if (row['Pending S/A Days'] && String(row['Pending S/A Days']).trim() && String(row['Pending S/A Days']) !== 'NaN') items.push('Days: ' + row['Pending S/A Days']);
+    if (row['Pending S/A Agency'] && String(row['Pending S/A Agency']).trim() && String(row['Pending S/A Agency']) !== 'NaN') items.push('Agency: ' + row['Pending S/A Agency']);
+    if (row['*LEADS Name'] && String(row['*LEADS Name']).trim() && String(row['*LEADS Name']) !== 'NaN') items.push('Lead: ' + row['*LEADS Name']);
+  } else if (c.includes('deposit')) {
+    const ci = fmtDate(row['Contract Issued Date']); if (ci) items.push('Contract: ' + ci);
+    const pe = fmtDate(row['Proposed Exchanged Date']); if (pe) items.push('Prop. Exchange: ' + pe);
+  } else if (c.includes('exchanged')) {
+    const ed = fmtDate(row['Exchanged Date']); if (ed) items.push('Exchanged: ' + ed);
+    const ps = fmtDate(row['Proposed Settled Date']); if (ps) items.push('Prop. Settle: ' + ps);
+  } else if (c.includes('settled')) {
+    const sd = fmtDate(row['Settled Date']); if (sd) items.push('Settled: ' + sd);
+  }
+  return items;
+}
+
 function renderLotList() {
   const list = document.getElementById('lot-list');
   document.getElementById('rec-count').textContent = `${filteredData.length} of ${allData.length} records`;
   if (!filteredData.length) { list.innerHTML = '<div class="empty-state">No records match your filters.</div>'; return; }
   list.innerHTML = filteredData.map((row, i) => {
     const lotNum = row['Lot #'] || row['Lot#'] || '—';
-    const address = row['Property Address'] || '';
     const val = row['$VAL '] || row['$VAL'] || '';
     const valFmt = val && !isNaN(val) ? '$' + Number(val).toLocaleString() : (val || '—');
-    const stage = row['Stage'] || '';
     const cond = String(row['Sales Condition '] || row['Sales Condition'] || '');
     const partner = row['Channel Partner'] || '';
+    const extras = conditionExtra(cond, row);
+    const extraHtml = extras.length ? `<div class="lot-extras">${extras.map(e => `<span class="lot-extra">${e}</span>`).join('')}</div>` : '';
     return `<div class="lot-card" onclick="openModal(${i})">
       <div class="lot-num-box">Lot<br>${lotNum}</div>
       <div class="lot-info">
-        <div class="lot-top"><span class="lot-address">${address || 'Lot ' + lotNum}</span><span class="lot-value">${valFmt}</span></div>
-        <div class="lot-bottom"><span class="lot-stage">${stage}</span><span class="badge ${badgeClass(cond)}">${cond}</span><span class="lot-partner">${partner}</span></div>
+        <div class="lot-top"><span class="lot-cond"><span class="badge ${badgeClass(cond)}">${cond}</span></span><span class="lot-value">${valFmt}</span></div>
+        <div class="lot-bottom"><span class="lot-partner">${partner}</span></div>
+        ${extraHtml}
       </div>
     </div>`;
   }).join('');
