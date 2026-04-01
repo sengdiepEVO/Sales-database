@@ -1022,6 +1022,11 @@ function openModal(idx) {
       }
     } else if ((k.includes('$') || k.toLowerCase().includes('price')) && !isNaN(v) && vs !== '') {
       display = '$' + Number(v).toLocaleString();
+    } else if (AREA_COLS.has(k)) {
+      const n = Number(vs);
+      display = (!isNaN(n) && vs !== '') ? Math.round(n).toLocaleString() : vs;
+    } else if (PERCENT_COLS.has(k) || k.trim() === 'Deposit%') {
+      display = fmtPercentText(vs);
     }
     body += `<div class="detail-row"><span class="detail-label">${k.trim()}</span><span class="detail-val">${display}</span></div>`;
   });
@@ -1037,7 +1042,12 @@ function editFromDetail() { closeModalDirect(); editRowIdx = modalRowIdx; popula
 function populateEditForm(row) {
   document.getElementById('edit-fields').innerHTML = headers.map(h => {
     const val = String(row[h] ?? '').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    const display = val || '—';
+    let display;
+    if (PERCENT_COLS.has(h) || h.trim() === 'Deposit%') {
+      display = val ? fmtPercentText(val) : '—';
+    } else {
+      display = val || '—';
+    }
     return `<div class="edit-row" id="row-${sid(h)}" onclick="startEdit('${sid(h)}','${val}')">
       <span class="edit-row-label">${h.trim()}</span>
       <span class="edit-row-val${val ? '' : ' empty'}" id="disp-${sid(h)}">${display}</span>
@@ -1054,12 +1064,52 @@ function startEdit(key, currentVal) {
   const disp = document.getElementById('disp-' + key);
   if (row.classList.contains('editing')) return;
   row.classList.add('editing');
+
+  // Check if this is a percent field
+  const headerForKey = headers.find(h => sid(h) === key);
+  const isPercent = headerForKey && (PERCENT_COLS.has(headerForKey) || headerForKey.trim() === 'Deposit%');
+
   const input = document.createElement('input');
   input.type = 'text';
-  input.value = currentVal === '—' ? '' : currentVal;
+  // For percent fields, convert decimal to display: 0.05 → "5"
+  let editVal;
+  if (isPercent) {
+    const rawNum = parseFloat(String(currentVal === '—' ? '' : currentVal).replace(/%/g,'').trim());
+    editVal = (!isNaN(rawNum) && currentVal !== '—') ? (rawNum > 0 && rawNum <= 1 ? String(rawNum * 100) : String(rawNum)) : '';
+  } else {
+    editVal = currentVal === '—' ? '' : currentVal;
+  }
+  input.value = editVal;
   input.id = 'edit-' + key;
   input.setAttribute('autocorrect','off');
   input.setAttribute('autocapitalize','none');
+  if (isPercent) input.placeholder = 'e.g. 10';
+
+  if (isPercent) {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;align-items:center;gap:4px;width:100%';
+    const suffix = document.createElement('span');
+    suffix.textContent = '%';
+    suffix.style.cssText = 'font-size:13px;color:var(--muted);flex-shrink:0';
+    wrap.appendChild(input);
+    wrap.appendChild(suffix);
+    disp.replaceWith(wrap);
+    input.focus();
+    input.addEventListener('input', () => { formDirty = true; });
+    input.addEventListener('blur', () => {
+      row.classList.remove('editing');
+      const n = parseFloat(input.value.trim());
+      const saveVal = isNaN(n) ? '' : String(n / 100); // store as decimal e.g. 0.05
+      const newDisp = document.createElement('span');
+      newDisp.id = 'disp-' + key;
+      newDisp.className = 'edit-row-val' + (saveVal ? '' : ' empty');
+      newDisp.textContent = saveVal ? fmtPercentText(saveVal) : '—';
+      wrap.replaceWith(newDisp);
+      newDisp.parentElement.onclick = () => startEdit(key, saveVal);
+    });
+    return;
+  }
+
   disp.replaceWith(input);
   input.focus();
   input.addEventListener('input', () => { formDirty = true; });
@@ -1121,6 +1171,11 @@ async function saveEdit() {
     let newVal = null;
     if (input) newVal = input.value;
     else if (disp && disp.textContent !== '—') newVal = disp.textContent;
+    // For percent fields, user types e.g. "5" or "5%" → save as decimal 0.05
+    if (newVal && (PERCENT_COLS.has(h) || h.trim() === 'Deposit%')) {
+      const n = parseFloat(String(newVal).replace(/%/g, '').trim());
+      newVal = isNaN(n) ? '' : String(n / 100);
+    }
     if (newVal !== null && newVal !== allData[editRowIdx][h]) {
       allData[editRowIdx][h] = newVal;
       markEdit(editRowIdx, h, newVal);
@@ -1317,12 +1372,16 @@ const PHONE_COLS = new Set(["Agent's Mobile","Agent's Email".replace('Email','Mo
 
 
 const CURRENCY_COLS = new Set(['$VAL ','$BASE','$LIST ','$CHECK$                   $BASE-$VAL','$CHECK$ $LIST-$BASE','Land Tax Per lot Value','Land Tax $Uplift / $Shortfall','OFFER Rebate','SETTLE Rebate','H&L $House (S/S)','$H&L Total (S/S)','H&L $House (D/S)','$H&L Total (D/S)','CfS Issued Price','CfS Exchanged Price ($)','CfS Settled Price ($)','Rebate']);
+const PERCENT_COLS = new Set(['Deposit%']);
+const AREA_COLS = new Set(['Lot Area (m²)','Lot Area (m\u00b2)']);
 
 function formatCellValue(h, v) {
   const vs = String(v ?? '');
   if (vs === '' || vs === 'NaN' || vs === 'undefined' || vs === 'null') return '';
   if (DATE_COLS.has(h)) return fmtDate(v);
   if (PHONE_COLS.has(h) || h.toLowerCase().includes('mobile') || h.toLowerCase().includes('phone')) return fmtPhone(v);
+  if (PERCENT_COLS.has(h) || h.trim() === 'Deposit%') return fmtPercentText(v);
+  if (AREA_COLS.has(h)) { const n = Number(vs); return (!isNaN(n) && vs !== '') ? Math.round(n).toLocaleString() : vs; }
   if ((CURRENCY_COLS.has(h) || h.includes('$') || h.toLowerCase().includes('price')) && !isNaN(v) && vs !== '' && vs !== '0') return '$' + Number(v).toLocaleString();
   return vs;
 }
@@ -1732,6 +1791,8 @@ function formatCellValue(h, v) {
   if (vs === '' || vs === 'NaN' || vs === 'undefined' || vs === 'null') return '';
   if (DATE_COLS.has(h)) return fmtDate(v);
   if (PHONE_COLS.has(h) || h.toLowerCase().includes('mobile') || h.toLowerCase().includes('phone')) return fmtPhone(v);
+  if (PERCENT_COLS.has(h) || h.trim() === 'Deposit%') return fmtPercentText(v);
+  if (AREA_COLS.has(h)) { const n = Number(vs); return (!isNaN(n) && vs !== '') ? Math.round(n).toLocaleString() : vs; }
   if ((CURRENCY_COLS.has(h) || h.includes('$') || h.toLowerCase().includes('price')) && !isNaN(v) && vs !== '' && vs !== '0') return '$' + Number(v).toLocaleString();
   return vs;
 }
@@ -1918,10 +1979,34 @@ function deskEditFromPanel() {
 const SALES_CONDITIONS = ['1. On Sale','2. Pending SA','3. Deposit','4. Exchanged','5. Settled','6. Unreleased','7. Withheld','8. Avantaus'];
 const SALES_COND_KEYS = new Set([sid('Sales Condition '), sid('Sales Condition')]);
 
+function fmtPercent(rawVal) {
+  if (!rawVal || rawVal === '' || rawVal === 'NaN') return '<span style="color:var(--muted);font-style:italic">&#8212;</span>';
+  const s = String(rawVal).trim().replace(/%/g, '');
+  const n = Number(s);
+  if (!isNaN(n) && s !== '') {
+    const pct = n > 0 && n <= 1 ? (n * 100) : n;
+    return pct + '%';
+  }
+  return String(rawVal).includes('%') ? String(rawVal) : String(rawVal) + '%';
+}
+
+function fmtPercentText(rawVal) {
+  if (!rawVal || rawVal === '' || rawVal === 'NaN') return '—';
+  const s = String(rawVal).trim().replace(/%/g, '');
+  const n = Number(s);
+  if (!isNaN(n) && s !== '') {
+    const pct = n > 0 && n <= 1 ? (n * 100) : n;
+    return pct + '%';
+  }
+  return String(rawVal).includes('%') ? String(rawVal) : String(rawVal) + '%';
+}
+
 function deskFormatDisplay(h, rawVal) {
   if (!rawVal || rawVal === '' || rawVal === 'NaN') return '<span style="color:var(--muted);font-style:italic">&#8212;</span>';
   if (DATE_COLS.has(h)) return fmtDate(rawVal);
   if (PHONE_COLS.has(h) || h.toLowerCase().includes('mobile') || h.toLowerCase().includes('phone')) return fmtPhone(rawVal);
+  if (PERCENT_COLS.has(h) || h.trim() === 'Deposit%') return fmtPercent(rawVal);
+  if (AREA_COLS.has(h)) { const n = Number(String(rawVal).trim()); return (!isNaN(n) && String(rawVal).trim() !== '') ? Math.round(n).toLocaleString() : rawVal; }
   if (CURRENCY_COLS.has(h) || h.includes('$') || h.toLowerCase().includes('price')) {
     const n = Number(rawVal);
     if (!isNaN(n)) return '$' + n.toLocaleString();
@@ -1937,6 +2022,40 @@ function deskStartEdit(key, currentVal) {
   disp.style.background = 'var(--accent-light)';
   disp.innerHTML = '';
   const inputStyle = 'width:100%;border:none;outline:none;font-size:13px;font-family:Aptos,sans-serif;background:transparent;padding:0;color:var(--ink)';
+
+  // Percent field
+  if (PERCENT_COLS.has(key) || key === sid('Deposit%')) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    // Convert decimal to display percent: 0.05 → "5"
+    const n = parseFloat(String(rawVal).replace(/%/g,'').trim());
+    const displayVal = (!isNaN(n) && n !== '') ? (n > 0 && n <= 1 ? String(n * 100) : String(n)) : '';
+    input.value = displayVal;
+    input.id = 'd-edit-' + key;
+    input.setAttribute('autocorrect','off');
+    input.setAttribute('autocapitalize','none');
+    input.placeholder = 'e.g. 10';
+    input.style.cssText = inputStyle;
+    // Show suffix hint
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;align-items:center;gap:4px;width:100%';
+    const suffix = document.createElement('span');
+    suffix.textContent = '%';
+    suffix.style.cssText = 'font-size:13px;color:var(--muted);flex-shrink:0';
+    wrap.appendChild(input);
+    wrap.appendChild(suffix);
+    disp.appendChild(wrap);
+    input.focus();
+    input.addEventListener('input', () => { formDirty = true; });
+    input.addEventListener('blur', () => {
+      disp.style.background = '';
+      const n = parseFloat(input.value.trim());
+      const saveVal = isNaN(n) ? '' : String(n / 100); // store as decimal e.g. 0.05
+      disp.innerHTML = saveVal ? fmtPercent(saveVal) : '<span style="color:var(--muted);font-style:italic">&#8212;</span>';
+      row.onclick = () => deskStartEdit(key, saveVal);
+    });
+    return;
+  }
 
   // Sales Condition dropdown
   if (SALES_COND_KEYS.has(key)) {
@@ -1986,6 +2105,11 @@ async function deskSaveEdit() {
     const input = disp.querySelector('input');
     let newVal = input ? input.value : disp.textContent.trim();
     if (newVal === '—' || newVal === '') newVal = '';
+    // For percent fields, user types e.g. "5" or "5%" → save as decimal 0.05
+    if (newVal && (PERCENT_COLS.has(h) || h.trim() === 'Deposit%')) {
+      const n = parseFloat(String(newVal).replace(/%/g, '').trim());
+      newVal = isNaN(n) ? '' : String(n / 100);
+    }
     if (String(newVal) !== String(allData[editRowIdx][h] ?? '')) {
       allData[editRowIdx][h] = newVal;
       markEdit(editRowIdx, h, newVal);
