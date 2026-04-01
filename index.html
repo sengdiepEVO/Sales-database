@@ -311,7 +311,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
   <div class="login-card">
     <div class="login-icon">&#128202;</div>
     <div class="login-title">Sales DB</div>
-    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">v2.9</div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">v2.11</div>
     <div class="login-sub">Sign in with your Microsoft account to access your OneDrive sales data.</div>
     <button class="ms-btn" onclick="signIn()">
       <div class="ms-logo"><div></div><div></div><div></div><div></div></div>
@@ -334,7 +334,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 <!-- APP -->
 <div id="app-wrapper" style="display:none">
   <div class="app-header">
-    <div class="header-logo">Sales<strong>DB</strong><span class="header-version">v2.9</span></div>
+    <div class="header-logo">Sales<strong>DB</strong><span class="header-version">v2.11</span></div>
     <div class="header-right">
       <div class="user-pill">
         <div class="user-avatar" id="user-avatar">?</div>
@@ -658,16 +658,29 @@ async function testApiKey() {
 }
 
 function saveApiKey() {
-  const key = document.getElementById('api-key-field').value.replace(/\s+/g, '').trim();
-  const result = document.getElementById('api-test-result');
-  // Reject placeholder bullets or anything that isn't a real key
-  if (!key || key.includes('•') || !key.startsWith('sk-')) {
-    if (result) { result.textContent = '✗ Invalid key — must start with sk-'; result.style.color = 'var(--danger)'; }
+  const input = document.getElementById('api-key-field');
+  const status = document.getElementById('api-key-status');
+  const key = (input.value || '').replace(/\s+/g, '').trim();
+
+  if (!key) {
+    status.textContent = '✗ Please enter your API key';
+    status.style.color = '#dc2626';
+    return;
+  }
+  if (key.includes('•')) {
+    status.textContent = '✓ Key already saved';
+    status.style.color = '#16a34a';
+    return;
+  }
+  if (!key.startsWith('sk-')) {
+    status.textContent = '✗ Key must start with sk-';
+    status.style.color = '#dc2626';
     return;
   }
   localStorage.setItem('anthropic_key', key);
-  document.getElementById('api-key-field').value = '••••••••••••••••';
-  if (result) { result.textContent = '✓ API key saved!'; result.style.color = 'var(--accent)'; }
+  input.value = '••••••••••••••••';
+  status.textContent = '✓ API key saved!';
+  status.style.color = '#16a34a';
 }
 
 async function signIn() {
@@ -1131,23 +1144,15 @@ async function addRecord() {
 }
 
 function cancelEditCheck() {
-  const restore = () => {
-    if (isDesktop()) {
-      document.getElementById('desktop-topnav').style.display = 'flex';
-      document.getElementById('desktop-filters').style.display = 'flex';
-      document.getElementById('desktop-table-wrap').style.display = 'block';
-    }
-    showScreen('data');
-  };
   if (formDirty) {
     if (confirm('You have unsaved changes. Save before leaving?')) {
       saveEdit();
     } else {
       formDirty = false;
-      restore();
+      showScreen('data');
     }
   } else {
-    restore();
+    showScreen('data');
   }
 }
 
@@ -1160,7 +1165,7 @@ async function saveEdit() {
     let newVal = null;
     if (input) newVal = input.value;
     else if (disp && disp.textContent !== '—') newVal = disp.textContent;
-    // For percent fields, user types e.g. "5" or "5%" → save as decimal 0.05
+    // For percent fields, store as decimal e.g. 0.05
     if (newVal && (PERCENT_COLS.has(h) || h.trim() === 'Deposit%')) {
       const n = parseFloat(String(newVal).replace(/%/g, '').trim());
       newVal = isNaN(n) ? '' : String(n / 100);
@@ -1173,15 +1178,8 @@ async function saveEdit() {
   applyFilters(); updateStats();
   try {
     await syncToOneDrive();
-    if (isDesktop()) {
-      showScreen('data');
-      document.getElementById('desktop-topnav').style.display = 'flex';
-      document.getElementById('desktop-filters').style.display = 'flex';
-      document.getElementById('desktop-table-wrap').style.display = 'block';
-      renderDesktopTable();
-    } else {
-      showScreen('data');
-    }
+    showScreen('data');
+    if (isDesktop()) renderDesktopTable();
   } catch(e) {
     // Stay on edit screen so user can retry
   }
@@ -1364,56 +1362,6 @@ const CURRENCY_COLS = new Set(['$VAL ','$BASE','$LIST ','$CHECK$                
 const PERCENT_COLS = new Set(['Deposit%']);
 const AREA_COLS = new Set(['Lot Area (m²)','Lot Area (m\u00b2)']);
 
-function formatCellValue(h, v) {
-  const vs = String(v ?? '');
-  if (vs === '' || vs === 'NaN' || vs === 'undefined' || vs === 'null') return '';
-  if (DATE_COLS.has(h)) return fmtDate(v);
-  if (PHONE_COLS.has(h) || h.toLowerCase().includes('mobile') || h.toLowerCase().includes('phone')) return fmtPhone(v);
-  if (PERCENT_COLS.has(h) || h.trim() === 'Deposit%') return fmtPercentText(v);
-  if (AREA_COLS.has(h)) { const n = Number(vs); return (!isNaN(n) && vs !== '') ? Math.round(n).toLocaleString() : vs; }
-  if ((CURRENCY_COLS.has(h) || h.includes('$') || h.toLowerCase().includes('price')) && !isNaN(v) && vs !== '' && vs !== '0') return '$' + Number(v).toLocaleString();
-  return vs;
-}
-
-
-function badgeCellStyle(cond) {
-  const c = String(cond || '').toLowerCase().trim();
-  if (c.includes('exchange')) return 'background:#fff0e0;color:#c45f00;font-weight:500';
-  if (c.includes('settle')) return 'background:#fde8e8;color:#a01a1a;font-weight:500';
-  if (c.includes('deposit')) return 'background:#e8f0fd;color:#1a3a8b;font-weight:500';
-  if (c.includes('on sale')) return 'background:#e8f4ed;color:#1a6b3a;font-weight:500';
-  if (c.includes('pending')) return 'background:#eeedfe;color:#534ab7;font-weight:500';
-  return 'background:#f0ebe0;color:#8a7d65;font-weight:500';
-}
-function renderDesktopTable() {
-  if (!filteredData.length) {
-    document.getElementById('dt-body').innerHTML = '<tr><td colspan="' + headers.length + '" style="text-align:center;padding:40px;color:var(--muted)">No records match your filters.</td></tr>';
-    return;
-  }
-  document.getElementById('dt-head').innerHTML = '<tr>' + headers.map(h =>
-    `<th class="${colClass(h)}" data-col="${h}" title="Click to filter ${h.trim()}" onclick="openColFilter(event,'${h}')">${h.trim()} ▾</th>`
-  ).join('') + '</tr>';
-
-  document.getElementById('dt-body').innerHTML = filteredData.map((row, i) => {
-    const cond = String(row['Sales Condition ']||row['Sales Condition']||'');
-    const cells = headers.map((h, hi) => {
-      const v = row[h];
-      const vs = String(v ?? '');
-      let display = vs;
-      let cls = '';
-      if (hi === 0) cls = 'td-lot';
-      if (h === 'Sales Condition ' || h === 'Sales Condition') {
-        display = `<span class="badge ${badgeClass(cond)}">${cond}</span>`;
-      } else if ((h.includes('$') || h.toLowerCase().includes('price')) && !isNaN(v) && vs !== '' && vs !== 'NaN') {
-        display = '$' + Number(v).toLocaleString();
-        cls += ' td-val';
-      }
-      return `<td class="${cls.trim()}" title="${vs}">${display||'—'}</td>`;
-    }).join('');
-    return `<tr onclick="selectDesktopRow(${i})" ondblclick="openDesktopPanel(${i})" id="dtr-${i}">${cells}</tr>`;
-  }).join('');
-  document.getElementById('dt-rec-count').textContent = filteredData.length + ' of ' + allData.length + ' records';
-}
 
 function selectDesktopRow(idx) {
   document.querySelectorAll('#dt-body tr').forEach(r => r.classList.remove('dt-selected'));
@@ -1424,7 +1372,7 @@ function openDesktopPanel(idx) {
   modalRowIdx = allData.indexOf(filteredData[idx]);
   const row = filteredData[idx];
   const lotNum = row['Lot #'] || row['Lot#'] || '—';
-  document.getElementById('desktop-panel-title').textContent = 'Lot ' + lotNum;
+  document.getElementById('dt-panel-title').textContent = 'Lot ' + lotNum;
   let body = '';
   headers.forEach(k => {
     const v = row[k]; const vs = String(v ?? '').trim();
@@ -1462,39 +1410,36 @@ function openDesktopPanel(idx) {
     }
     body += `<div class="detail-row"><span class="detail-label">${k.trim()}</span><span class="detail-val">${display}</span></div>`;
   });
-  document.getElementById('desktop-panel-body').innerHTML = body;
-  document.getElementById('desktop-panel').classList.add('open');
+  document.getElementById('dt-panel-body').innerHTML = body;
+  document.getElementById('dt-panel').classList.add('open');
   document.querySelectorAll('#dt-body tr').forEach(r => r.classList.remove('dt-selected'));
   document.getElementById('dtr-' + idx)?.classList.add('dt-selected');
 }
 
-function closeDesktopPanel() { document.getElementById('desktop-panel').classList.remove('open'); }
+function closeDesktopPanel() { document.getElementById('dt-panel').classList.remove('open'); }
 
 function editFromDesktop() {
   editRowIdx = modalRowIdx;
   closeDesktopPanel();
-  document.getElementById('desktop-table-wrap').style.display = 'none';
-  document.getElementById('desktop-topnav').style.display = 'none';
-  document.getElementById('desktop-filters').style.display = 'none';
-  populateEditForm(allData[editRowIdx]);
+  deskEditRow(filteredData.indexOf(allData[editRowIdx]));
 }
 
 
 
 function showScreen(name) {
-  // On desktop, show/hide table wrap based on screen
+  // On desktop, phone screens aren't used — desktop has its own nav
   if (isDesktop()) {
-    const tableWrap = document.getElementById('desktop-table-wrap');
-    const desktopFilters = document.getElementById('desktop-filters');
-    tableWrap.style.display = name === 'data' ? 'block' : 'none';
-    desktopFilters.style.display = name === 'data' ? 'flex' : 'none';
-    if (name !== 'data') closeDesktopPanel();
+    // Just sync the desktop nav button state
+    ['data','chat','reports'].forEach(n => {
+      document.getElementById('dnav-' + n)?.classList.toggle('active', n === name);
+    });
+    return;
   }
+  // Phone: switch active screen
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + name).classList.add('active');
+  document.getElementById('screen-' + name)?.classList.add('active');
   ['data','chat','reports'].forEach(n => {
     document.getElementById('nav-' + n)?.classList.toggle('active', n === name);
-    document.getElementById('dnav-' + n)?.classList.toggle('active', n === name);
   });
 }
 
@@ -1552,7 +1497,8 @@ async function sendChat() {
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },\n\n${dataSnapshot()}\n\nIMPORTANT FORMATTING RULES:\n- Never use markdown tables or pipe characters\n- Never use ** for bold\n- Use plain conversational text\n- For lists, just use simple line breaks\n- Keep answers concise and easy to read on a phone screen\n- When listing lots, format as: Lot 2001 — Exchanged — $980,000\n- Use plain numbers and short sentences`, messages: [{ role: 'user', content: msg }] })
+      headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 1000, system: `You are a property sales analyst. Database: ${allData.length} lots.\n\n${dataSnapshot()}\n\nRules: plain text only, no markdown, no bold, no tables. List lots as: Lot 42 — Exchanged — $980,000`, messages: [{ role: 'user', content: msg }] })
     });
     const d = await res.json(); thinking.remove();
     if (d.error) { addMsg('system', 'Error: ' + d.error.message); return; }
@@ -1679,7 +1625,20 @@ window.addEventListener('resize', function() {
     });
   }
   const saved = localStorage.getItem('anthropic_key');
-  if (saved) { const f = document.getElementById('api-key-field'); if (f) f.value = '••••••••••••••••'; }
+  if (saved) {
+    const f = document.getElementById('api-key-field');
+    if (f) f.value = '••••••••••••••••';
+    const s = document.getElementById('api-key-status');
+    if (s) {
+      if (saved.startsWith('sk-')) {
+        s.textContent = '✓ API key is saved';
+        s.style.color = '#16a34a';
+      } else {
+        s.textContent = '✗ Saved key looks invalid — please re-enter';
+        s.style.color = '#dc2626';
+      }
+    }
+  }
   try {
     const pca = await getMsal();
     const response = await pca.handleRedirectPromise();
