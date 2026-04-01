@@ -193,9 +193,9 @@ body { background: var(--bg); color: var(--ink); font-family: 'Aptos', sans-seri
 }
 
 @media (min-width: 768px) {
-  html, body { overflow: auto; height: 100%; }
+  html, body { overflow: hidden; height: 100%; }
   .bottom-nav { display: none; }
-  #app-wrapper { height: 100dvh; display: flex; flex-direction: column; }
+  #app-wrapper { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 
   /* Desktop top nav instead of bottom nav */
   .desktop-topnav { display: flex; align-items: center; gap: 4px; padding: 0 16px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
@@ -206,7 +206,10 @@ body { background: var(--bg); color: var(--ink); font-family: 'Aptos', sans-seri
 
   /* Spreadsheet table */
   .lot-list { display: none; }
-  #desktop-table-wrap { display: block; overflow: auto; flex: 1; background: var(--surface); }
+  .screens { flex: 1; overflow: hidden; min-height: 0; }
+  #screen-data { height: 100%; }
+  #desktop-table-wrap { display: block; overflow: auto; background: var(--surface); }
+  #desktop-table-wrap { height: calc(100dvh - var(--header-h) - 40px - 46px - 36px); }
   table.dt { border-collapse: collapse; font-size: 12px; white-space: nowrap; table-layout: fixed; }
   table.dt thead { position: sticky; top: 0; z-index: 5; }
   table.dt th {
@@ -232,14 +235,16 @@ body { background: var(--bg); color: var(--ink); font-family: 'Aptos', sans-seri
   table.dt th.col-wide { min-width: 150px; width: 150px; }
   table.dt th.col-val { min-width: 100px; width: 100px; text-align: right; }
   table.dt td {
-    padding: 5px 10px;
+    padding: 0 10px;
     border: 1px solid #e0dbd0;
     color: var(--ink);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     height: 28px;
+    line-height: 28px;
     max-width: 0;
+    vertical-align: middle;
   }
   table.dt td.td-val { text-align: right; }
   table.dt td.td-lot { font-weight: 600; position: sticky; left: 0; background: var(--surface); z-index: 2; border-right: 2px solid #c8c0b0; }
@@ -320,9 +325,9 @@ body { background: var(--bg); color: var(--ink); font-family: 'Aptos', sans-seri
   </div>
 
   <div class="desktop-topnav" id="desktop-topnav" style="display:none">
-    <button class="desktop-navbtn active" id="dnav-data" onclick="showScreen('data')">☰ Data</button>
-    <button class="desktop-navbtn" id="dnav-chat" onclick="showScreen('chat')">💬 Ask Claude</button>
-    <button class="desktop-navbtn" id="dnav-reports" onclick="showScreen('reports')">📊 Reports</button>
+    <button class="desktop-navbtn active" id="dnav-data" onclick="showScreen('data')"> Data</button>
+    <button class="desktop-navbtn" id="dnav-chat" onclick="showScreen('chat')"> Ask Claude</button>
+    <button class="desktop-navbtn" id="dnav-reports" onclick="showScreen('reports')"> Reports</button>
     <div class="desktop-navbtn-right">
       <div id="sync-bar-desktop" style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px">
         <span id="sync-dot-d" style="width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block"></span>
@@ -335,13 +340,13 @@ body { background: var(--bg); color: var(--ink); font-family: 'Aptos', sans-seri
   <!-- Desktop filter bar -->
   <div class="desktop-filters" id="desktop-filters" style="display:none">
     <input type="text" id="dt-search" placeholder="Search (comma separated)..." oninput="applyFilters()">
-    <select class="filter-select" id="f-stage" onchange="applyFilters()"><option value="">All stages</option></select>
-    <select class="filter-select" id="f-condition" onchange="applyFilters()"><option value="">All conditions</option></select>
-    <select class="filter-select" id="f-channel" onchange="applyFilters()"><option value="">All channels</option></select>
-    <select class="filter-select" id="f-partner" onchange="applyFilters()"><option value="">All partners</option></select>
-    <select class="filter-select" id="f-productline" onchange="applyFilters()"><option value="">All product lines</option></select>
-    <select class="filter-select" id="f-market" onchange="applyFilters()"><option value="">All markets</option></select>
-    <select class="filter-select" id="f-year" onchange="applyFilters()"><option value="">All years</option></select>
+    <select class="filter-select" id="dt-f-stage" onchange="applyFilters()"><option value="">All stages</option></select>
+    <select class="filter-select" id="dt-f-condition" onchange="applyFilters()"><option value="">All conditions</option></select>
+    <select class="filter-select" id="dt-f-channel" onchange="applyFilters()"><option value="">All channels</option></select>
+    <select class="filter-select" id="dt-f-partner" onchange="applyFilters()"><option value="">All partners</option></select>
+    <select class="filter-select" id="dt-f-productline" onchange="applyFilters()"><option value="">All product lines</option></select>
+    <select class="filter-select" id="dt-f-market" onchange="applyFilters()"><option value="">All markets</option></select>
+    <select class="filter-select" id="dt-f-year" onchange="applyFilters()"><option value="">All years</option></select>
     <button class="filter-clear-btn" onclick="clearFilters()">✕ Clear</button>
     <span class="desktop-rec-count" id="dt-rec-count">— records</span>
   </div>
@@ -518,16 +523,13 @@ body { background: var(--bg); color: var(--ink); font-family: 'Aptos', sans-seri
 
   <nav class="bottom-nav">
     <div class="nav-item active" id="nav-data" onclick="showScreen('data')">
-      <span class="nav-icon">☰</span>
-      <span class="nav-label">Data</span>
+      <span class="nav-label" style="font-size:12px;font-weight:500">Data</span>
     </div>
     <div class="nav-item" id="nav-chat" onclick="showScreen('chat')">
-      <span class="nav-icon">💬</span>
-      <span class="nav-label">Ask Claude</span>
+      <span class="nav-label" style="font-size:12px;font-weight:500">Ask Claude</span>
     </div>
     <div class="nav-item" id="nav-reports" onclick="showScreen('reports')">
-      <span class="nav-icon">📊</span>
-      <span class="nav-label">Reports</span>
+      <span class="nav-label" style="font-size:12px;font-weight:500">Reports</span>
     </div>
   </nav>
 </div>
@@ -738,10 +740,12 @@ function colIdxToLetter(idx) {
 
 function populateDropdowns() {
   Object.entries(FILTER_MAP).forEach(([id, col]) => {
-    const el = document.getElementById(id); if (!el) return;
-    const first = el.options[0]; el.innerHTML = ''; el.appendChild(first);
-    const vals = [...new Set(allData.map(r => String(r[col]||'').trim()).filter(v => v && v !== 'NaN'))].sort();
-    vals.forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; el.appendChild(o); });
+    ['', 'dt-'].forEach(prefix => {
+      const el = document.getElementById(prefix + id); if (!el) return;
+      const first = el.options[0]; el.innerHTML = ''; el.appendChild(first);
+      const vals = [...new Set(allData.map(r => String(r[col]||'').trim()).filter(v => v && v !== 'NaN'))].sort();
+      vals.forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; el.appendChild(o); });
+    });
   });
 }
 
@@ -763,8 +767,15 @@ function applyFilters() {
   const terms = document.getElementById('search-input').value.split(',').map(t=>t.trim().toLowerCase()).filter(Boolean);
   const dropVals = {}; let activeCount = 0;
   Object.entries(FILTER_MAP).forEach(([id, col]) => {
-    const el = document.getElementById(id); dropVals[col] = el?.value || '';
-    el?.classList.toggle('active', !!el?.value); if (el?.value) activeCount++;
+    const mob = document.getElementById(id);
+    const dsk = document.getElementById('dt-' + id);
+    const active = mob || dsk;
+    // Use desktop value if on desktop, mobile otherwise
+    const val = isDesktop() ? (dsk?.value || '') : (mob?.value || '');
+    dropVals[col] = val;
+    mob?.classList.toggle('active', !!val);
+    dsk?.classList.toggle('active', !!val);
+    if (val) activeCount++;
   });
   filteredData = allData.filter(row => {
     if (activeQuickFilter) {
@@ -805,7 +816,7 @@ function removeSearchTerm(term) {
   applyFilters();
 }
 function clearDropdown(id) { const el = document.getElementById(id); if (el) { el.value = ''; el.classList.remove('active'); } applyFilters(); }
-function clearFilters() { document.getElementById('search-input').value = ''; Object.keys(FILTER_MAP).forEach(id => { const el = document.getElementById(id); if (el) { el.value = ''; el.classList.remove('active'); } }); applyFilters(); }
+function clearFilters() { document.getElementById('search-input').value = ''; const dts = document.getElementById('dt-search'); if(dts) dts.value=''; Object.keys(FILTER_MAP).forEach(id => { ['','dt-'].forEach(p => { const el = document.getElementById(p+id); if (el) { el.value = ''; el.classList.remove('active'); } }); }); applyFilters(); }
 function toggleFilterDrawer() { filterDrawerOpen = !filterDrawerOpen; document.getElementById('filter-drawer').classList.toggle('open', filterDrawerOpen); }
 
 function fmtDate(v) {
