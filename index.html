@@ -187,7 +187,7 @@ body { background: var(--bg); color: var(--ink); font-family: 'Aptos', sans-seri
     <div class="api-key-section">
       <label>Anthropic API Key</label>
       <div class="api-key-row">
-        <input type="password" id="api-key-field" placeholder="sk-ant-...">
+        <input type="text" id="api-key-field" placeholder="sk-ant-..." autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
         <button onclick="saveApiKey()">Save</button>
       </div>
       <div class="api-note">Stored in your browser only. Required for Chat and Reports.</div>
@@ -721,12 +721,8 @@ async function sendChat() {
 }
 
 function dataSnapshot() {
-  // Send a compact summary instead of raw rows to stay within token limits
   const total = allData.length;
-  const conditions = {};
-  const partners = {};
-  const channels = {};
-  const stages = {};
+  const conditions = {}, partners = {}, channels = {}, stages = {};
   let totalVal = 0, valCount = 0;
 
   allData.forEach(r => {
@@ -742,25 +738,22 @@ function dataSnapshot() {
     if (val) { totalVal += val; valCount++; }
   });
 
-  const fmt = obj => Object.entries(obj).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${k}: ${v}`).join(', ');
+  const fmt = obj => Object.entries(obj).sort((a,b)=>b[1]-a[1]).map(([k,v])=>k+': '+v).join(', ');
 
-  // Include last 20 rows as recent examples
-  const recent = allData.slice(-20).map(r => {
-    const key = ['Lot #','Stage','Sales Condition ','$VAL ','Channel Partner','Sales Channel','Property Address'];
-    return key.map(k => `${k.trim()}=${String(r[k]||'').trim()}`).join(' | ');
+  // All lots with key fields
+  const lotLines = allData.map(r => {
+    const lot = r['Lot #']||r['Lot#']||'';
+    const cond = String(r['Sales Condition ']||r['Sales Condition']||'').trim();
+    const stage = String(r['Stage']||'').trim();
+    const partner = String(r['Channel Partner']||'').trim();
+    const val = r['$VAL ']||r['$VAL']||'';
+    const exchDate = r['Exchanged Date']||'';
+    const settleDate = r['Settled Date']||'';
+    const propSettle = r['Proposed Settled Date']||'';
+    return 'Lot '+lot+' | '+cond+' | Stage:'+stage+' | Partner:'+partner+' | Val:$'+Number(val||0).toLocaleString()+(exchDate?' | Exch:'+exchDate:'')+(settleDate?' | Settled:'+settleDate:'')+(propSettle?' | PropSettle:'+propSettle:'');
   }).join('\n');
 
-  return `SALES DATABASE SUMMARY (${total} total lots)
-Columns available: ${headers.join(', ')}
-
-BY CONDITION: ${fmt(conditions)}
-BY STAGE: ${fmt(stages)}
-BY CHANNEL: ${fmt(channels)}
-BY PARTNER: ${fmt(partners)}
-TOTAL VALUE: $${totalVal.toLocaleString()} across ${valCount} lots (avg $${valCount ? Math.round(totalVal/valCount).toLocaleString() : 0})
-
-RECENT 20 RECORDS:
-${recent}`;
+  return 'SALES DATABASE ('+total+' lots)\nColumns: '+headers.join(', ')+'\n\nBY CONDITION: '+fmt(conditions)+'\nBY STAGE: '+fmt(stages)+'\nBY CHANNEL: '+fmt(channels)+'\nBY PARTNER: '+fmt(partners)+'\nTOTAL VALUE: $'+totalVal.toLocaleString()+' (avg $'+(valCount?Math.round(totalVal/valCount).toLocaleString():0)+')\n\nALL LOTS:\n'+lotLines;
 }
 
 function renderMarkdown(text) {
