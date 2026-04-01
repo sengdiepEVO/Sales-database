@@ -808,7 +808,7 @@
 <script>
 // ── CONFIG ─────────────────────────────────────────────
 const CLIENT_ID = 'cd53b987-59ab-4b81-9bfb-178cfa8ee5b2';
-const REDIRECT_URI = 'https://sengdiepevo.github.io/Sales-database/';
+const REDIRECT_URI = 'https://SENDIE1.github.io/Sales-database/';
 const FILE_NAME = 'sales DB - Claude.xlsx';
 const SCOPES = ['Files.ReadWrite', 'User.Read'];
 const ANTHROPIC_KEY = () => sessionStorage.getItem('anthropic_key') || '';
@@ -816,7 +816,7 @@ const ANTHROPIC_KEY = () => sessionStorage.getItem('anthropic_key') || '';
 const msalConfig = {
   auth: {
     clientId: CLIENT_ID,
-    authority: 'https://login.microsoftonline.com/common',
+    authority: 'https://login.microsoftonline.com/ab54a23e-1458-4baf-a2f6-9b8164f032d1',
     redirectUri: REDIRECT_URI,
   },
   cache: { cacheLocation: 'sessionStorage' }
