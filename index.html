@@ -1326,6 +1326,15 @@ function formatCellValue(h, v) {
 }
 
 
+function badgeCellStyle(cond) {
+  const c = String(cond || '').toLowerCase().trim();
+  if (c.includes('exchange')) return 'background:#fff0e0;color:#c45f00;font-weight:500';
+  if (c.includes('settle')) return 'background:#fde8e8;color:#a01a1a;font-weight:500';
+  if (c.includes('deposit')) return 'background:#e8f0fd;color:#1a3a8b;font-weight:500';
+  if (c.includes('on sale')) return 'background:#e8f4ed;color:#1a6b3a;font-weight:500';
+  if (c.includes('pending')) return 'background:#eeedfe;color:#534ab7;font-weight:500';
+  return 'background:#f0ebe0;color:#8a7d65;font-weight:500';
+}
 function renderDesktopTable() {
   if (!filteredData.length) {
     document.getElementById('dt-body').innerHTML = '<tr><td colspan="' + headers.length + '" style="text-align:center;padding:40px;color:var(--muted)">No records match your filters.</td></tr>';
@@ -1706,6 +1715,15 @@ function formatCellValue(h, v) {
 }
 
 
+function badgeCellStyle(cond) {
+  const c = String(cond || '').toLowerCase().trim();
+  if (c.includes('exchange')) return 'background:#fff0e0;color:#c45f00;font-weight:500';
+  if (c.includes('settle')) return 'background:#fde8e8;color:#a01a1a;font-weight:500';
+  if (c.includes('deposit')) return 'background:#e8f0fd;color:#1a3a8b;font-weight:500';
+  if (c.includes('on sale')) return 'background:#e8f4ed;color:#1a6b3a;font-weight:500';
+  if (c.includes('pending')) return 'background:#eeedfe;color:#534ab7;font-weight:500';
+  return 'background:#f0ebe0;color:#8a7d65;font-weight:500';
+}
 function renderDesktopTable() {
   if (!filteredData.length) {
     document.getElementById('dt-body').innerHTML = '<tr><td colspan="' + headers.length + '" style="text-align:center;padding:40px;color:var(--muted)">No records match your filters.</td></tr>';
@@ -1726,8 +1744,8 @@ function renderDesktopTable() {
       let cls = hi === 0 ? 'td-lot' : '';
       let display;
       if (h === 'Sales Condition ' || h === 'Sales Condition') {
-        display = `<span class="badge ${badgeClass(cond)}">${cond}</span>`;
-        cls += ' td-badge';
+        const condStyle = badgeCellStyle(cond);
+        return `<td class="${cls.trim()}" style="${condStyle}" title="${vs}">${cond}</td>`;
       } else {
         display = formatCellValue(h, v) || '&#8212;';
         if ((h.includes('$') || h.toLowerCase().includes('price')) && !isNaN(v) && vs !== '' && vs !== 'NaN') cls += ' td-val';
@@ -1765,6 +1783,23 @@ function closeDtPanel() {
   document.querySelectorAll('#dt-body tr').forEach(r => r.classList.remove('dt-sel'));
 }
 
+
+const COL_GROUPS = [
+  { label: 'Property Details', colour: '#C0E6F5', textColour: '#000000', cols: ['Project Name','Lot ID','Property Address','Stage','Lot #','Sales Condition '] },
+  { label: 'Pending SA', colour: '#FFFF00', textColour: '#000000', cols: ['Pending S/A Date','Pending S/A Days','Pending S/A Agency','*LEADS Name'] },
+  { label: 'Property Info', colour: '#156082', textColour: '#ffffff', cols: ['CfS Type','Property Type','Product Line','Product Type','Lot Area (m\u00b2)','Lot Frontage (Width) (m)'] },
+  { label: 'Stock & Notes', colour: '#9437FF', textColour: '#ffffff', cols: ['StockList','Notes'] },
+  { label: 'Channel & Allocation', colour: '#A02B93', textColour: '#ffffff', cols: ['Channel Market','Sales Channel','Channel Partner','Swap to/from Channel Partner','Allocation Date','Allocation Days','Allocation Period (days)','Allocation Days / Allocation Expiry Date'] },
+  { label: 'Pricing', colour: '#FFFF00', textColour: '#000000', cols: ['$VAL ','$BASE','$LIST '] },
+  { label: 'Price Checks', colour: '#FF0066', textColour: '#ffffff', cols: ['$CHECK$                   $BASE-$VAL','$CHECK$ $LIST-$BASE'] },
+  { label: 'Land Tax', colour: '#FFFFFF', textColour: '#FF0000', cols: ['Land Tax Per lot Value','Land Tax $Uplift / $Shortfall'] },
+  { label: 'Campaign & Rebates', colour: '#FFFF00', textColour: '#000000', cols: ['March Campaign','OFFER Rebate','SETTLE Rebate','H&L $House (S/S)','$H&L Total (S/S)','H&L $House (D/S)','$H&L Total (D/S)','Notes.1'] },
+  { label: 'Dates & CfS', colour: '#4EA72E', textColour: '#ffffff', cols: ['Sales Advice Received Date','Sales Advice Sent To Legal Date','Contract Issued Date','Days From CfS Issued','CfS Issued Price','Proposed Exchanged Date','Exchanged Date','CfS Exchanged Price ($)','Proposed Settled Date','Settled Date','Settled Month','Settled Year','CfS Settled Price ($)','Rebate','Deposit%','Cooling Off Date','FIRB Approval','March Campaign.1','Comments'] },
+  { label: 'Vendors & Agents', colour: '#A02B93', textColour: '#ffffff', cols: ['Vendors Agency','Vendors Agency Agent',"Agent's Mobile","Agent's Email"] },
+  { label: 'Purchaser Details', colour: '#E97132', textColour: '#ffffff', cols: ["(1) Purchaser's Name","(1) Purchaser's Email","(1) Purchaser's Mobile","(2) Purchaser's Name","(2) Purchaser's Email","(2) Purchaser's Mobile","Purchaser's Suburb","Purchaser's Postcode","Purchaser's Solicitor (P'Sol)","Purchaser's Solicitor Phone"] },
+  { label: 'Other', colour: '#FFFF00', textColour: '#000000', cols: ['Type Of Purchaser','Special Condilions/Variations','2026 Report','Comments.1'] },
+];
+
 function deskEditRow(idx) {
   dtSelectedIdx = idx;
   modalRowIdx = allData.indexOf(filteredData[idx]);
@@ -1772,13 +1807,37 @@ function deskEditRow(idx) {
   const row = allData[editRowIdx];
   const lotNum = row['Lot #'] || row['Lot#'] || '';
   document.getElementById('d-edit-title').textContent = 'Lot ' + lotNum;
-  document.getElementById('d-edit-fields').innerHTML = headers.map(h => {
-    const val = String(row[h] ?? '').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    return `<div class="edit-row" id="d-row-${sid(h)}" onclick="deskStartEdit('${sid(h)}','${val}')">
-      <span class="edit-row-label">${h.trim()}</span>
-      <span class="edit-row-val${val ? '' : ' empty'}" id="d-disp-${sid(h)}">${val || '&#8212;'}</span>
-    </div>`;
-  }).join('');
+  let editHtml = '';
+  COL_GROUPS.forEach(group => {
+    const groupCols = group.cols.filter(c => headers.includes(c));
+    if (!groupCols.length) return;
+    editHtml += `<div style="padding:8px 16px 4px;background:${group.colour};color:${group.textColour};font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid rgba(0,0,0,0.1)">${group.label}</div>`;
+    editHtml += '<div style="display:grid;grid-template-columns:1fr 1fr;background:var(--surface)">';
+    groupCols.forEach(h => {
+      const val = String(row[h] ?? '').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      editHtml += `<div class="edit-row" id="d-row-${sid(h)}" onclick="deskStartEdit('${sid(h)}','${val}')">
+        <span class="edit-row-label">${h.trim()}</span>
+        <span class="edit-row-val${val ? '' : ' empty'}" id="d-disp-${sid(h)}">${val || '&#8212;'}</span>
+      </div>`;
+    });
+    editHtml += '</div>';
+  });
+  // Any ungrouped headers
+  const groupedCols = COL_GROUPS.flatMap(g => g.cols);
+  const ungrouped = headers.filter(h => !groupedCols.includes(h));
+  if (ungrouped.length) {
+    editHtml += `<div style="padding:8px 16px 4px;background:#e8e3d8;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border)">Other</div>`;
+    editHtml += '<div style="display:grid;grid-template-columns:1fr 1fr;background:var(--surface)">';
+    ungrouped.forEach(h => {
+      const val = String(row[h] ?? '').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      editHtml += `<div class="edit-row" id="d-row-${sid(h)}" onclick="deskStartEdit('${sid(h)}','${val}')">
+        <span class="edit-row-label">${h.trim()}</span>
+        <span class="edit-row-val${val ? '' : ' empty'}" id="d-disp-${sid(h)}">${val || '&#8212;'}</span>
+      </div>`;
+    });
+    editHtml += '</div>';
+  }
+  document.getElementById('d-edit-fields').innerHTML = editHtml;
   formDirty = false;
   closeDtPanel();
   deskShowScreen('edit');
@@ -1790,13 +1849,37 @@ function deskEditFromPanel() {
   const row = allData[editRowIdx];
   const lotNum = row['Lot #'] || row['Lot#'] || '';
   document.getElementById('d-edit-title').textContent = 'Lot ' + lotNum;
-  document.getElementById('d-edit-fields').innerHTML = headers.map(h => {
-    const val = String(row[h] ?? '').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    return `<div class="edit-row" id="d-row-${sid(h)}" onclick="deskStartEdit('${sid(h)}','${val}')">
-      <span class="edit-row-label">${h.trim()}</span>
-      <span class="edit-row-val${val ? '' : ' empty'}" id="d-disp-${sid(h)}">${val || '&#8212;'}</span>
-    </div>`;
-  }).join('');
+  let editHtml = '';
+  COL_GROUPS.forEach(group => {
+    const groupCols = group.cols.filter(c => headers.includes(c));
+    if (!groupCols.length) return;
+    editHtml += `<div style="padding:8px 16px 4px;background:${group.colour};color:${group.textColour};font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid rgba(0,0,0,0.1)">${group.label}</div>`;
+    editHtml += '<div style="display:grid;grid-template-columns:1fr 1fr;background:var(--surface)">';
+    groupCols.forEach(h => {
+      const val = String(row[h] ?? '').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      editHtml += `<div class="edit-row" id="d-row-${sid(h)}" onclick="deskStartEdit('${sid(h)}','${val}')">
+        <span class="edit-row-label">${h.trim()}</span>
+        <span class="edit-row-val${val ? '' : ' empty'}" id="d-disp-${sid(h)}">${val || '&#8212;'}</span>
+      </div>`;
+    });
+    editHtml += '</div>';
+  });
+  // Any ungrouped headers
+  const groupedCols = COL_GROUPS.flatMap(g => g.cols);
+  const ungrouped = headers.filter(h => !groupedCols.includes(h));
+  if (ungrouped.length) {
+    editHtml += `<div style="padding:8px 16px 4px;background:#e8e3d8;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border)">Other</div>`;
+    editHtml += '<div style="display:grid;grid-template-columns:1fr 1fr;background:var(--surface)">';
+    ungrouped.forEach(h => {
+      const val = String(row[h] ?? '').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      editHtml += `<div class="edit-row" id="d-row-${sid(h)}" onclick="deskStartEdit('${sid(h)}','${val}')">
+        <span class="edit-row-label">${h.trim()}</span>
+        <span class="edit-row-val${val ? '' : ' empty'}" id="d-disp-${sid(h)}">${val || '&#8212;'}</span>
+      </div>`;
+    });
+    editHtml += '</div>';
+  }
+  document.getElementById('d-edit-fields').innerHTML = editHtml;
   formDirty = false;
   deskShowScreen('edit');
 }
@@ -1834,8 +1917,8 @@ async function deskSaveEdit() {
     const disp = document.getElementById('d-disp-' + sid(h));
     let newVal = null;
     if (input) newVal = input.value;
-    else if (disp && disp.textContent !== '&#8212;') newVal = disp.textContent;
-    if (newVal !== null && newVal !== String(allData[editRowIdx][h] ?? '')) {
+    else if (disp && disp.textContent !== '—') newVal = disp.textContent;
+    if (newVal !== null && String(newVal) !== String(allData[editRowIdx][h] ?? '')) {
       allData[editRowIdx][h] = newVal;
       markEdit(editRowIdx, h, newVal);
     }
