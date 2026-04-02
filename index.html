@@ -311,7 +311,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
   <div class="login-card">
     <div class="login-icon">&#128202;</div>
     <div class="login-title">Sales DB</div>
-    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">v2.11</div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">v2.12</div>
     <div class="login-sub">Sign in with your Microsoft account to access your OneDrive sales data.</div>
     <button class="ms-btn" onclick="signIn()">
       <div class="ms-logo"><div></div><div></div><div></div><div></div></div>
@@ -334,7 +334,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 <!-- APP -->
 <div id="app-wrapper" style="display:none">
   <div class="app-header">
-    <div class="header-logo">Sales<strong>DB</strong><span class="header-version">v2.11</span></div>
+    <div class="header-logo">Sales<strong>DB</strong><span class="header-version">v2.12</span></div>
     <div class="header-right">
       <div class="user-pill">
         <div class="user-avatar" id="user-avatar">?</div>
@@ -1489,10 +1489,15 @@ async function sendChat() {
   const inp = document.getElementById('chat-input');
   const msg = inp.value.trim(); if (!msg) return;
   const key = ANTHROPIC_KEY();
-  if (!key) { toast('API key missing — re-enter it on the sign-in screen', 'error'); return; }
-  // Debug: show first 20 chars of key being used
-  toast('Using key: ' + key.slice(0,20) + '...', 'success');
+  const rawStored = localStorage.getItem('anthropic_key') || '';
+  if (!key) {
+    // Show what's actually stored so user can diagnose
+    addMsg('system', `No valid key found.\nStored value starts with: "${rawStored.slice(0,10)}"\nLength: ${rawStored.length}\nPlease re-enter your API key.`);
+    return;
+  }
   inp.value = ''; addMsg('user', msg);
+  // Debug line - remove once working
+  addMsg('system', `[Debug] Sending key: ${key.slice(0,15)}... (${key.length} chars)`);
   const thinking = addThinking();
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -1501,7 +1506,7 @@ async function sendChat() {
       body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 1000, system: `You are a property sales analyst. Database: ${allData.length} lots.\n\n${dataSnapshot()}\n\nRules: plain text only, no markdown, no bold, no tables. List lots as: Lot 42 — Exchanged — $980,000`, messages: [{ role: 'user', content: msg }] })
     });
     const d = await res.json(); thinking.remove();
-    if (d.error) { addMsg('system', 'Error: ' + d.error.message); return; }
+    if (d.error) { addMsg('system', `API Error: ${d.error.message}\nType: ${d.error.type}\nKey used: ${key.slice(0,15)}... (${key.length} chars)`); return; }
     addMsg('assistant', d.content?.find(b=>b.type==='text')?.text || 'No response.');
   } catch(e) { thinking.remove(); addMsg('system', 'Error: ' + e.message + '\n\nIf this is a CORS error, the Anthropic API does not allow direct browser calls. This is a known limitation.'); console.error('Chat error:', e); }
 }
