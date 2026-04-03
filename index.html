@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Sales DB</title>
 <link href="https://fonts.googleapis.com/css2?family=Aptos:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -311,7 +314,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
   <div class="login-card">
     <div class="login-icon">&#128202;</div>
     <div class="login-title">Sales DB</div>
-    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">v2.16</div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">v2.19</div>
     <div class="login-sub">Sign in with your Microsoft account to access your OneDrive sales data.</div>
     <button class="ms-btn" onclick="signIn()">
       <div class="ms-logo"><div></div><div></div><div></div><div></div></div>
@@ -335,7 +338,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 <!-- APP -->
 <div id="app-wrapper" style="display:none">
   <div class="app-header">
-    <div class="header-logo">Sales<strong>DB</strong><span class="header-version">v2.16</span></div>
+    <div class="header-logo">Sales<strong>DB</strong><span class="header-version">v2.19</span></div>
     <div class="header-right">
       <div class="user-pill">
         <div class="user-avatar" id="user-avatar">?</div>
@@ -371,6 +374,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
           <span style="font-size:11px;color:var(--muted)" id="dt-active-filters"></span>
           <span class="dt-rec-count" id="dt-rec-count">— records</span>
           <button class="dt-clear-btn" onclick="clearAllColFilters()">&#10005; Clear filters</button>
+          <button onclick="openScanPdf()" style="margin-left:auto;padding:5px 14px;background:var(--accent);color:#fff;border:none;border-radius:4px;font-family:Aptos,sans-serif;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px">&#128196; Scan PDF</button>
         </div>
         <div class="dt-wrap" id="dt-wrap">
           <table class="dt" id="dt">
@@ -465,6 +469,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
         <button class="filter-toggle-btn" id="filter-toggle-btn" onclick="toggleFilterDrawer()">
           Filters <span id="filter-count-badge" class="filter-count-badge" style="display:none">0</span>
         </button>
+        <button onclick="openScanPdf()" style="padding:8px 12px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:Aptos,sans-serif;font-size:12px;cursor:pointer;white-space:nowrap">&#128196; Scan PDF</button>
       </div>
       <div class="filter-drawer" id="filter-drawer">
         <div class="filter-drawer-row">
@@ -587,6 +592,71 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
     <div class="nav-item" id="nav-reports" onclick="showScreen('reports')"><span class="nav-label">Reports</span></div>
   </nav>
 
+</div>
+
+<!-- SCAN PDF MODAL -->
+<div id="scan-pdf-overlay" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;padding:16px">
+  <div style="background:var(--bg);border-radius:12px;width:100%;max-width:540px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden">
+    <!-- Header -->
+    <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <div>
+        <div style="font-size:16px;font-weight:600;color:var(--ink)">&#128196; Scan Sales Advice PDF</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Upload a PDF to auto-fill fields from the Sales Advice</div>
+      </div>
+      <button onclick="closeScanPdf()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);padding:4px">&#10005;</button>
+    </div>
+    <!-- Upload step -->
+    <div id="scan-step-upload" style="padding:24px;display:flex;flex-direction:column;align-items:center;gap:16px">
+      <label for="scan-pdf-input" style="width:100%;border:2px dashed var(--border);border-radius:8px;padding:32px 16px;text-align:center;cursor:pointer;transition:border-color 0.2s" id="scan-drop-zone">
+        <div style="font-size:32px;margin-bottom:8px">&#128196;</div>
+        <div style="font-size:14px;font-weight:500;color:var(--ink)">Tap to select PDF</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px" id="scan-file-name">No file selected</div>
+        <input type="file" id="scan-pdf-input" accept=".pdf" style="display:none" onchange="onScanFileSelected(event)">
+      </label>
+      <button onclick="runScanPdf()" id="scan-extract-btn" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;opacity:0.4;pointer-events:none">Extract Fields</button>
+    </div>
+    <!-- Processing step -->
+    <div id="scan-step-processing" style="display:none;padding:40px;text-align:center">
+      <div style="font-size:32px;margin-bottom:12px">&#129302;</div>
+      <div style="font-size:14px;font-weight:500;color:var(--ink)">Reading PDF...</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:6px">Claude is extracting the fields</div>
+    </div>
+    <!-- Review step -->
+    <div id="scan-step-review" style="display:none;flex-direction:column;overflow:hidden;flex:1">
+      <div style="padding:12px 20px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0">
+        <div style="font-size:12px;color:var(--muted)">Matched to: <strong id="scan-matched-lot" style="color:var(--ink)">—</strong></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Review and edit fields before saving</div>
+      </div>
+      <!-- Resc/Exch warning banner — shown only when applicable -->
+      <div id="scan-resc-banner" style="display:none;padding:10px 20px;background:#fff3cd;border-bottom:2px solid #e6a817;flex-shrink:0">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:18px">⚠️</span>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:#7d4e00">Rescission / Exchange Lot</div>
+            <div style="font-size:11px;color:#7d4e00;margin-top:1px">CfS Type is <strong>2.Resc / Exch</strong> — please verify all fields carefully before applying</div>
+          </div>
+        </div>
+      </div>
+      <div id="scan-fields-list" style="overflow-y:auto;flex:1;padding:12px 20px"></div>
+      <div style="padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:10px;flex-shrink:0;background:var(--bg)">
+        <button onclick="closeScanPdf()" style="flex:1;padding:11px;background:none;border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer;color:var(--muted)">Cancel</button>
+        <button onclick="confirmScanPdf()" style="flex:2;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">&#10003; Apply to Database</button>
+      </div>
+    </div>
+    <!-- Success step -->
+    <div id="scan-step-success" style="display:none;padding:40px;text-align:center">
+      <div style="font-size:48px;margin-bottom:12px">✅</div>
+      <div style="font-size:16px;font-weight:600;color:var(--ink)">Saved to OneDrive</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:6px" id="scan-success-msg">Fields updated successfully</div>
+      <button onclick="closeScanPdf()" style="margin-top:20px;padding:11px 32px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">Done</button>
+    </div>
+    <!-- Error step -->
+    <div id="scan-step-error" style="display:none;padding:32px;text-align:center">
+      <div style="font-size:32px;margin-bottom:12px">&#9888;&#65039;</div>
+      <div style="font-size:14px;font-weight:500;color:var(--ink)" id="scan-error-msg">Something went wrong</div>
+      <button onclick="resetScanPdf()" style="margin-top:16px;padding:10px 24px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer">Try Again</button>
+    </div>
+  </div>
 </div>
 
 <!-- DESKTOP EDIT SCREEN (fixed overlay, outside content so hiding content doesn't affect it) -->
@@ -1525,6 +1595,264 @@ async function genReport(type) {
     const d = await res.json();
     out.textContent = d.content?.find(b=>b.type==='text')?.text || 'No report generated.';
   } catch(e) { out.textContent = 'Error: ' + e.message; }
+}
+
+// ── SCAN PDF ──────────────────────────────────────────
+const SCAN_FIELDS = [
+  { key: 'Sales Advice Received Date',     label: 'SA Received Date',      type: 'date' },
+  { key: 'Proposed Exchanged Date',        label: 'Proposed Exchange Date', type: 'date' },
+  { key: 'Proposed Settled Date',          label: 'Proposed Settled Date',  type: 'date' },
+  { key: 'CfS Issued Price',               label: 'CfS Issue Price',        type: 'currency' },
+  { key: 'Rebate',                         label: 'Rebate',                 type: 'currency' },
+  { key: 'Deposit%',                       label: 'Deposit %',              type: 'percent' },
+  { key: "(1) Purchaser's Name",           label: 'Purchaser 1 Name',       type: 'text' },
+  { key: "(1) Purchaser's Email",          label: 'Purchaser 1 Email',      type: 'text' },
+  { key: "(1) Purchaser's Mobile",         label: 'Purchaser 1 Mobile',     type: 'text' },
+  { key: "(2) Purchaser's Name",           label: 'Purchaser 2 Name',       type: 'text' },
+  { key: "(2) Purchaser's Email",          label: 'Purchaser 2 Email',      type: 'text' },
+  { key: "(2) Purchaser's Mobile",         label: 'Purchaser 2 Mobile',     type: 'text' },
+  { key: "Purchaser's Postcode",           label: 'Purchaser Postcode',     type: 'text' },
+  { key: "Purchaser's Suburb",             label: 'Purchaser Suburb',       type: 'text' },
+  { key: "Purchaser's Solicitor (P'Sol)",  label: 'Purchaser Solicitor',    type: 'text' },
+  { key: "Purchaser's Solicitor Phone",    label: 'Solicitor Phone',        type: 'text' },
+];
+
+let scanPdfFile = null;
+let scanExtractedData = {};
+let scanMatchedRowIdx = -1;
+
+function openScanPdf() {
+  document.getElementById('scan-pdf-overlay').style.display = 'flex';
+  resetScanPdf();
+}
+
+function closeScanPdf() {
+  document.getElementById('scan-pdf-overlay').style.display = 'none';
+  scanPdfFile = null;
+  scanExtractedData = {};
+  scanMatchedRowIdx = -1;
+}
+
+function resetScanPdf() {
+  scanPdfFile = null;
+  document.getElementById('scan-file-name').textContent = 'No file selected';
+  document.getElementById('scan-extract-btn').style.opacity = '0.4';
+  document.getElementById('scan-extract-btn').style.pointerEvents = 'none';
+  showScanStep('upload');
+}
+
+function showScanStep(step) {
+  ['upload','processing','review','error','success'].forEach(s => {
+    const el = document.getElementById('scan-step-' + s);
+    if (el) el.style.display = 'none';
+  });
+  const active = document.getElementById('scan-step-' + step);
+  if (!active) return;
+  if (step === 'review') {
+    active.style.display = 'flex';
+    active.style.flexDirection = 'column';
+  } else if (step === 'upload') {
+    active.style.display = 'flex';
+    active.style.flexDirection = 'column';
+  } else {
+    active.style.display = 'block';
+  }
+}
+
+function onScanFileSelected(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  scanPdfFile = file;
+  document.getElementById('scan-file-name').textContent = file.name;
+  document.getElementById('scan-extract-btn').style.opacity = '1';
+  document.getElementById('scan-extract-btn').style.pointerEvents = 'auto';
+}
+
+async function runScanPdf() {
+  if (!scanPdfFile) return;
+  const key = ANTHROPIC_KEY();
+  if (!key) { alert('Please save your Anthropic API key first.'); return; }
+
+  showScanStep('processing');
+
+  try {
+    // Read PDF as base64
+    const base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(scanPdfFile);
+    });
+
+    // Ask Claude to extract fields
+    const prompt = `This is a Sales Advice document for a property sale. Extract the following fields exactly as they appear. Return ONLY a JSON object with these keys (use null if not found):
+
+{
+  "lot_number": "the lot number or lot # mentioned",
+  "sa_received_date": "date document was prepared or signed (dd/mm/yyyy)",
+  "proposed_exchange_date": "proposed exchange date (dd/mm/yyyy)",
+  "proposed_settled_date": "proposed settlement date (dd/mm/yyyy)",
+  "cfs_issue_price": "contract price or sale price as a number only (no $ or commas)",
+  "rebate": "rebate amount as number only (no $ or commas), null if none",
+  "deposit_percent": "deposit percentage as number only e.g. 10 for 10%",
+  "purchaser1_name": "first purchaser full name",
+  "purchaser1_email": "first purchaser email",
+  "purchaser1_mobile": "first purchaser mobile/phone",
+  "purchaser2_name": "second purchaser full name, null if none",
+  "purchaser2_email": "second purchaser email, null if none",
+  "purchaser2_mobile": "second purchaser mobile, null if none",
+  "purchaser_postcode": "purchaser postcode",
+  "purchaser_suburb": "purchaser suburb",
+  "solicitor_name": "purchaser solicitor name or firm",
+  "solicitor_phone": "solicitor phone number"
+}
+
+Return ONLY the JSON object, no other text.`;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
+            { type: 'text', text: prompt }
+          ]
+        }]
+      })
+    });
+
+    const d = await res.json();
+    if (d.error) throw new Error(d.error.message);
+
+    const text = d.content?.find(b => b.type === 'text')?.text || '';
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('Could not parse response from Claude');
+    const extracted = JSON.parse(jsonMatch[0]);
+
+    // Find matching row by lot number
+    const lotNum = String(extracted.lot_number || '').trim();
+    if (!lotNum) throw new Error('Could not find a Lot # in the PDF');
+
+    const rowIdx = allData.findIndex(r =>
+      String(r['Lot #'] || r['Lot#'] || '').trim() === lotNum
+    );
+    if (rowIdx === -1) throw new Error(`Lot ${lotNum} not found in database`);
+
+    scanMatchedRowIdx = rowIdx;
+
+    // Map extracted values to DB fields
+    scanExtractedData = {};
+    const map = {
+      'Sales Advice Received Date':    extracted.sa_received_date,
+      'Proposed Exchanged Date':       extracted.proposed_exchange_date,
+      'Proposed Settled Date':         extracted.proposed_settled_date,
+      'CfS Issued Price':              extracted.cfs_issue_price,
+      'Rebate':                        extracted.rebate,
+      'Deposit%':                      extracted.deposit_percent != null ? String(Number(extracted.deposit_percent) / 100) : null,
+      "(1) Purchaser's Name":          extracted.purchaser1_name,
+      "(1) Purchaser's Email":         extracted.purchaser1_email,
+      "(1) Purchaser's Mobile":        extracted.purchaser1_mobile,
+      "(2) Purchaser's Name":          extracted.purchaser2_name,
+      "(2) Purchaser's Email":         extracted.purchaser2_email,
+      "(2) Purchaser's Mobile":        extracted.purchaser2_mobile,
+      "Purchaser's Postcode":          extracted.purchaser_postcode,
+      "Purchaser's Suburb":            extracted.purchaser_suburb,
+      "Purchaser's Solicitor (P'Sol)": extracted.solicitor_name,
+      "Purchaser's Solicitor Phone":   extracted.solicitor_phone,
+    };
+    Object.entries(map).forEach(([k, v]) => {
+      if (v !== null && v !== undefined && String(v).trim() !== '' && String(v) !== 'null') {
+        scanExtractedData[k] = String(v).trim();
+      }
+    });
+
+    // Render review screen
+    document.getElementById('scan-matched-lot').textContent =
+      `Lot ${lotNum} — ${allData[rowIdx]['Project Name'] || ''}`;
+
+    // Show Resc/Exch warning if applicable
+    const cfsType = String(allData[rowIdx]['CfS Type'] || allData[rowIdx]['CFS Type'] || '').trim();
+    const isRescExch = cfsType.toLowerCase().includes('resc') || cfsType.toLowerCase().includes('exch');
+    document.getElementById('scan-resc-banner').style.display = isRescExch ? 'block' : 'none';
+
+    const list = document.getElementById('scan-fields-list');
+    list.innerHTML = SCAN_FIELDS.map(f => {
+      const val = scanExtractedData[f.key] || '';
+      const display = val ? formatCellValue(f.key, val) || val : '';
+      return `<div style="padding:10px 0;border-bottom:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">${f.label}</div>
+        <input
+          data-field="${f.key}"
+          type="text"
+          value="${display.replace(/"/g,'&quot;')}"
+          placeholder="Not found"
+          style="width:100%;padding:8px 10px;border:1px solid ${val ? 'var(--accent)' : 'var(--border)'};border-radius:6px;font-size:13px;font-family:Aptos,sans-serif;background:${val ? 'rgba(37,99,235,0.04)' : 'var(--bg)'};color:var(--ink);outline:none"
+        >
+      </div>`;
+    }).join('');
+
+    showScanStep('review');
+
+  } catch(e) {
+    document.getElementById('scan-error-msg').textContent = e.message;
+    showScanStep('error');
+  }
+}
+
+async function confirmScanPdf() {
+  if (scanMatchedRowIdx < 0) return;
+  const row = allData[scanMatchedRowIdx];
+  const lotNum = row['Lot #'] || row['Lot#'] || '';
+
+  // Read values from the review inputs (user may have edited them)
+  document.querySelectorAll('#scan-fields-list input[data-field]').forEach(input => {
+    const field = input.getAttribute('data-field');
+    let val = input.value.trim();
+    if (!val) return;
+    // Currency: strip $ and commas
+    if (field === 'CfS Issued Price' || field === 'Rebate') {
+      val = val.replace(/[$,]/g, '').trim();
+    }
+    // Percent: convert display back to decimal
+    if (field === 'Deposit%') {
+      const n = parseFloat(val.replace(/%/g, ''));
+      if (!isNaN(n)) val = String(n > 1 ? n / 100 : n);
+    }
+    if (val && val !== row[field]) {
+      row[field] = val;
+      markEdit(scanMatchedRowIdx, field, val);
+    }
+  });
+
+  applyFilters();
+  if (isDesktop()) renderDesktopTable();
+
+  // Show processing while syncing
+  showScanStep('processing');
+  document.querySelector('#scan-step-processing div:nth-child(2)').textContent = 'Saving to OneDrive...';
+
+  try {
+    await syncToOneDrive();
+    // Show success screen
+    const updatedCount = Object.keys(pendingEdits[scanMatchedRowIdx] || {}).length || SCAN_FIELDS.filter(f => row[f.key]).length;
+    document.getElementById('scan-success-msg').textContent =
+      `Lot ${lotNum} updated — ${updatedCount} field${updatedCount !== 1 ? 's' : ''} saved to OneDrive`;
+    showScanStep('success');
+    scanMatchedRowIdx = -1;
+    scanExtractedData = {};
+  } catch(e) {
+    document.getElementById('scan-error-msg').textContent = 'Sync failed: ' + e.message + '\n\nData was applied locally but not saved to OneDrive.';
+    showScanStep('error');
+  }
 }
 
 function saveChatKey() {
