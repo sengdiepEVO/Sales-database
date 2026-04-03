@@ -314,7 +314,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
   <div class="login-card">
     <div class="login-icon">&#128202;</div>
     <div class="login-title">Sales DB</div>
-    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">v2.19</div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">v2.20</div>
     <div class="login-sub">Sign in with your Microsoft account to access your OneDrive sales data.</div>
     <button class="ms-btn" onclick="signIn()">
       <div class="ms-logo"><div></div><div></div><div></div><div></div></div>
@@ -338,7 +338,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 <!-- APP -->
 <div id="app-wrapper" style="display:none">
   <div class="app-header">
-    <div class="header-logo">Sales<strong>DB</strong><span class="header-version">v2.19</span></div>
+    <div class="header-logo">Sales<strong>DB</strong><span class="header-version">v2.20</span></div>
     <div class="header-right">
       <div class="user-pill">
         <div class="user-avatar" id="user-avatar">?</div>
@@ -400,6 +400,11 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
               <button class="sug-btn" onclick="deskUseSug(this)">Top channel partners?</button>
               <button class="sug-btn" onclick="deskUseSug(this)">Open pipeline value?</button>
               <button class="sug-btn" onclick="deskUseSug(this)">Settled this year?</button>
+            </div>
+            <div style="display:flex;justify-content:center;padding:6px 0 2px">
+              <button id="dchat-mic-btn" onclick="toggleVoice('dchat-input','dchat-mic-btn')" style="display:flex;align-items:center;gap:7px;padding:8px 20px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);font-family:Aptos,sans-serif;font-size:12px;cursor:pointer;transition:all 0.2s">
+                <span style="font-size:16px">🎤</span> Ask verbally
+              </button>
             </div>
             <div class="chat-input-row">
               <textarea class="chat-textarea" id="dchat-input" placeholder="Ask about your data..." onkeydown="deskHandleKey(event)"></textarea>
@@ -558,6 +563,11 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
           <button class="sug-btn" onclick="useSug(this)">Top channel partners?</button>
           <button class="sug-btn" onclick="useSug(this)">Open pipeline value?</button>
           <button class="sug-btn" onclick="useSug(this)">Settled this year?</button>
+        </div>
+        <div id="voice-btn-row" style="display:flex;justify-content:center;padding:6px 0 2px">
+          <button id="chat-mic-btn" onclick="toggleVoice('chat-input','chat-mic-btn')" style="display:flex;align-items:center;gap:7px;padding:8px 20px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);font-family:Aptos,sans-serif;font-size:12px;cursor:pointer;transition:all 0.2s">
+            <span style="font-size:16px">🎤</span> Ask verbally
+          </button>
         </div>
         <div class="chat-input-row">
           <textarea class="chat-textarea" id="chat-input" placeholder="Ask about your data..." onkeydown="handleKey(event)"></textarea>
@@ -1853,6 +1863,83 @@ async function confirmScanPdf() {
     document.getElementById('scan-error-msg').textContent = 'Sync failed: ' + e.message + '\n\nData was applied locally but not saved to OneDrive.';
     showScanStep('error');
   }
+}
+
+// ── VOICE INPUT ───────────────────────────────────────
+let voiceRecognition = null;
+
+function toggleVoice(inputId, btnId) {
+  // Stop if already listening
+  if (voiceRecognition) {
+    voiceRecognition.stop();
+    return;
+  }
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    toast('Voice input not supported on this browser', 'error');
+    return;
+  }
+
+  const input = document.getElementById(inputId);
+  const btn = document.getElementById(btnId);
+
+  voiceRecognition = new SpeechRecognition();
+  voiceRecognition.lang = 'en-AU';
+  voiceRecognition.interimResults = true;
+  voiceRecognition.continuous = false;
+
+  // Button goes red/pulsing while listening
+  if (btn) {
+    btn.innerHTML = '<span style="font-size:16px">🔴</span> Listening... (tap to stop)';
+    btn.style.borderColor = '#dc2626';
+    btn.style.color = '#dc2626';
+    btn.style.background = '#fff1f1';
+  }
+  input.placeholder = '🎙 Listening...';
+
+  let finalTranscript = '';
+
+  voiceRecognition.onresult = (e) => {
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) finalTranscript += t;
+      else interim = t;
+    }
+    input.value = finalTranscript || interim;
+  };
+
+  const resetBtn = () => {
+    if (btn) {
+      btn.innerHTML = '<span style="font-size:16px">🎤</span> Ask verbally';
+      btn.style.borderColor = '';
+      btn.style.color = '';
+      btn.style.background = '';
+    }
+    input.placeholder = 'Ask about your data...';
+    voiceRecognition = null;
+  };
+
+  voiceRecognition.onend = () => {
+    resetBtn();
+    // Auto-send if we captured something
+    if (input.value.trim()) {
+      if (inputId === 'chat-input') sendChat();
+      else deskSendChat();
+    }
+  };
+
+  voiceRecognition.onerror = (e) => {
+    resetBtn();
+    if (e.error === 'not-allowed') {
+      toast('Microphone access denied — check browser permissions', 'error');
+    } else if (e.error !== 'no-speech') {
+      toast('Voice error: ' + e.error, 'error');
+    }
+  };
+
+  voiceRecognition.start();
 }
 
 function saveChatKey() {
