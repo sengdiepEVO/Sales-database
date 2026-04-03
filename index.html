@@ -314,7 +314,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
   <div class="login-card">
     <div class="login-icon">&#128202;</div>
     <div class="login-title">Sales DB</div>
-    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">v2.20</div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">v2.23</div>
     <div class="login-sub">Sign in with your Microsoft account to access your OneDrive sales data.</div>
     <button class="ms-btn" onclick="signIn()">
       <div class="ms-logo"><div></div><div></div><div></div><div></div></div>
@@ -338,7 +338,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 <!-- APP -->
 <div id="app-wrapper" style="display:none">
   <div class="app-header">
-    <div class="header-logo">Sales<strong>DB</strong><span class="header-version">v2.20</span></div>
+    <div class="header-logo">Sales<strong>DB</strong><span class="header-version">v2.23</span></div>
     <div class="header-right">
       <div class="user-pill">
         <div class="user-avatar" id="user-avatar">?</div>
@@ -374,7 +374,6 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
           <span style="font-size:11px;color:var(--muted)" id="dt-active-filters"></span>
           <span class="dt-rec-count" id="dt-rec-count">— records</span>
           <button class="dt-clear-btn" onclick="clearAllColFilters()">&#10005; Clear filters</button>
-          <button onclick="openScanPdf()" style="margin-left:auto;padding:5px 14px;background:var(--accent);color:#fff;border:none;border-radius:4px;font-family:Aptos,sans-serif;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px">&#128196; Scan PDF</button>
         </div>
         <div class="dt-wrap" id="dt-wrap">
           <table class="dt" id="dt">
@@ -474,7 +473,6 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
         <button class="filter-toggle-btn" id="filter-toggle-btn" onclick="toggleFilterDrawer()">
           Filters <span id="filter-count-badge" class="filter-count-badge" style="display:none">0</span>
         </button>
-        <button onclick="openScanPdf()" style="padding:8px 12px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:Aptos,sans-serif;font-size:12px;cursor:pointer;white-space:nowrap">&#128196; Scan PDF</button>
       </div>
       <div class="filter-drawer" id="filter-drawer">
         <div class="filter-drawer-row">
@@ -529,7 +527,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
       <div class="sub-header">
         <button class="back-btn" onclick="cancelEditCheck()">&#8592; Back</button>
         <span class="sub-title">Edit record</span>
-        <div style="width:50px"></div>
+        <button onclick="openScanPdf()" style="padding:5px 10px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-family:Aptos,sans-serif;font-size:11px;cursor:pointer">&#128196; Scan PDF</button>
       </div>
       <div class="form-screen">
         <div id="edit-fields"></div>
@@ -647,6 +645,16 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
           </div>
         </div>
       </div>
+      <div id="scan-price-banner" style="display:none;padding:10px 20px;background:#fef2f2;border-bottom:2px solid #dc2626;flex-shrink:0">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:18px">⚠️</span>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:#991b1b">Land Price Below $LIST</div>
+            <div style="font-size:11px;color:#991b1b;margin-top:1px" id="scan-price-msg"></div>
+            <div style="font-size:11px;color:#991b1b;margin-top:2px">You can still proceed — verify before saving.</div>
+          </div>
+        </div>
+      </div>
       <div id="scan-fields-list" style="overflow-y:auto;flex:1;padding:12px 20px"></div>
       <div style="padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:10px;flex-shrink:0;background:var(--bg)">
         <button onclick="closeScanPdf()" style="flex:1;padding:11px;background:none;border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer;color:var(--muted)">Cancel</button>
@@ -675,7 +683,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
     <div class="desktop-edit-header">
       <button class="back-btn" onclick="deskCancelEditCheck()">&#8592; Back</button>
       <span class="sub-title" id="d-edit-title">Edit record</span>
-      <div style="width:60px"></div>
+      <button onclick="openScanPdf()" style="padding:5px 14px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-family:Aptos,sans-serif;font-size:12px;cursor:pointer">&#128196; Scan PDF</button>
     </div>
     <div class="desktop-edit-body" id="d-edit-fields" style="flex:1;overflow-y:auto"></div>
     <div class="desktop-edit-actions">
@@ -1609,22 +1617,27 @@ async function genReport(type) {
 
 // ── SCAN PDF ──────────────────────────────────────────
 const SCAN_FIELDS = [
-  { key: 'Sales Advice Received Date',     label: 'SA Received Date',      type: 'date' },
-  { key: 'Proposed Exchanged Date',        label: 'Proposed Exchange Date', type: 'date' },
-  { key: 'Proposed Settled Date',          label: 'Proposed Settled Date',  type: 'date' },
-  { key: 'CfS Issued Price',               label: 'CfS Issue Price',        type: 'currency' },
-  { key: 'Rebate',                         label: 'Rebate',                 type: 'currency' },
-  { key: 'Deposit%',                       label: 'Deposit %',              type: 'percent' },
-  { key: "(1) Purchaser's Name",           label: 'Purchaser 1 Name',       type: 'text' },
-  { key: "(1) Purchaser's Email",          label: 'Purchaser 1 Email',      type: 'text' },
-  { key: "(1) Purchaser's Mobile",         label: 'Purchaser 1 Mobile',     type: 'text' },
-  { key: "(2) Purchaser's Name",           label: 'Purchaser 2 Name',       type: 'text' },
-  { key: "(2) Purchaser's Email",          label: 'Purchaser 2 Email',      type: 'text' },
-  { key: "(2) Purchaser's Mobile",         label: 'Purchaser 2 Mobile',     type: 'text' },
-  { key: "Purchaser's Postcode",           label: 'Purchaser Postcode',     type: 'text' },
-  { key: "Purchaser's Suburb",             label: 'Purchaser Suburb',       type: 'text' },
-  { key: "Purchaser's Solicitor (P'Sol)",  label: 'Purchaser Solicitor',    type: 'text' },
-  { key: "Purchaser's Solicitor Phone",    label: 'Solicitor Phone',        type: 'text' },
+  { key: 'Sales Advice Received Date',     label: 'SA Received Date',       type: 'date' },
+  { key: 'Proposed Exchanged Date',        label: 'Proposed Exchange Date',  type: 'date' },
+  { key: 'Proposed Settled Date',          label: 'Proposed Settled Date',   type: 'date' },
+  { key: 'CfS Issued Price',               label: 'Land Price (CfS)',        type: 'currency' },
+  { key: 'Rebate',                         label: 'Rebate',                  type: 'currency' },
+  { key: 'Deposit%',                       label: 'Deposit %',               type: 'percent' },
+  { key: "(1) Purchaser's Name",           label: 'Purchaser 1 Name',        type: 'text' },
+  { key: "(1) Purchaser's Email",          label: 'Purchaser 1 Email',       type: 'text' },
+  { key: "(1) Purchaser's Mobile",         label: 'Purchaser 1 Mobile',      type: 'text' },
+  { key: "(2) Purchaser's Name",           label: 'Purchaser 2 Name',        type: 'text' },
+  { key: "(2) Purchaser's Email",          label: 'Purchaser 2 Email',       type: 'text' },
+  { key: "(2) Purchaser's Mobile",         label: 'Purchaser 2 Mobile',      type: 'text' },
+  { key: "Purchaser's Postcode",           label: 'Purchaser Postcode',      type: 'text' },
+  { key: "Purchaser's Suburb",             label: 'Purchaser Suburb',        type: 'text' },
+  { key: "Purchaser's Solicitor (P'Sol)",  label: 'Purchaser Solicitor',     type: 'text' },
+  { key: "Purchaser's Solicitor Phone",    label: 'Solicitor Phone',         type: 'text' },
+  { key: "Vendors Agent",                  label: 'Agency Full Name',        type: 'text' },
+  { key: "Vendors Agency Agent",           label: "Agent's Name",            type: 'text' },
+  { key: "Agent's Email",                  label: 'Agency Admin Email',      type: 'text' },
+  { key: "Agent's Mobile",                 label: 'Agency Admin Mobile',     type: 'text' },
+  { key: "FIRB Approval",                  label: 'FIRB Approval Required',  type: 'text' },
 ];
 
 let scanPdfFile = null;
@@ -1634,6 +1647,14 @@ let scanMatchedRowIdx = -1;
 function openScanPdf() {
   document.getElementById('scan-pdf-overlay').style.display = 'flex';
   resetScanPdf();
+  // Pre-set the matched row from whichever edit screen is open
+  if (editRowIdx >= 0) {
+    scanMatchedRowIdx = editRowIdx;
+    const lot = allData[editRowIdx]['Lot #'] || allData[editRowIdx]['Lot#'] || '';
+    if (lot) {
+      document.getElementById('scan-file-name').textContent = `Will match to Lot ${lot}`;
+    }
+  }
 }
 
 function closeScanPdf() {
@@ -1648,6 +1669,8 @@ function resetScanPdf() {
   document.getElementById('scan-file-name').textContent = 'No file selected';
   document.getElementById('scan-extract-btn').style.opacity = '0.4';
   document.getElementById('scan-extract-btn').style.pointerEvents = 'none';
+  document.getElementById('scan-resc-banner').style.display = 'none';
+  document.getElementById('scan-price-banner').style.display = 'none';
   showScanStep('upload');
 }
 
@@ -1695,26 +1718,35 @@ async function runScanPdf() {
     });
 
     // Ask Claude to extract fields
-    const prompt = `This is a Sales Advice document for a property sale. Extract the following fields exactly as they appear. Return ONLY a JSON object with these keys (use null if not found):
+    const todayStr = new Date().toLocaleDateString('en-AU', { day:'2-digit', month:'2-digit', year:'numeric' }).replace(/\//g,'/');
+    const prompt = `This is a Sales Advice (S/A) document for a property sale. Extract the following fields. Return ONLY a JSON object with these keys (use null if not found):
 
 {
-  "lot_number": "the lot number or lot # mentioned",
-  "sa_received_date": "date document was prepared or signed (dd/mm/yyyy)",
-  "proposed_exchange_date": "proposed exchange date (dd/mm/yyyy)",
-  "proposed_settled_date": "proposed settlement date (dd/mm/yyyy)",
-  "cfs_issue_price": "contract price or sale price as a number only (no $ or commas)",
-  "rebate": "rebate amount as number only (no $ or commas), null if none",
-  "deposit_percent": "deposit percentage as number only e.g. 10 for 10%",
-  "purchaser1_name": "first purchaser full name",
-  "purchaser1_email": "first purchaser email",
-  "purchaser1_mobile": "first purchaser mobile/phone",
-  "purchaser2_name": "second purchaser full name, null if none",
-  "purchaser2_email": "second purchaser email, null if none",
-  "purchaser2_mobile": "second purchaser mobile, null if none",
-  "purchaser_postcode": "purchaser postcode",
-  "purchaser_suburb": "purchaser suburb",
-  "solicitor_name": "purchaser solicitor name or firm",
-  "solicitor_phone": "solicitor phone number"
+  "lot_number": "the lot number — look for 'Lot Number', 'Lot #', or 'Lot [number]' anywhere in the document",
+  "sa_received_date": "the date the document was signed or prepared — look for 'Date' near the top of the Sales Advice — return exactly as shown e.g. 22/03/26",
+  "proposed_exchange_date": "look in SPECIAL (CfS) CONDITIONS for 'Exchanged Date' — return exactly as shown e.g. 05/06/26",
+  "proposed_settled_date": "look in SPECIAL (CfS) CONDITIONS or 'Settlement Date' field — return exactly as shown e.g. 06/04/26",
+  "cfs_issue_price": "the land price — look specifically for 'Land Price: $' field — return as number only, no $ or commas",
+  "rebate": "look in SPECIAL (CfS) CONDITIONS for any dollar rebate amount e.g. '$5,000 rebate on settlement' — return as number only (e.g. 5000), null if none",
+  "deposit_percent": "look in SPECIAL (CfS) CONDITIONS for a deposit percentage e.g. '5% deposit to exchange' — return as number only (e.g. 5), null if none. If only standard 10% is mentioned return 10",
+  "purchaser1_name": "Purchaser 1 Full Name as per ID",
+  "purchaser1_email": "Purchaser 1 Email",
+  "purchaser1_mobile": "Purchaser 1 mobile — first number from 'Purchaser 1 & 2 Mobile No'",
+  "purchaser2_name": "Purchaser 2 Full Name as per ID, null if none",
+  "purchaser2_email": "Purchaser 2 Email, null if none",
+  "purchaser2_mobile": "Purchaser 2 mobile — second number from 'Purchaser 1 & 2 Mobile No', null if none",
+  "purchaser_postcode": "postcode from purchaser address",
+  "purchaser_suburb": "suburb from purchaser address",
+  "solicitor_name": "PURCHASER'S SOLICITOR firm name",
+  "solicitor_phone": "PURCHASER'S SOLICITOR phone number",
+  "agency_name": "SELLING AGENCIES DETAILS — Agency Full Name",
+  "agent_name": "SELLING AGENCIES DETAILS — Agent's Name",
+  "agency_email": "SELLING AGENCIES DETAILS — Agency Admin Email",
+  "agency_mobile": "SELLING AGENCIES DETAILS — Agency Admin Mobile No",
+  "firb": "FIRB APPROVAL REQUIRED — if the Yes box is ticked or marked with X return 'Yes', if No is ticked or marked with X return null",
+  "purchaser1_signed": "PURCHASER'S SIGNATURE section — is Purchaser/Guarantor 1 signature field filled, signed, or contains any mark, name, or DocuSign stamp? Return true or false",
+  "purchaser2_signed": "PURCHASER'S SIGNATURE section — is Purchaser/Guarantor 2 signature field filled, signed, or contains any mark, name, or DocuSign stamp? Return true or false",
+  "id_count": "Count the number of ID documents (driver's licences or passports) visible as images in this PDF across all pages — return as a number e.g. 0, 1, 2"
 }
 
 Return ONLY the JSON object, no other text.`;
@@ -1748,36 +1780,101 @@ Return ONLY the JSON object, no other text.`;
     if (!jsonMatch) throw new Error('Could not parse response from Claude');
     const extracted = JSON.parse(jsonMatch[0]);
 
-    // Find matching row by lot number
-    const lotNum = String(extracted.lot_number || '').trim();
-    if (!lotNum) throw new Error('Could not find a Lot # in the PDF');
+    // Use pre-matched row from edit screen if available, otherwise match by lot number
+    let rowIdx = scanMatchedRowIdx >= 0 ? scanMatchedRowIdx : -1;
+    let lotNum = rowIdx >= 0
+      ? String(allData[rowIdx]['Lot #'] || allData[rowIdx]['Lot#'] || '').trim()
+      : String(extracted.lot_number || '').trim();
 
-    const rowIdx = allData.findIndex(r =>
-      String(r['Lot #'] || r['Lot#'] || '').trim() === lotNum
-    );
-    if (rowIdx === -1) throw new Error(`Lot ${lotNum} not found in database`);
+    if (rowIdx === -1) {
+      if (!lotNum) throw new Error('Could not find a Lot # in the PDF');
+      rowIdx = allData.findIndex(r => String(r['Lot #'] || r['Lot#'] || '').trim() === lotNum);
+      if (rowIdx === -1) throw new Error(`Lot ${lotNum} not found in database`);
+    }
 
     scanMatchedRowIdx = rowIdx;
 
+    // ── RULE 1: Lot mismatch — hard stop ──────────────────────────
+    // If opened from edit screen, PDF lot must match the edit lot exactly
+    if (editRowIdx >= 0) {
+      const editLot = String(allData[editRowIdx]['Lot #'] || allData[editRowIdx]['Lot#'] || '').trim();
+      const pdfLot  = String(extracted.lot_number || '').trim();
+      if (pdfLot && editLot && pdfLot !== editLot) {
+        throw new Error(`Lot mismatch — this PDF is for Lot ${pdfLot} but you are editing Lot ${editLot}. Please load the correct Sales Advice PDF.`);
+      }
+    }
+
+    // ── RULE: Signature validation — hard stop ────────────────────
+    const hasPurchaser2 = extracted.purchaser2_name && String(extracted.purchaser2_name).trim() !== '' && String(extracted.purchaser2_name).toLowerCase() !== 'null';
+    const sig1 = extracted.purchaser1_signed === true || extracted.purchaser1_signed === 'true';
+    const sig2 = extracted.purchaser2_signed === true || extracted.purchaser2_signed === 'true';
+
+    if (!sig1) {
+      throw new Error(`Missing signature — Purchaser 1 (${extracted.purchaser1_name || 'unknown'}) has not signed the Sales Advice. Cannot proceed.`);
+    }
+    if (hasPurchaser2 && !sig2) {
+      throw new Error(`Missing signature — There are 2 purchasers but Purchaser 2 (${extracted.purchaser2_name}) has not signed the Sales Advice. Cannot proceed.`);
+    }
+
+    // ── RULE: ID count must match buyer count — hard stop ─────────
+    const expectedIDs = hasPurchaser2 ? 2 : 1;
+    const idCount = parseInt(extracted.id_count, 10) || 0;
+    if (idCount < expectedIDs) {
+      throw new Error(`Missing ID — ${expectedIDs} buyer${expectedIDs > 1 ? 's' : ''} but only ${idCount} ID document${idCount !== 1 ? 's' : ''} found in this PDF. All purchasers must have ID attached. Cannot proceed.`);
+    }
+
+    // ── RULE 2: Land price below $LIST — warn but allow override ──
+    const listPrice = parseFloat(String(allData[rowIdx]['$LIST '] || allData[rowIdx]['$LIST'] || '0').replace(/[^0-9.]/g,''));
+    const landPrice = parseFloat(String(extracted.cfs_issue_price || '0').replace(/[^0-9.]/g,''));
+    let priceWarning = null;
+    if (listPrice > 0 && landPrice > 0 && landPrice < listPrice) {
+      priceWarning = `Land Price $${landPrice.toLocaleString()} is below the $LIST price of $${listPrice.toLocaleString()} for this lot. Do you want to continue?`;
+    }
+
     // Map extracted values to DB fields
     scanExtractedData = {};
+
+    // Convert dd/mm/yy → dd-mmm-yyyy (app and Excel use dd-mmm-yyyy format)
+    const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const fixYear = (d) => {
+      if (!d) return null;
+      const m = String(d).trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+      if (m) {
+        const day = m[1].padStart(2,'0');
+        const mon = MONTHS[parseInt(m[2], 10) - 1] || m[2];
+        const year = m[3].length === 2 ? '20' + m[3] : m[3];
+        return `${day}-${mon}-${year}`;
+      }
+      return d; // already correct format, leave as-is
+    };
+
+    // SA Received Date always defaults to today (date you scanned the document)
+    const now = new Date();
+    const pad = n => String(n).padStart(2,'0');
+    const todayFormatted = `${pad(now.getDate())}-${MONTHS[now.getMonth()]}-${now.getFullYear()}`;
+
     const map = {
-      'Sales Advice Received Date':    extracted.sa_received_date,
-      'Proposed Exchanged Date':       extracted.proposed_exchange_date,
-      'Proposed Settled Date':         extracted.proposed_settled_date,
+      'Sales Advice Received Date':    fixYear(extracted.sa_received_date) || todayFormatted,
+      'Proposed Exchanged Date':       fixYear(extracted.proposed_exchange_date),
+      'Proposed Settled Date':         fixYear(extracted.proposed_settled_date),
       'CfS Issued Price':              extracted.cfs_issue_price,
       'Rebate':                        extracted.rebate,
       'Deposit%':                      extracted.deposit_percent != null ? String(Number(extracted.deposit_percent) / 100) : null,
       "(1) Purchaser's Name":          extracted.purchaser1_name,
       "(1) Purchaser's Email":         extracted.purchaser1_email,
-      "(1) Purchaser's Mobile":        extracted.purchaser1_mobile,
+      "(1) Purchaser's Mobile":        extracted.purchaser1_mobile ? fmtPhone(extracted.purchaser1_mobile) : null,
       "(2) Purchaser's Name":          extracted.purchaser2_name,
       "(2) Purchaser's Email":         extracted.purchaser2_email,
-      "(2) Purchaser's Mobile":        extracted.purchaser2_mobile,
+      "(2) Purchaser's Mobile":        extracted.purchaser2_mobile ? fmtPhone(extracted.purchaser2_mobile) : null,
       "Purchaser's Postcode":          extracted.purchaser_postcode,
       "Purchaser's Suburb":            extracted.purchaser_suburb,
       "Purchaser's Solicitor (P'Sol)": extracted.solicitor_name,
-      "Purchaser's Solicitor Phone":   extracted.solicitor_phone,
+      "Purchaser's Solicitor Phone":   extracted.solicitor_phone ? fmtPhone(extracted.solicitor_phone) : null,
+      "Vendors Agent":                 extracted.agency_name,
+      "Vendors Agency Agent":          extracted.agent_name,
+      "Agent's Email":                 extracted.agency_email,
+      "Agent's Mobile":                extracted.agency_mobile ? fmtPhone(extracted.agency_mobile) : null,
+      "FIRB Approval":                 extracted.firb === 'Yes' ? 'Yes' : null,
     };
     Object.entries(map).forEach(([k, v]) => {
       if (v !== null && v !== undefined && String(v).trim() !== '' && String(v) !== 'null') {
@@ -1793,6 +1890,15 @@ Return ONLY the JSON object, no other text.`;
     const cfsType = String(allData[rowIdx]['CfS Type'] || allData[rowIdx]['CFS Type'] || '').trim();
     const isRescExch = cfsType.toLowerCase().includes('resc') || cfsType.toLowerCase().includes('exch');
     document.getElementById('scan-resc-banner').style.display = isRescExch ? 'block' : 'none';
+
+    // Show price warning banner if land price is below $LIST
+    if (priceWarning) {
+      document.getElementById('scan-price-msg').textContent =
+        `Extracted: $${landPrice.toLocaleString()} — $LIST: $${listPrice.toLocaleString()}`;
+      document.getElementById('scan-price-banner').style.display = 'block';
+    } else {
+      document.getElementById('scan-price-banner').style.display = 'none';
+    }
 
     const list = document.getElementById('scan-fields-list');
     list.innerHTML = SCAN_FIELDS.map(f => {
@@ -1828,12 +1934,12 @@ async function confirmScanPdf() {
     const field = input.getAttribute('data-field');
     let val = input.value.trim();
     if (!val) return;
-    // Currency: strip $ and commas
-    if (field === 'CfS Issued Price' || field === 'Rebate') {
+    // Currency: strip $ and commas for any currency field
+    if (CURRENCY_COLS.has(field) || field.includes('$') || field.toLowerCase().includes('price')) {
       val = val.replace(/[$,]/g, '').trim();
     }
-    // Percent: convert display back to decimal
-    if (field === 'Deposit%') {
+    // Percent: convert display (e.g. "5%") back to decimal (0.05)
+    if (field === 'Deposit%' || PERCENT_COLS.has(field)) {
       const n = parseFloat(val.replace(/%/g, ''));
       if (!isNaN(n)) val = String(n > 1 ? n / 100 : n);
     }
