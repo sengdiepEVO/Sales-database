@@ -2143,97 +2143,85 @@ function renderSalesTargetTable() {
     return;
   }
 
-  // Exact colours extracted from Excel file
-  const C = {
-    HEADER_BG:   '#FF0000',  // FFFF0000 — row 2 header
-    HEADER_FG:   '#FFFFFF',
-    TARGET_CELL: '#FF3300',  // FFFF3300 — target data cells (orange-red)
-    TARGET_FG:   '#FF0000',  // FFFF0000 — target label font
-    TARGET_LABEL:'#FFFFFF',  // white text on label cols
-    ACT_DEP_BG:  '#83E28E',  // FF83E28E — actual deposit (green)
-    ACT_EXC_BG:  '#44B3E1',  // FF44B3E1 — actual exchanged (blue)
-    PROPOSED_BG: '#F0F0F0',  // proposed rows — light grey (no fill in Excel)
-    ACTUAL_SET:  '#FFFFFF',  // actual settled — white
-    EMPTY_BG:    '#F7F7F7',
-    DARK:        '#1A1A1A',
-    WHITE:       '#FFFFFF',
-    MUTED:       '#666666',
+  // Exact colours from Excel (strip FF alpha prefix)
+  const HDR_RED = '#FF0000';  // FFFF0000 header cols A-E
+  const TGT_ORA = '#FF3300';  // FFFF3300 target data cells F-L
+  const ACT_GRN = '#83E28E';  // FF83E28E actual deposit full row
+  const ACT_BLU = '#44B3E1';  // FF44B3E1 actual exchanged totals col M only
+  const TGT_FC  = '#FF0000';  // FFFF0000 target label font
+  const WHITE   = '#FFFFFF';
+  const DARK    = '#1A1A1A';
+
+  const getColour = (rowIdx, colIdx) => {
+    if (rowIdx === 1) {
+      return colIdx <= 4
+        ? { bg: HDR_RED, fg: WHITE, bold: true }
+        : { bg: 'transparent', fg: DARK, bold: true };
+    }
+    const status  = String(stSheetData[rowIdx]?.[0] || '').trim().toUpperCase();
+    const section = String(stSheetData[rowIdx]?.[1] || '').trim().toUpperCase();
+    const isLabel = colIdx <= 4;
+    const isData  = colIdx >= 5 && colIdx <= 11;
+    const isTot   = colIdx === 12;
+
+    if (status === 'TARGET') {
+      if (isLabel) return { bg: 'transparent', fg: TGT_FC, bold: true };
+      if (isData)  return { bg: TGT_ORA, fg: WHITE, bold: true };
+      if (isTot)   return { bg: 'transparent', fg: DARK, bold: true };
+    }
+    if (status === 'ACTUAL' && section.includes('DEPOSIT')) {
+      return { bg: ACT_GRN, fg: DARK, bold: isLabel };
+    }
+    if (status === 'ACTUAL' && section.includes('EXCHANGE')) {
+      if (isTot) return { bg: ACT_BLU, fg: WHITE, bold: true };
+      return { bg: 'transparent', fg: DARK, bold: isLabel };
+    }
+    return { bg: 'transparent', fg: DARK, bold: isLabel };
   };
 
   const fmtVal = (val) => {
-    if (val === null || val === undefined || val === '') return '—';
-    if (typeof val === 'string' && val.startsWith('=')) return '—'; // formula not evaluated
+    if (val === null || val === undefined || val === '') return '';
+    if (typeof val === 'string' && val.startsWith('=')) return '\u2014';
+    if (typeof val === 'object') return '\u2014';
     if (typeof val === 'number') {
-      if (val === 0) return '—';
+      if (val === 0) return '\u2014';
       if (Math.abs(val) >= 1000) return '$\u00a0' + val.toLocaleString();
       return String(val);
     }
     return String(val);
   };
 
-  const getRowStyle = (row) => {
-    const status = String(row[0] || '').trim().toUpperCase();
-    const section = String(row[1] || '').trim().toUpperCase();
-    const metric = String(row[2] || '').trim().toUpperCase();
-
-    if (!status && !section) return { labelBg: C.EMPTY_BG, dataBg: C.EMPTY_BG, labelFg: C.DARK, dataFg: C.DARK, bold: false, editable: false };
-
-    if (status === 'TARGET') return {
-      labelBg: 'transparent', dataBg: C.TARGET_CELL,
-      labelFg: C.TARGET_FG,  dataFg: C.WHITE,
-      bold: true, editable: metric.includes('# OF LOTS')
-    };
-    if (status === 'PROPOSED' || status === 'Proposed'.toUpperCase()) return {
-      labelBg: C.PROPOSED_BG, dataBg: C.PROPOSED_BG,
-      labelFg: C.DARK, dataFg: C.DARK,
-      bold: false, editable: false
-    };
-    if (status === 'ACTUAL') {
-      if (section.includes('DEPOSIT'))  return { labelBg: C.ACT_DEP_BG, dataBg: C.ACT_DEP_BG, labelFg: C.DARK, dataFg: C.DARK, bold: true, editable: false };
-      if (section.includes('EXCHANGE')) return { labelBg: C.ACT_EXC_BG, dataBg: C.ACT_EXC_BG, labelFg: C.WHITE, dataFg: C.WHITE, bold: true, editable: false };
-      return { labelBg: C.ACTUAL_SET, dataBg: C.ACTUAL_SET, labelFg: C.DARK, dataFg: C.DARK, bold: true, editable: false };
-    }
-    return { labelBg: C.EMPTY_BG, dataBg: C.EMPTY_BG, labelFg: C.DARK, dataFg: C.DARK, bold: false, editable: false };
-  };
-
   stSheetData.forEach((row, rowIdx) => {
-    // Skip row 0 (title row)
     if (rowIdx === 0) return;
+    if (rowIdx > 19) return; // only display rows 2-20
+    if (!row.some(v => v !== null && v !== undefined && v !== '')) return;
 
     const tr = document.createElement('tr');
-    const isHeader = rowIdx === 1;
-    const style = isHeader ? null : getRowStyle(row);
-    const isTarget = !isHeader && style?.editable;
-    if (isTarget) stTargetRows.push(rowIdx);
+    const status = String(row[0] || '').trim().toUpperCase();
+    const metric = String(row[2] || '').trim();
+    const isTargetRow = status === 'TARGET';
+    if (isTargetRow) stTargetRows.push(rowIdx);
 
     row.forEach((cell, colIdx) => {
-      const td = document.createElement(isHeader ? 'th' : 'td');
-      const isLabelCol = colIdx <= 2;
-      const isTotals = colIdx === row.length - 1;
-
-      let bg, fg, bold;
-      if (isHeader) {
-        bg = C.HEADER_BG; fg = C.HEADER_FG; bold = true;
-      } else {
-        bg = isLabelCol ? style.labelBg : style.dataBg;
-        fg = isLabelCol ? style.labelFg : style.dataFg;
-        bold = style.bold;
-      }
+      if (colIdx > 12) return; // stop at col M
+      if (colIdx === 3 || colIdx === 4) return; // skip cols D & E
+      const td = document.createElement(rowIdx === 1 ? 'th' : 'td');
+      const c = getColour(rowIdx, colIdx);
 
       td.style.cssText = [
-        `padding:5px ${isLabelCol ? 10 : 7}px`,
-        `border:1px solid rgba(0,0,0,0.1)`,
-        `text-align:${isLabelCol ? 'left' : 'center'}`,
-        `background:${isTotals && !isHeader ? bg : bg}`,
-        `color:${fg}`,
-        `font-weight:${bold || isTotals ? '600' : '400'}`,
-        `white-space:nowrap`,
-        `min-width:${colIdx === 0 ? 70 : colIdx <= 2 ? 130 : 80}px`,
-        `font-size:11px`,
-        `font-family:Aptos,sans-serif`,
+        'background:' + c.bg,
+        'color:' + c.fg,
+        'font-weight:' + (c.bold ? '700' : '400'),
+        'padding:5px ' + (colIdx <= 2 ? 10 : 7) + 'px',
+        'border:1px solid rgba(0,0,0,0.1)',
+        'text-align:' + (colIdx <= 2 ? 'left' : 'center'),
+        'white-space:nowrap',
+        'font-size:11px',
+        'font-family:Aptos,sans-serif',
+        'min-width:' + (colIdx === 0 ? 65 : colIdx === 1 ? 140 : colIdx === 2 ? 130 : 78) + 'px',
       ].join(';');
 
-      if (isTarget && !isLabelCol && !isHeader) {
+      if (isTargetRow && metric === '# of Lots' && colIdx >= 5 && colIdx <= 11) {
         const input = document.createElement('input');
         input.type = 'number';
         input.value = (cell === null || cell === '' || cell === 0) ? '' : cell;
@@ -2252,7 +2240,7 @@ function renderSalesTargetTable() {
         });
         td.appendChild(input);
       } else {
-        td.textContent = isHeader ? String(cell || '') : fmtVal(cell);
+        td.textContent = rowIdx === 1 ? String(cell || '') : fmtVal(cell);
       }
       tr.appendChild(td);
     });
@@ -2262,7 +2250,6 @@ function renderSalesTargetTable() {
   document.getElementById('st-table-wrap').style.display = 'block';
   document.getElementById('st-save-bar').style.display = stDirty ? 'flex' : 'none';
 }
-
 async function saveSalesTargets() {
   if (!stDirty) return;
   try {
