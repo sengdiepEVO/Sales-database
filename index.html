@@ -159,8 +159,9 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
   .desktop-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
   .desktop-stat{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
   .desktop-stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
-  .desktop-stat-val{font-size:24px;font-weight:600;color:var(--ink);line-height:1.1}
-  .desktop-stat-rev{font-size:11px;color:var(--accent);font-weight:500;margin-top:3px}
+  .desktop-stat-val-row{display:flex;align-items:baseline;gap:8px}
+  .desktop-stat-val{font-size:24px;font-weight:600;color:var(--ink)}
+  .desktop-stat-rev{font-size:24px;font-weight:600;color:var(--accent)}
   .desktop-report-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .desktop-report-btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all 0.15s}
   .desktop-report-btn:hover{background:var(--accent-light);border-color:var(--accent)}
@@ -287,8 +288,9 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px}
 .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px}
 .stat-label{font-size:10px;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:4px}
-.stat-val{font-size:22px;font-weight:600;color:var(--ink);line-height:1.1}
-.stat-rev{font-size:10px;color:var(--accent);font-weight:500;margin-top:3px}
+.stat-val-row{display:flex;align-items:baseline;gap:6px}
+.stat-val{font-size:22px;font-weight:600;color:var(--ink)}
+.stat-rev{font-size:22px;font-weight:600;color:var(--accent)}
 .section-title{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:4px 16px 8px}
 .report-btn-card{margin:0 14px 10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;display:flex;align-items:center;gap:14px;cursor:pointer}
 .report-btn-card:active{background:var(--surface2)}
@@ -316,7 +318,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
   <div class="login-card">
     <div class="login-icon">&#128202;</div>
     <div class="login-title">Sales DB</div>
-    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">v2.24</div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">v2.25</div>
     <div class="login-sub">Sign in with your Microsoft account to access your OneDrive sales data.</div>
     <button class="ms-btn" onclick="signIn()">
       <div class="ms-logo"><div></div><div></div><div></div><div></div></div>
@@ -340,7 +342,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 <!-- APP -->
 <div id="app-wrapper" style="display:none">
   <div class="app-header">
-    <div class="header-logo">Sales<strong>DB</strong><span class="header-version">v2.24</span></div>
+    <div class="header-logo">Sales<strong>DB</strong><span class="header-version">v2.25</span></div>
     <div class="header-right">
       <div class="user-pill">
         <div class="user-avatar" id="user-avatar">?</div>
@@ -415,12 +417,16 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
       <div class="desktop-screen" id="dscreen-reports">
         <div class="desktop-reports">
           <div class="desktop-stats">
-            <div class="desktop-stat"><div class="desktop-stat-label">Pending SA</div><div class="desktop-stat-val" id="d-stat-pending">&#8212;</div><div class="desktop-stat-rev" id="d-stat-pending-rev"></div></div>
-            <div class="desktop-stat"><div class="desktop-stat-label">Deposit</div><div class="desktop-stat-val" id="d-stat-deposit">&#8212;</div><div class="desktop-stat-rev" id="d-stat-deposit-rev"></div></div>
-            <div class="desktop-stat"><div class="desktop-stat-label">Exchanged</div><div class="desktop-stat-val" id="d-stat-exchanged">&#8212;</div><div class="desktop-stat-rev" id="d-stat-exchanged-rev"></div></div>
-            <div class="desktop-stat"><div class="desktop-stat-label">Settled</div><div class="desktop-stat-val" id="d-stat-settled">&#8212;</div><div class="desktop-stat-rev" id="d-stat-settled-rev"></div></div>
+            <div class="desktop-stat"><div class="desktop-stat-label">Pending SA</div><div class="desktop-stat-val-row"><div class="desktop-stat-val" id="d-stat-pending">&#8212;</div><div class="desktop-stat-rev" id="d-stat-pending-rev"></div></div></div>
+            <div class="desktop-stat"><div class="desktop-stat-label">Deposit</div><div class="desktop-stat-val-row"><div class="desktop-stat-val" id="d-stat-deposit">&#8212;</div><div class="desktop-stat-rev" id="d-stat-deposit-rev"></div></div></div>
+            <div class="desktop-stat"><div class="desktop-stat-label">Exchanged</div><div class="desktop-stat-val-row"><div class="desktop-stat-val" id="d-stat-exchanged">&#8212;</div><div class="desktop-stat-rev" id="d-stat-exchanged-rev"></div></div></div>
+            <div class="desktop-stat"><div class="desktop-stat-label">Settled</div><div class="desktop-stat-val-row"><div class="desktop-stat-val" id="d-stat-settled">&#8212;</div><div class="desktop-stat-rev" id="d-stat-settled-rev"></div></div></div>
           </div>
           <div class="desktop-report-grid">
+            <div class="desktop-report-btn" onclick="openSalesTarget()">
+              <div class="report-icon" style="background:#fde8e8;border-radius:8px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">&#127919;</div>
+              <div class="desktop-report-info"><div class="report-title">Sales Target</div><div class="report-sub">Deposit, Exchange & Settlement vs targets</div></div>
+            </div>
             <div class="desktop-report-btn" onclick="deskGenReport('summary')">
               <div class="desktop-report-icon" style="background:#e8f4ed">&#128202;</div>
               <div class="desktop-report-info"><div class="report-title">Sales summary</div><div class="report-sub">Revenue, counts, key insights</div></div>
@@ -572,12 +578,13 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
     <div id="screen-reports" class="screen" style="background:var(--bg);overflow-y:auto">
       <div class="sub-header"><span class="sub-title">Reports</span></div>
       <div class="stats-grid">
-        <div class="stat-card"><div class="stat-label">Pending SA</div><div class="stat-val" id="stat-pending">&#8212;</div><div class="stat-rev" id="stat-pending-rev"></div></div>
-        <div class="stat-card"><div class="stat-label">Deposit</div><div class="stat-val" id="stat-deposit">&#8212;</div><div class="stat-rev" id="stat-deposit-rev"></div></div>
-        <div class="stat-card"><div class="stat-label">Exchanged</div><div class="stat-val" id="stat-exchanged">&#8212;</div><div class="stat-rev" id="stat-exchanged-rev"></div></div>
-        <div class="stat-card"><div class="stat-label">Settled</div><div class="stat-val" id="stat-settled">&#8212;</div><div class="stat-rev" id="stat-settled-rev"></div></div>
+        <div class="stat-card"><div class="stat-label">Pending SA</div><div class="stat-val-row"><div class="stat-val" id="stat-pending">&#8212;</div><div class="stat-rev" id="stat-pending-rev"></div></div></div>
+        <div class="stat-card"><div class="stat-label">Deposit</div><div class="stat-val-row"><div class="stat-val" id="stat-deposit">&#8212;</div><div class="stat-rev" id="stat-deposit-rev"></div></div></div>
+        <div class="stat-card"><div class="stat-label">Exchanged</div><div class="stat-val-row"><div class="stat-val" id="stat-exchanged">&#8212;</div><div class="stat-rev" id="stat-exchanged-rev"></div></div></div>
+        <div class="stat-card"><div class="stat-label">Settled</div><div class="stat-val-row"><div class="stat-val" id="stat-settled">&#8212;</div><div class="stat-rev" id="stat-settled-rev"></div></div></div>
       </div>
       <div class="section-title">Generate AI reports</div>
+      <div class="report-btn-card" onclick="openSalesTarget()"><div class="report-icon" style="background:#fde8e8">&#127919;</div><div class="report-info"><div class="report-title">Sales Target</div><div class="report-sub">Deposit, Exchange & Settlement vs targets</div></div></div>
       <div class="report-btn-card" onclick="genReport('summary')"><div class="report-icon" style="background:#e8f4ed">&#128202;</div><div class="report-info"><div class="report-title">Sales summary</div><div class="report-sub">Revenue, counts, key insights</div></div></div>
       <div class="report-btn-card" onclick="genReport('pipeline')"><div class="report-icon" style="background:#eeedfe">&#128270;</div><div class="report-info"><div class="report-title">Pipeline forecast</div><div class="report-sub">Open deals & risk assessment</div></div></div>
       <div class="report-btn-card" onclick="genReport('channel')"><div class="report-icon" style="background:#faeeda">&#127942;</div><div class="report-info"><div class="report-title">Channel performance</div><div class="report-sub">By partner & channel</div></div></div>
@@ -594,6 +601,43 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
     <div class="nav-item" id="nav-reports" onclick="showScreen('reports')"><span class="nav-label">Reports</span></div>
   </nav>
 
+</div>
+
+<!-- SALES TARGET MODAL -->
+<div id="sales-target-overlay" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.5);align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto">
+  <div style="background:var(--bg);border-radius:12px;width:100%;max-width:1100px;margin:auto;display:flex;flex-direction:column;overflow:hidden">
+    <!-- Header -->
+    <div style="padding:14px 20px;background:#1a2a3a;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <div>
+        <div style="font-size:16px;font-weight:700;color:white">&#127919; Sales Target Report</div>
+        <div style="font-size:11px;color:#a8d0d0;margin-top:2px">Deposit · Exchanged · Settled vs targets</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button onclick="refreshSalesTarget()" style="padding:5px 12px;background:rgba(255,255,255,0.15);color:white;border:none;border-radius:6px;font-size:11px;cursor:pointer">&#8635; Refresh</button>
+        <button onclick="closeSalesTarget()" style="background:none;border:none;font-size:20px;cursor:pointer;color:white;padding:4px">&#10005;</button>
+      </div>
+    </div>
+    <!-- Loading -->
+    <div id="st-loading" style="padding:40px;text-align:center;color:var(--muted)">
+      <div style="font-size:24px;margin-bottom:8px">&#8987;</div>
+      <div>Loading sales target data...</div>
+    </div>
+    <!-- Table container -->
+    <div id="st-table-wrap" style="display:none;overflow-x:auto;padding:16px">
+      <div id="st-save-bar" style="display:none;padding:8px 0 12px;display:flex;align-items:center;gap:10px">
+        <span style="font-size:12px;color:var(--muted)">&#9998; Targets edited</span>
+        <button onclick="saveSalesTargets()" style="padding:6px 16px;background:var(--accent);color:white;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600">Save to Excel</button>
+        <button onclick="cancelSalesTargets()" style="padding:6px 12px;background:none;border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer;color:var(--muted)">Cancel</button>
+      </div>
+      <table id="st-table" style="border-collapse:collapse;font-size:11px;font-family:Aptos,sans-serif;min-width:800px;width:100%"></table>
+    </div>
+    <!-- Error -->
+    <div id="st-error" style="display:none;padding:32px;text-align:center">
+      <div style="font-size:32px;margin-bottom:8px">&#9888;&#65039;</div>
+      <div id="st-error-msg" style="font-size:13px;color:var(--ink)"></div>
+      <button onclick="refreshSalesTarget()" style="margin-top:12px;padding:8px 20px;background:var(--accent);color:white;border:none;border-radius:6px;font-size:12px;cursor:pointer">Try Again</button>
+    </div>
+  </div>
 </div>
 
 <!-- SCAN PDF MODAL -->
@@ -2031,6 +2075,176 @@ async function confirmScanPdf() {
   }
 }
 
+
+// ── SALES TARGET REPORT ──────────────────────────────
+const ST_SHEET = 'salestarget';
+let stSheetData = null;      // raw 2D array from Excel
+let stOriginalData = null;   // copy for cancel
+let stTargetRows = [];       // row indices of editable target rows
+let stDirty = false;
+
+async function openSalesTarget() {
+  document.getElementById('sales-target-overlay').style.display = 'flex';
+  await loadSalesTarget();
+}
+
+function closeSalesTarget() {
+  document.getElementById('sales-target-overlay').style.display = 'none';
+  stDirty = false;
+}
+
+async function refreshSalesTarget() {
+  document.getElementById('st-table-wrap').style.display = 'none';
+  document.getElementById('st-error').style.display = 'none';
+  document.getElementById('st-loading').style.display = 'block';
+  await loadSalesTarget();
+}
+
+async function loadSalesTarget() {
+  document.getElementById('st-loading').style.display = 'block';
+  document.getElementById('st-table-wrap').style.display = 'none';
+  document.getElementById('st-error').style.display = 'none';
+
+  try {
+    const token = await getToken();
+    const driveBase = fileDriveId
+      ? `https://graph.microsoft.com/v1.0/drives/${fileDriveId}/items/${fileId}`
+      : `https://graph.microsoft.com/v1.0/me/drive/items/${fileId}`;
+
+    // Get used range from salestarget sheet
+    const res = await fetch(
+      `${driveBase}/workbook/worksheets/${encodeURIComponent(ST_SHEET)}/usedRange`,
+      { headers: { Authorization: 'Bearer ' + token } }
+    );
+    if (!res.ok) throw new Error(`Could not read "${ST_SHEET}" sheet (${res.status})`);
+    const data = await res.json();
+    stSheetData = data.values;
+    stOriginalData = JSON.parse(JSON.stringify(stSheetData));
+    stDirty = false;
+    renderSalesTargetTable();
+  } catch(e) {
+    document.getElementById('st-loading').style.display = 'none';
+    document.getElementById('st-error-msg').textContent = e.message;
+    document.getElementById('st-error').style.display = 'block';
+  }
+}
+
+function renderSalesTargetTable() {
+  document.getElementById('st-loading').style.display = 'none';
+  document.getElementById('st-error').style.display = 'none';
+
+  const table = document.getElementById('st-table');
+  table.innerHTML = '';
+  stTargetRows = [];
+
+  if (!stSheetData || !stSheetData.length) {
+    document.getElementById('st-error-msg').textContent = 'No data found in salestarget sheet';
+    document.getElementById('st-error').style.display = 'block';
+    return;
+  }
+
+  // Colour map based on cell content keywords
+  const getRowStyle = (row) => {
+    const label = String(row[0] || row[1] || '').toUpperCase();
+    if (label.includes('TARGET') || label.includes('# OF LOTS') && !label.includes('PROPOSED')) {
+      if (label.includes('DEPOSIT'))   return { bg:'#e53e3e', color:'white', bold:true };
+      if (label.includes('EXCHANGE'))  return { bg:'#e53e3e', color:'white', bold:true };
+      if (label.includes('SETTLED') || label.includes('SETTLEMENT')) return { bg:'#e53e3e', color:'white', bold:true };
+    }
+    if (label.includes('BASE'))        return { bg:'#e53e3e', color:'white', bold:true };
+    if (label.includes('PROPOSED'))    return { bg:'#3182ce', color:'white', bold:false };
+    if (label.includes('CFS') || label.includes('CfS')) return { bg:'#38a169', color:'white', bold:false };
+    return { bg:'white', color:'#1a1a1a', bold:false };
+  };
+
+  const fmtCell = (val) => {
+    if (val === null || val === undefined || val === '') return '—';
+    if (typeof val === 'number') {
+      if (val >= 1000) return '$' + val.toLocaleString();
+      return val;
+    }
+    return String(val);
+  };
+
+  const numCols = stSheetData[0].length;
+
+  stSheetData.forEach((row, rowIdx) => {
+    const tr = document.createElement('tr');
+    const label = String(row[0] || row[1] || '').toUpperCase();
+    const isTarget = label.includes('TARGET') || (label.includes('# OF LOTS') && rowIdx < 4);
+    if (isTarget) stTargetRows.push(rowIdx);
+
+    const style = getRowStyle(row);
+
+    row.forEach((cell, colIdx) => {
+      const td = document.createElement(rowIdx === 0 ? 'th' : 'td');
+      td.style.cssText = `padding:5px 10px;border:1px solid #ddd;white-space:nowrap;text-align:${colIdx === 0 ? 'left' : 'center'};background:${rowIdx === 0 ? '#1a2a3a' : style.bg};color:${rowIdx === 0 ? 'white' : style.color};font-weight:${style.bold || rowIdx === 0 ? '600' : '400'}`;
+
+      if (isTarget && colIdx > 0 && rowIdx !== 0 && typeof cell === 'number') {
+        // Editable target cell
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.value = cell === null || cell === '' ? '' : cell;
+        input.dataset.row = rowIdx;
+        input.dataset.col = colIdx;
+        input.style.cssText = 'width:50px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);border-radius:3px;color:white;font-size:11px;text-align:center;padding:2px 4px;font-family:Aptos,sans-serif';
+        input.addEventListener('change', (e) => {
+          stSheetData[rowIdx][colIdx] = Number(e.target.value);
+          stDirty = true;
+          document.getElementById('st-save-bar').style.display = 'flex';
+        });
+        td.appendChild(input);
+      } else {
+        td.textContent = rowIdx === 0 ? String(cell || '') : fmtCell(cell);
+      }
+      tr.appendChild(td);
+    });
+    table.appendChild(tr);
+  });
+
+  document.getElementById('st-table-wrap').style.display = 'block';
+  if (!stDirty) document.getElementById('st-save-bar').style.display = 'none';
+}
+
+async function saveSalesTargets() {
+  if (!stDirty) return;
+  try {
+    const token = await getToken();
+    const driveBase = fileDriveId
+      ? `https://graph.microsoft.com/v1.0/drives/${fileDriveId}/items/${fileId}`
+      : `https://graph.microsoft.com/v1.0/me/drive/items/${fileId}`;
+
+    // Write all target row values back
+    for (const rowIdx of stTargetRows) {
+      const row = stSheetData[rowIdx];
+      // Build range address — row is 1-based in Excel, +1 for header offset
+      const excelRow = rowIdx + 1;
+      const lastCol = String.fromCharCode(64 + row.length);
+      const rangeAddr = `A${excelRow}:${lastCol}${excelRow}`;
+
+      await fetch(
+        `${driveBase}/workbook/worksheets/${encodeURIComponent(ST_SHEET)}/range(address='${rangeAddr}')`,
+        {
+          method: 'PATCH',
+          headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ values: [row] })
+        }
+      );
+    }
+    stOriginalData = JSON.parse(JSON.stringify(stSheetData));
+    stDirty = false;
+    document.getElementById('st-save-bar').style.display = 'none';
+    toast('Targets saved to Excel ✓', 'success');
+  } catch(e) {
+    toast('Save failed: ' + e.message, 'error');
+  }
+}
+
+function cancelSalesTargets() {
+  stSheetData = JSON.parse(JSON.stringify(stOriginalData));
+  stDirty = false;
+  renderSalesTargetTable();
+}
 
 function saveChatKey() {
   const inp = document.getElementById('chat-key-input');
