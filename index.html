@@ -318,7 +318,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
   <div class="login-card">
     <div class="login-icon">&#128202;</div>
     <div class="login-title">Sales DB</div>
-    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">v2.25</div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">v2.26</div>
     <div class="login-sub">Sign in with your Microsoft account to access your OneDrive sales data.</div>
     <button class="ms-btn" onclick="signIn()">
       <div class="ms-logo"><div></div><div></div><div></div><div></div></div>
@@ -342,7 +342,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 <!-- APP -->
 <div id="app-wrapper" style="display:none">
   <div class="app-header">
-    <div class="header-logo">Sales<strong>DB</strong><span class="header-version">v2.25</span></div>
+    <div class="header-logo">Sales<strong>DB</strong><span class="header-version">v2.26</span></div>
     <div class="header-right">
       <div class="user-pill">
         <div class="user-avatar" id="user-avatar">?</div>
@@ -2077,7 +2077,7 @@ async function confirmScanPdf() {
 
 
 // ── SALES TARGET REPORT ──────────────────────────────
-const ST_SHEET = 'salestarget';
+const ST_SHEET = '2.SalesTarget';
 let stSheetData = null;      // raw 2D array from Excel
 let stOriginalData = null;   // copy for cancel
 let stTargetRows = [];       // row indices of editable target rows
@@ -2138,64 +2138,121 @@ function renderSalesTargetTable() {
   stTargetRows = [];
 
   if (!stSheetData || !stSheetData.length) {
-    document.getElementById('st-error-msg').textContent = 'No data found in salestarget sheet';
+    document.getElementById('st-error-msg').textContent = 'No data found in 2.SalesTarget sheet';
     document.getElementById('st-error').style.display = 'block';
     return;
   }
 
-  // Colour map based on cell content keywords
-  const getRowStyle = (row) => {
-    const label = String(row[0] || row[1] || '').toUpperCase();
-    if (label.includes('TARGET') || label.includes('# OF LOTS') && !label.includes('PROPOSED')) {
-      if (label.includes('DEPOSIT'))   return { bg:'#e53e3e', color:'white', bold:true };
-      if (label.includes('EXCHANGE'))  return { bg:'#e53e3e', color:'white', bold:true };
-      if (label.includes('SETTLED') || label.includes('SETTLEMENT')) return { bg:'#e53e3e', color:'white', bold:true };
-    }
-    if (label.includes('BASE'))        return { bg:'#e53e3e', color:'white', bold:true };
-    if (label.includes('PROPOSED'))    return { bg:'#3182ce', color:'white', bold:false };
-    if (label.includes('CFS') || label.includes('CfS')) return { bg:'#38a169', color:'white', bold:false };
-    return { bg:'white', color:'#1a1a1a', bold:false };
+  // Exact colours extracted from Excel file
+  const C = {
+    HEADER_BG:   '#FF0000',  // FFFF0000 — row 2 header
+    HEADER_FG:   '#FFFFFF',
+    TARGET_CELL: '#FF3300',  // FFFF3300 — target data cells (orange-red)
+    TARGET_FG:   '#FF0000',  // FFFF0000 — target label font
+    TARGET_LABEL:'#FFFFFF',  // white text on label cols
+    ACT_DEP_BG:  '#83E28E',  // FF83E28E — actual deposit (green)
+    ACT_EXC_BG:  '#44B3E1',  // FF44B3E1 — actual exchanged (blue)
+    PROPOSED_BG: '#F0F0F0',  // proposed rows — light grey (no fill in Excel)
+    ACTUAL_SET:  '#FFFFFF',  // actual settled — white
+    EMPTY_BG:    '#F7F7F7',
+    DARK:        '#1A1A1A',
+    WHITE:       '#FFFFFF',
+    MUTED:       '#666666',
   };
 
-  const fmtCell = (val) => {
+  const fmtVal = (val) => {
     if (val === null || val === undefined || val === '') return '—';
+    if (typeof val === 'string' && val.startsWith('=')) return '—'; // formula not evaluated
     if (typeof val === 'number') {
-      if (val >= 1000) return '$' + val.toLocaleString();
-      return val;
+      if (val === 0) return '—';
+      if (Math.abs(val) >= 1000) return '$\u00a0' + val.toLocaleString();
+      return String(val);
     }
     return String(val);
   };
 
-  const numCols = stSheetData[0].length;
+  const getRowStyle = (row) => {
+    const status = String(row[0] || '').trim().toUpperCase();
+    const section = String(row[1] || '').trim().toUpperCase();
+    const metric = String(row[2] || '').trim().toUpperCase();
+
+    if (!status && !section) return { labelBg: C.EMPTY_BG, dataBg: C.EMPTY_BG, labelFg: C.DARK, dataFg: C.DARK, bold: false, editable: false };
+
+    if (status === 'TARGET') return {
+      labelBg: 'transparent', dataBg: C.TARGET_CELL,
+      labelFg: C.TARGET_FG,  dataFg: C.WHITE,
+      bold: true, editable: metric.includes('# OF LOTS')
+    };
+    if (status === 'PROPOSED' || status === 'Proposed'.toUpperCase()) return {
+      labelBg: C.PROPOSED_BG, dataBg: C.PROPOSED_BG,
+      labelFg: C.DARK, dataFg: C.DARK,
+      bold: false, editable: false
+    };
+    if (status === 'ACTUAL') {
+      if (section.includes('DEPOSIT'))  return { labelBg: C.ACT_DEP_BG, dataBg: C.ACT_DEP_BG, labelFg: C.DARK, dataFg: C.DARK, bold: true, editable: false };
+      if (section.includes('EXCHANGE')) return { labelBg: C.ACT_EXC_BG, dataBg: C.ACT_EXC_BG, labelFg: C.WHITE, dataFg: C.WHITE, bold: true, editable: false };
+      return { labelBg: C.ACTUAL_SET, dataBg: C.ACTUAL_SET, labelFg: C.DARK, dataFg: C.DARK, bold: true, editable: false };
+    }
+    return { labelBg: C.EMPTY_BG, dataBg: C.EMPTY_BG, labelFg: C.DARK, dataFg: C.DARK, bold: false, editable: false };
+  };
 
   stSheetData.forEach((row, rowIdx) => {
+    // Skip row 0 (title row)
+    if (rowIdx === 0) return;
+
     const tr = document.createElement('tr');
-    const label = String(row[0] || row[1] || '').toUpperCase();
-    const isTarget = label.includes('TARGET') || (label.includes('# OF LOTS') && rowIdx < 4);
+    const isHeader = rowIdx === 1;
+    const style = isHeader ? null : getRowStyle(row);
+    const isTarget = !isHeader && style?.editable;
     if (isTarget) stTargetRows.push(rowIdx);
 
-    const style = getRowStyle(row);
-
     row.forEach((cell, colIdx) => {
-      const td = document.createElement(rowIdx === 0 ? 'th' : 'td');
-      td.style.cssText = `padding:5px 10px;border:1px solid #ddd;white-space:nowrap;text-align:${colIdx === 0 ? 'left' : 'center'};background:${rowIdx === 0 ? '#1a2a3a' : style.bg};color:${rowIdx === 0 ? 'white' : style.color};font-weight:${style.bold || rowIdx === 0 ? '600' : '400'}`;
+      const td = document.createElement(isHeader ? 'th' : 'td');
+      const isLabelCol = colIdx <= 2;
+      const isTotals = colIdx === row.length - 1;
 
-      if (isTarget && colIdx > 0 && rowIdx !== 0 && typeof cell === 'number') {
-        // Editable target cell
+      let bg, fg, bold;
+      if (isHeader) {
+        bg = C.HEADER_BG; fg = C.HEADER_FG; bold = true;
+      } else {
+        bg = isLabelCol ? style.labelBg : style.dataBg;
+        fg = isLabelCol ? style.labelFg : style.dataFg;
+        bold = style.bold;
+      }
+
+      td.style.cssText = [
+        `padding:5px ${isLabelCol ? 10 : 7}px`,
+        `border:1px solid rgba(0,0,0,0.1)`,
+        `text-align:${isLabelCol ? 'left' : 'center'}`,
+        `background:${isTotals && !isHeader ? bg : bg}`,
+        `color:${fg}`,
+        `font-weight:${bold || isTotals ? '600' : '400'}`,
+        `white-space:nowrap`,
+        `min-width:${colIdx === 0 ? 70 : colIdx <= 2 ? 130 : 80}px`,
+        `font-size:11px`,
+        `font-family:Aptos,sans-serif`,
+      ].join(';');
+
+      if (isTarget && !isLabelCol && !isHeader) {
         const input = document.createElement('input');
         input.type = 'number';
-        input.value = cell === null || cell === '' ? '' : cell;
+        input.value = (cell === null || cell === '' || cell === 0) ? '' : cell;
         input.dataset.row = rowIdx;
         input.dataset.col = colIdx;
-        input.style.cssText = 'width:50px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);border-radius:3px;color:white;font-size:11px;text-align:center;padding:2px 4px;font-family:Aptos,sans-serif';
+        input.style.cssText = [
+          'width:44px', 'background:rgba(255,255,255,0.25)',
+          'border:1px solid rgba(255,255,255,0.6)', 'border-radius:3px',
+          'color:white', 'font-size:11px', 'text-align:center',
+          'padding:2px 4px', 'font-family:Aptos,sans-serif', 'font-weight:700',
+        ].join(';');
         input.addEventListener('change', (e) => {
-          stSheetData[rowIdx][colIdx] = Number(e.target.value);
+          stSheetData[rowIdx][colIdx] = Number(e.target.value) || 0;
           stDirty = true;
           document.getElementById('st-save-bar').style.display = 'flex';
         });
         td.appendChild(input);
       } else {
-        td.textContent = rowIdx === 0 ? String(cell || '') : fmtCell(cell);
+        td.textContent = isHeader ? String(cell || '') : fmtVal(cell);
       }
       tr.appendChild(td);
     });
@@ -2203,7 +2260,7 @@ function renderSalesTargetTable() {
   });
 
   document.getElementById('st-table-wrap').style.display = 'block';
-  if (!stDirty) document.getElementById('st-save-bar').style.display = 'none';
+  document.getElementById('st-save-bar').style.display = stDirty ? 'flex' : 'none';
 }
 
 async function saveSalesTargets() {
