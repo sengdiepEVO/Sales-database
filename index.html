@@ -1023,8 +1023,14 @@ async function loadFileFromOneDrive() {
   const buf = await res.arrayBuffer();
   const wb = XLSX.read(buf, { type: 'array' });
   const ws = wb.Sheets[wb.SheetNames[0]];
-  const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
-  if (!json.length) throw new Error('File is empty');
+  const rawJson = XLSX.utils.sheet_to_json(ws, { defval: '' });
+  if (!rawJson.length) throw new Error('File is empty');
+  // Trim trailing/leading spaces from all header keys
+  const json = rawJson.map(row => {
+    const clean = {};
+    Object.keys(row).forEach(k => { clean[k.trim()] = row[k]; });
+    return clean;
+  });
   headers = Object.keys(json[0]);
   allData = json;
   filteredData = [...allData];
