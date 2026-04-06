@@ -2546,7 +2546,9 @@ async function loadCfsTrack() {
       throw new Error(`Graph API ${res.status}: ${txt.slice(0,120)}`);
     }
     const data = await res.json();
-    const rows = data.values || [];
+    // Use data.text — returns display-formatted strings (dates as "30-Mar-26" not serials)
+    // Fall back to data.values if text not available
+    const rows = (data.text && data.text.length ? data.text : data.values) || [];
     if (!rows.length) throw new Error('No data returned from CfS Track sheet');
 
     // Row 0 = headers, rows 1+ = data
@@ -2590,15 +2592,41 @@ async function loadCfsTrack() {
 }
 
 function cfsDateFmt(v) {
-  if (!v || v === '0:00:00' || v === '' ) return '—';
-  // Graph API returns dates as ISO strings or serial numbers
-  const d = new Date(v);
-  if (!isNaN(d.getTime())) {
+  if (!v || v === '' || v === '0:00:00') return '—';
+  const s = String(v).trim();
+  if (!s || s === '0') return '—';
+
+  // If it's already a formatted date string from data.text (e.g. "30-Mar-26"), normalise to 4-digit year
+  const textMatch = s.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{2,4})$/);
+  if (textMatch) {
+    const day = textMatch[1].padStart(2,'0');
+    const mon = textMatch[2].charAt(0).toUpperCase() + textMatch[2].slice(1,3).toLowerCase();
+    let yr = parseInt(textMatch[3]);
+    if (yr < 100) yr += 2000;
+    return day + '-' + mon + '-' + yr;
+  }
+
+  // If it's an ISO string from data.values fallback
+  const d = new Date(s);
+  if (!isNaN(d.getTime()) && d.getFullYear() >= 1970) {
     return d.getDate().toString().padStart(2,'0') + '-' +
       ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()] +
       '-' + d.getFullYear();
   }
-  return String(v);
+
+  // Excel serial number fallback (e.g. 46117)
+  const serial = parseFloat(s);
+  if (!isNaN(serial) && serial > 1000 && serial < 100000) {
+    // Excel epoch: 1 Jan 1900 = serial 1 (with leap year bug, serial 60 = 29-Feb-1900 never existed)
+    const excelEpoch = new Date(1899, 11, 30);
+    const d2 = new Date(excelEpoch.getTime() + serial * 86400000);
+    if (d2.getFullYear() >= 1970) {
+      return d2.getDate().toString().padStart(2,'0') + '-' +
+        ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d2.getMonth()] +
+        '-' + d2.getFullYear();
+    }
+  }
+  return '—';
 }
 
 function cfsCurrFmt(v) {
