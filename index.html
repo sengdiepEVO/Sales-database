@@ -825,7 +825,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.10.0/lib/msal-browser.min.js"></script>
 <script>
 
@@ -2599,11 +2599,13 @@ function cfsDateFmt(v) {
   // If it's already a formatted date string from data.text (e.g. "30-Mar-26"), normalise to 4-digit year
   const textMatch = s.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{2,4})$/);
   if (textMatch) {
-    const day = textMatch[1].padStart(2,'0');
+    const day = parseInt(textMatch[1]);
     const mon = textMatch[2].charAt(0).toUpperCase() + textMatch[2].slice(1,3).toLowerCase();
     let yr = parseInt(textMatch[3]);
     if (yr < 100) yr += 2000;
-    return day + '-' + mon + '-' + yr;
+    // Zero serial renders as "0-Jan-1900" or "0-Jan-2000" — treat as blank
+    if (day === 0 || yr < 1970) return '—';
+    return day.toString().padStart(2,'0') + '-' + mon + '-' + yr;
   }
 
   // If it's an ISO string from data.values fallback
@@ -2707,8 +2709,10 @@ function renderCfsTable() {
     tr.appendChild(td(cfsDateFmt(row.cfsIssued)));
 
     // Days — colour-code: >20 red, 10-20 orange
+    // Suppress Excel serial numbers (>1000) which appear when CfS Issued date is blank
     const daysTd = document.createElement('td');
-    const days = parseInt(row.daysCfs) || 0;
+    const daysRaw = parseInt(row.daysCfs) || 0;
+    const days = daysRaw > 1000 ? 0 : daysRaw;
     let daysColor = 'var(--ink)';
     if (days > 20) daysColor = '#c00';
     else if (days > 10) daysColor = '#b86000';
@@ -2875,7 +2879,8 @@ function downloadCfsTrack() {
     rowMeta.push({ type: 'section', cond });
 
     group.forEach(row => {
-      const days = parseInt(row.daysCfs) || 0;
+      const daysRaw = parseInt(row.daysCfs) || 0;
+      const days = daysRaw > 1000 ? 0 : daysRaw;
       const exchPrice = parseFloat(row.exchPrice) || null;
       aoa.push([
         String(row.lot),
@@ -2921,68 +2926,16 @@ function downloadCfsTrack() {
   });
   if (merges.length) ws['!merges'] = merges;
 
-  // Apply cell styles (requires sheetjs-style or xlsx-js-style — check if available)
-  // If not available, we still get a clean functional spreadsheet
-  const canStyle = typeof XLSX.utils.encode_cell === 'function';
-
-  if (canStyle) {
-    const HDR_FILL  = { patternType: 'solid', fgColor: { rgb: '1F497D' } };
-    const HDR_FONT  = { bold: true, color: { rgb: 'FFFFFF' }, name: 'Aptos', sz: 10 };
-    const HDR_ALIGN = { horizontal: 'center', vertical: 'center', wrapText: true };
-
-    const SECT_FILLS = {
-      '2. Pending SA': { patternType: 'solid', fgColor: { rgb: 'FAEEDA' } },
-      '3. Deposit':    { patternType: 'solid', fgColor: { rgb: 'E8F0FD' } },
-      '4. Exchanged':  { patternType: 'solid', fgColor: { rgb: 'EAF3DE' } },
-    };
-    const SECT_FONTS = {
-      '2. Pending SA': { bold: true, color: { rgb: '7A4900' }, name: 'Aptos', sz: 10 },
-      '3. Deposit':    { bold: true, color: { rgb: '1A3A8B' }, name: 'Aptos', sz: 10 },
-      '4. Exchanged':  { bold: true, color: { rgb: '2E6B0E' }, name: 'Aptos', sz: 10 },
-    };
-
-    const BODY_FONT  = { name: 'Aptos', sz: 10 };
-    const BODY_ALIGN = { vertical: 'top' };
-    const NOTES_ALIGN = { vertical: 'top', wrapText: true };
-    const BORDER = {
-      top:    { style: 'thin', color: { rgb: 'CCCCCC' } },
-      bottom: { style: 'thin', color: { rgb: 'CCCCCC' } },
-      left:   { style: 'thin', color: { rgb: 'CCCCCC' } },
-      right:  { style: 'thin', color: { rgb: 'CCCCCC' } },
-    };
-
-    rowMeta.forEach((meta, ri) => {
-      for (let ci = 0; ci < 10; ci++) {
-        const addr = XLSX.utils.encode_cell({ r: ri, c: ci });
-        if (!ws[addr]) ws[addr] = { t: 's', v: '' };
-
-        if (meta.type === 'header') {
-          ws[addr].s = { fill: HDR_FILL, font: HDR_FONT, alignment: HDR_ALIGN, border: BORDER };
-        } else if (meta.type === 'section') {
-          ws[addr].s = {
-            fill: SECT_FILLS[meta.cond] || {},
-            font: SECT_FONTS[meta.cond] || { bold: true },
-            alignment: { vertical: 'center' },
-            border: BORDER,
-          };
-        } else {
-          // Days column (index 4) — colour code
-          let font = { ...BODY_FONT };
-          if (ci === 4 && meta.days > 20)       font.color = { rgb: 'CC0000' };
-          else if (ci === 4 && meta.days > 10)  font.color = { rgb: 'B86000' };
-
-          // Exch Price column (index 6) — number format
-          const align = ci === 9 ? NOTES_ALIGN : BODY_ALIGN;
-          ws[addr].s = { font, alignment: align, border: BORDER };
-
-          if (ci === 6 && ws[addr].v) {
-            ws[addr].t = 'n';
-            ws[addr].z = '$#,##0';
-          }
-        }
+  // Apply number format to Exch Price column (col index 6) — SheetJS CE supports z format
+  rowMeta.forEach((meta, ri) => {
+    if (meta.type === 'data') {
+      const addr = XLSX.utils.encode_cell({ r: ri, c: 6 });
+      if (ws[addr] && ws[addr].v) {
+        ws[addr].t = 'n';
+        ws[addr].z = '$#,##0';
       }
-    });
-  }
+    }
+  });
 
   XLSX.utils.book_append_sheet(wb, ws, 'CfS Track');
 
