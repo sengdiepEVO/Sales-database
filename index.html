@@ -976,13 +976,13 @@ async function loadFileFromOneDrive() {
   showLoading('Locating file...');
   // 1. Try own OneDrive by path
   try {
-    const r = await graphGet('https://graph.microsoft.com/v1.0/me/drive/root:/Sales%20DB/SalesDB-Main.xlsx');
+    const r = await graphGet('https://graph.microsoft.com/v1.0/me/drive/root:/Sales%20Platform/Sales%20DB/SalesDB-Main.xlsx');
     if (r?.id) { itemId = r.id; driveId = r.parentReference?.driveId; }
   } catch(e) {}
-  // 2. Try own OneDrive search
+  // 2. Try own OneDrive search by exact filename
   if (!itemId) {
     try {
-      const r = await graphGet(`https://graph.microsoft.com/v1.0/me/drive/search(q='Sales DB - Claude.xlsx')`);
+      const r = await graphGet(`https://graph.microsoft.com/v1.0/me/drive/search(q='SalesDB-Main.xlsx')`);
       const f = (r.value||[]).find(f => f.name === FILE_NAME);
       if (f) { itemId = f.id; driveId = f.parentReference?.driveId; }
     } catch(e) {}
@@ -993,18 +993,6 @@ async function loadFileFromOneDrive() {
     try {
       const r = await graphGet(`https://graph.microsoft.com/v1.0/me/drive/sharedWithMe`);
       const f = (r.value||[]).find(f => f.name === FILE_NAME);
-      if (f) {
-        // For shared items the real ID and driveId live inside remoteItem
-        itemId = f.remoteItem?.id || f.id;
-        driveId = f.remoteItem?.parentReference?.driveId || f.parentReference?.driveId;
-      }
-    } catch(e) {}
-  }
-  // 4. Try searching shared with broader name match
-  if (!itemId) {
-    try {
-      const r = await graphGet(`https://graph.microsoft.com/v1.0/me/drive/sharedWithMe`);
-      const f = (r.value||[]).find(f => (f.name||'').toLowerCase().includes('sales db'));
       if (f) {
         itemId = f.remoteItem?.id || f.id;
         driveId = f.remoteItem?.parentReference?.driveId || f.parentReference?.driveId;
