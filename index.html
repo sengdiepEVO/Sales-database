@@ -428,11 +428,18 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
       <!-- DESKTOP REPORTS SCREEN -->
       <div class="desktop-screen" id="dscreen-reports">
         <div class="desktop-reports">
+          <div style="font-size:10px;color:var(--muted);padding:4px 0 4px;font-weight:600;letter-spacing:0.05em">JAN–JUL 2026 (excl. Stage C)</div>
           <div class="desktop-stats">
             <div class="desktop-stat"><div class="desktop-stat-label">Pending SA</div><div class="desktop-stat-val-row"><div class="desktop-stat-val" id="d-stat-pending">&#8212;</div><div class="desktop-stat-rev" id="d-stat-pending-rev"></div></div></div>
             <div class="desktop-stat"><div class="desktop-stat-label">Deposit</div><div class="desktop-stat-val-row"><div class="desktop-stat-val" id="d-stat-deposit">&#8212;</div><div class="desktop-stat-rev" id="d-stat-deposit-rev"></div></div></div>
             <div class="desktop-stat"><div class="desktop-stat-label">Exchanged</div><div class="desktop-stat-val-row"><div class="desktop-stat-val" id="d-stat-exchanged">&#8212;</div><div class="desktop-stat-rev" id="d-stat-exchanged-rev"></div></div></div>
             <div class="desktop-stat"><div class="desktop-stat-label">Settled</div><div class="desktop-stat-val-row"><div class="desktop-stat-val" id="d-stat-settled">&#8212;</div><div class="desktop-stat-rev" id="d-stat-settled-rev"></div></div></div>
+          </div>
+          <div style="font-size:10px;color:var(--muted);padding:4px 0 4px;font-weight:600;letter-spacing:0.05em" id="d-stat-month-label">THIS MONTH (excl. Stage C)</div>
+          <div class="desktop-stats">
+            <div class="desktop-stat"><div class="desktop-stat-label">Deposit</div><div class="desktop-stat-val-row"><div class="desktop-stat-val" id="d-stat-mth-dep">&#8212;</div><div class="desktop-stat-rev" id="d-stat-mth-dep-rev"></div></div></div>
+            <div class="desktop-stat"><div class="desktop-stat-label">Exchanged</div><div class="desktop-stat-val-row"><div class="desktop-stat-val" id="d-stat-mth-exc">&#8212;</div><div class="desktop-stat-rev" id="d-stat-mth-exc-rev"></div></div></div>
+            <div class="desktop-stat"><div class="desktop-stat-label">Settled</div><div class="desktop-stat-val-row"><div class="desktop-stat-val" id="d-stat-mth-set">&#8212;</div><div class="desktop-stat-rev" id="d-stat-mth-set-rev"></div></div></div>
           </div>
           <div class="desktop-report-grid">
             <div class="desktop-report-btn" onclick="openSalesTarget()">
@@ -593,11 +600,18 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
     <!-- PHONE REPORTS -->
     <div id="screen-reports" class="screen" style="background:var(--bg);overflow-y:auto">
       <div class="sub-header"><span class="sub-title">Reports</span></div>
+      <div style="font-size:10px;color:var(--muted);padding:6px 14px 2px;font-weight:600;letter-spacing:0.05em">JAN–JUL 2026 (excl. Stage C)</div>
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-label">Pending SA</div><div class="stat-val-row"><div class="stat-val" id="stat-pending">&#8212;</div><div class="stat-rev" id="stat-pending-rev"></div></div></div>
         <div class="stat-card"><div class="stat-label">Deposit</div><div class="stat-val-row"><div class="stat-val" id="stat-deposit">&#8212;</div><div class="stat-rev" id="stat-deposit-rev"></div></div></div>
         <div class="stat-card"><div class="stat-label">Exchanged</div><div class="stat-val-row"><div class="stat-val" id="stat-exchanged">&#8212;</div><div class="stat-rev" id="stat-exchanged-rev"></div></div></div>
         <div class="stat-card"><div class="stat-label">Settled</div><div class="stat-val-row"><div class="stat-val" id="stat-settled">&#8212;</div><div class="stat-rev" id="stat-settled-rev"></div></div></div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);padding:6px 14px 2px;font-weight:600;letter-spacing:0.05em" id="stat-month-label">THIS MONTH (excl. Stage C)</div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Deposit</div><div class="stat-val-row"><div class="stat-val" id="stat-mth-dep">&#8212;</div><div class="stat-rev" id="stat-mth-dep-rev"></div></div></div>
+        <div class="stat-card"><div class="stat-label">Exchanged</div><div class="stat-val-row"><div class="stat-val" id="stat-mth-exc">&#8212;</div><div class="stat-rev" id="stat-mth-exc-rev"></div></div></div>
+        <div class="stat-card"><div class="stat-label">Settled</div><div class="stat-val-row"><div class="stat-val" id="stat-mth-set">&#8212;</div><div class="stat-rev" id="stat-mth-set-rev"></div></div></div>
       </div>
       <div class="section-title">Generate AI reports</div>
       <div class="report-btn-card" onclick="openSalesTarget()"><div class="report-icon" style="background:#fde8e8">&#127919;</div><div class="report-info"><div class="report-title">Sales Target</div><div class="report-sub">Deposit, Exchange & Settlement vs targets</div></div></div>
@@ -3196,6 +3210,37 @@ function updateDeskStats() {
   document.getElementById('d-stat-deposit-rev').textContent   = fmtM(depositRev);
   document.getElementById('d-stat-exchanged-rev').textContent = fmtM(exchangedRev);
   document.getElementById('d-stat-settled-rev').textContent   = fmtM(settledRev);
+
+  // Current month bar — same logic as Sales Target, dynamic month
+  const now       = new Date();
+  const mthStart  = new Date(now.getFullYear(), now.getMonth(), 1);
+  const mthEnd    = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const mthName   = MONTHS_SHORT[now.getMonth()].toUpperCase() + '-' + String(now.getFullYear()).slice(2);
+  const inMth = d => { const dt = stParseDate(d); return dt && dt >= mthStart && dt < mthEnd; };
+  const no2C2 = r => !String(r['Stage']||'').includes('C');
+
+  const mthDep = allData.filter(r => no2C2(r) && inMth(r['Contract Issued Date']));
+  const mthExc = allData.filter(r => no2C2(r) && inMth(r['Exchanged Date']));
+  const mthSet = allData.filter(r => no2C2(r) && inMth(r['Settled Date']) && r['Sales Advice Received Date']);
+
+  const mthDepRev = mthDep.reduce((s,r) => s + (Number(r['CfS Issued Price'])||0), 0);
+  const mthExcRev = mthExc.reduce((s,r) => s + (Number(r['CfS Exchanged Price ($)'])||0), 0);
+  const mthSetRev = mthSet.reduce((s,r) => s + (Number(r['CfS Settled Price ($)'])||0), 0);
+
+  ['','d-'].forEach(p => {
+    const g = id => document.getElementById(p + id);
+    const lbl = g('stat-month-label');
+    if (lbl) lbl.textContent = mthName + ' (excl. Stage C)';
+    if (!g('stat-mth-dep')) return;
+    g('stat-mth-dep').textContent     = mthDep.length;
+    g('stat-mth-exc').textContent     = mthExc.length;
+    g('stat-mth-set').textContent     = mthSet.length;
+    g('stat-mth-dep-rev').textContent = fmtM(mthDepRev);
+    g('stat-mth-exc-rev').textContent = fmtM(mthExcRev);
+    g('stat-mth-set-rev').textContent = fmtM(mthSetRev);
+  });
+
 }
 
 // ── DESKTOP SPREADSHEET ──
