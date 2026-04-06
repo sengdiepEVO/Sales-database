@@ -1010,7 +1010,7 @@ async function loadFileFromOneDrive() {
   if (!res.ok) throw new Error(`Download failed: ${res.status}`);
   const buf = await res.arrayBuffer();
   const wb = XLSX.read(buf, { type: 'array' });
-  const ws = wb.Sheets[wb.SheetNames[0]];
+  const ws = wb.Sheets['Database'] || wb.Sheets[wb.SheetNames[0]];
   const rawJson = XLSX.utils.sheet_to_json(ws, { defval: '' });
   if (!rawJson.length) throw new Error('File is empty');
   // Trim trailing/leading spaces from all header keys
