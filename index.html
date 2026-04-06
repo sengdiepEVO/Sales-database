@@ -1288,7 +1288,7 @@ function updateStats() {
   const pendingRows   = allData.filter(r => sc(r).includes('Pending'));
   const depositRows   = allData.filter(r => sc(r).includes('Deposit'));
   const exchangedRows = allData.filter(r => sc(r).includes('Exchanged'));
-  const settledRows   = allData.filter(r => sc(r).includes('Settled'));
+  const settledRows   = allData.filter(r => sc(r).includes('Settled') && r['Sales Advice Received Date']);
 
   const n = v => parseFloat(String(v||'0').replace(/[^0-9.-]/g,''))||0;
   const pendingRev   = pendingRows.reduce((s,r)   => s + n(r['$LIST']), 0);
@@ -3179,7 +3179,7 @@ function updateDeskStats() {
   const pendingRows   = allData.filter(r => sc(r).includes('Pending'));
   const depositRows   = allData.filter(r => sc(r).includes('Deposit'));
   const exchangedRows = allData.filter(r => sc(r).includes('Exchanged'));
-  const settledRows   = allData.filter(r => sc(r).includes('Settled'));
+  const settledRows   = allData.filter(r => sc(r).includes('Settled') && r['Sales Advice Received Date']);
 
   const n = v => parseFloat(String(v||'0').replace(/[^0-9.-]/g,''))||0;
   const pendingRev   = pendingRows.reduce((s,r)   => s + n(r['$LIST']), 0);
