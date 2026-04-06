@@ -1012,7 +1012,17 @@ async function loadFileFromOneDrive() {
       }
     } catch(e) {}
   }
-  if (!itemId) throw new Error(`Could not find "${FILE_NAME}".\n\nChecked:\n• Your OneDrive (path & search)\n• Files shared with you\n\nAsk the file owner to share it with your Microsoft account.`);
+  // 4. Hardcoded fallback — direct access via known driveId/fileId (for shared users)
+  if (!itemId) {
+    showLoading('Trying direct file access...');
+    try {
+      const OWNER_DRIVE_ID = 'b!UWcAmYWyCEWBmcznjprYM_mkLkrX_LxPjnwaTG0HT6XUqqEU0Yo2RJPyf5hCDY7v';
+      const OWNER_FILE_ID  = '01OZWGZ4X4UHXUAK52OBAZUVICXBJ6JVCA';
+      const r = await graphGet(`https://graph.microsoft.com/v1.0/drives/${OWNER_DRIVE_ID}/items/${OWNER_FILE_ID}`);
+      if (r?.id) { itemId = r.id; driveId = OWNER_DRIVE_ID; }
+    } catch(e) {}
+  }
+  if (!itemId) throw new Error(`Could not find "${FILE_NAME}".\n\nChecked:\n• Your OneDrive (path & search)\n• Files shared with you\n• Direct file access\n\nAsk the file owner to share it with your Microsoft account.`);
   fileId = itemId;
   fileDriveId = driveId;
   showLoading('Downloading...');
