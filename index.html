@@ -318,7 +318,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
   <div class="login-card">
     <div class="login-icon">&#128202;</div>
     <div class="login-title">Sales DB</div>
-    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">v2.30</div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">v2.31</div>
     <div class="login-sub">Sign in with your Microsoft account to access your OneDrive sales data.</div>
     <button class="ms-btn" onclick="signIn()">
       <div class="ms-logo"><div></div><div></div><div></div><div></div></div>
@@ -342,7 +342,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 <!-- APP -->
 <div id="app-wrapper" style="display:none">
   <div class="app-header">
-    <div class="header-logo">Sales<strong>DB</strong><span class="header-version">v2.30</span></div>
+    <div class="header-logo">Sales<strong>DB</strong><span class="header-version">v2.31</span></div>
     <div class="header-right">
       <div class="user-pill">
         <div class="user-avatar" id="user-avatar">?</div>
@@ -831,7 +831,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 
 const CLIENT_ID = 'cd53b987-59ab-4b81-9bfb-178cfa8ee5b2';
 const REDIRECT_URI = 'https://SENDIE1.github.io/Sales-database/';
-const FILE_NAME = 'Sales DB - Claude.xlsx';
+const FILE_NAME = 'SalesDB-Main.xlsx';
 const SCOPES = ['Files.ReadWrite', 'User.Read'];
 const ANTHROPIC_KEY = () => {
   let k = localStorage.getItem('anthropic_key') || '';
@@ -976,7 +976,7 @@ async function loadFileFromOneDrive() {
   showLoading('Locating file...');
   // 1. Try own OneDrive by path
   try {
-    const r = await graphGet('https://graph.microsoft.com/v1.0/me/drive/root:/Sales%20DB/Sales%20DB%20-%20Claude.xlsx');
+    const r = await graphGet('https://graph.microsoft.com/v1.0/me/drive/root:/Sales%20DB/SalesDB-Main.xlsx');
     if (r?.id) { itemId = r.id; driveId = r.parentReference?.driveId; }
   } catch(e) {}
   // 2. Try own OneDrive search
