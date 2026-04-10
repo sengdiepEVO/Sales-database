@@ -324,7 +324,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
   <div class="login-card">
     <div class="login-icon">&#128202;</div>
     <div class="login-title">Sales DB</div>
-    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">v2.34</div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">v2.39</div>
     <div class="login-sub">Sign in with your Microsoft account to access your OneDrive sales data.</div>
     <button class="ms-btn" onclick="signIn()">
       <div class="ms-logo"><div></div><div></div><div></div><div></div></div>
@@ -348,7 +348,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 <!-- APP -->
 <div id="app-wrapper" style="display:none">
   <div class="app-header">
-    <div class="header-logo">Sales<strong>DB</strong><span class="header-version">v2.34</span></div>
+    <div class="header-logo">Sales<strong>DB</strong><span class="header-version">v2.39</span></div>
     <div class="header-right">
       <div class="user-pill">
         <div class="user-avatar" id="user-avatar">?</div>
@@ -728,7 +728,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
     <div id="scan-step-upload" style="padding:24px;display:flex;flex-direction:column;align-items:center;gap:16px">
       <label for="scan-pdf-input" style="width:100%;border:2px dashed var(--border);border-radius:8px;padding:32px 16px;text-align:center;cursor:pointer;transition:border-color 0.2s" id="scan-drop-zone">
         <div style="font-size:32px;margin-bottom:8px">&#128196;</div>
-        <div style="font-size:14px;font-weight:500;color:var(--ink)">Tap to select PDF</div>
+        <div style="font-size:14px;font-weight:500;color:var(--ink)">Tap or drag &amp; drop PDF</div>
         <div style="font-size:11px;color:var(--muted);margin-top:4px" id="scan-file-name">No file selected</div>
         <input type="file" id="scan-pdf-input" accept=".pdf" style="display:none" onchange="onScanFileSelected(event)">
       </label>
@@ -839,6 +839,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.10.0/lib/msal-browser.min.js"></script>
 <script>
 
@@ -2034,6 +2035,48 @@ function onScanFileSelected(event) {
   document.getElementById('scan-extract-btn').style.pointerEvents = 'auto';
 }
 
+function setScanFile(file) {
+  if (!file || file.type !== 'application/pdf') { toast('Please drop a PDF file', 'error'); return; }
+  scanPdfFile = file;
+  document.getElementById('scan-file-name').textContent = file.name;
+  document.getElementById('scan-extract-btn').style.opacity = '1';
+  document.getElementById('scan-extract-btn').style.pointerEvents = 'auto';
+}
+
+function initScanDropZone() {
+  // Target the modal panel so the whole upload area is a valid drop target
+  const modal = document.getElementById('scan-pdf-overlay');
+  if (!modal || modal._dropInited) return;
+  modal._dropInited = true;
+  let dragDepth = 0; // counter prevents dragleave firing on child elements
+
+  modal.addEventListener('dragenter', e => {
+    e.preventDefault();
+    dragDepth++;
+    const zone = document.getElementById('scan-drop-zone');
+    if (zone) { zone.style.borderColor = 'var(--accent)'; zone.style.background = 'var(--accent-light)'; }
+  });
+  modal.addEventListener('dragover', e => {
+    e.preventDefault(); // required to allow drop
+  });
+  modal.addEventListener('dragleave', e => {
+    dragDepth--;
+    if (dragDepth <= 0) {
+      dragDepth = 0;
+      const zone = document.getElementById('scan-drop-zone');
+      if (zone) { zone.style.borderColor = ''; zone.style.background = ''; }
+    }
+  });
+  modal.addEventListener('drop', e => {
+    e.preventDefault();
+    dragDepth = 0;
+    const zone = document.getElementById('scan-drop-zone');
+    if (zone) { zone.style.borderColor = ''; zone.style.background = ''; }
+    const file = e.dataTransfer.files[0];
+    setScanFile(file);
+  });
+}
+
 async function runScanPdf() {
   if (!scanPdfFile) return;
   const key = ANTHROPIC_KEY();
@@ -2042,7 +2085,22 @@ async function runScanPdf() {
   showScanStep('processing');
 
   try {
-    // Read PDF as base64
+    // Extract raw text from PDF using PDF.js (exact characters — avoids OCR misreads)
+    const arrayBuffer = await scanPdfFile.arrayBuffer();
+    let pdfText = '';
+    try {
+      if (typeof pdfjsLib !== 'undefined') {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        for (let p = 1; p <= pdfDoc.numPages; p++) {
+          const page = await pdfDoc.getPage(p);
+          const tc = await page.getTextContent();
+          pdfText += tc.items.map(i => i.str).join(' ') + '\n';
+        }
+      }
+    } catch(e) { console.warn('PDF.js text extraction failed, falling back to visual:', e); }
+
+    // Also read as base64 for visual checks (signatures, ID photos)
     const base64 = await new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = e => resolve(e.target.result.split(',')[1]);
@@ -2052,7 +2110,10 @@ async function runScanPdf() {
 
     // Ask Claude to extract fields
     const todayStr = new Date().toLocaleDateString('en-AU', { day:'2-digit', month:'2-digit', year:'numeric' }).replace(/\//g,'/');
-    const prompt = `This is a Sales Advice (S/A) document for a property sale. Extract the following fields. Return ONLY a JSON object with these keys (use null if not found):
+    const textBlock = pdfText.trim()
+      ? `\n\nEXTRACTED PDF TEXT (exact characters — use this for all text fields, names, emails, dates, prices):\n${pdfText.slice(0, 8000)}`
+      : '';
+    const prompt = `This is a Sales Advice (S/A) document for a property sale.${textBlock}\n\nExtract the following fields. Return ONLY a JSON object with these keys (use null if not found):
 
 {
   "lot_number": "the lot number — look for 'Lot Number', 'Lot #', or 'Lot [number]' anywhere in the document",
@@ -2062,11 +2123,11 @@ async function runScanPdf() {
   "cfs_issue_price": "the land price — look specifically for 'Land Price: $' field — return as number only, no $ or commas",
   "rebate": "look in SPECIAL (CfS) CONDITIONS for any dollar rebate amount e.g. '$5,000 rebate on settlement' — return as number only (e.g. 5000), null if none",
   "deposit_percent": "look in SPECIAL (CfS) CONDITIONS for a deposit percentage e.g. '5% deposit to exchange' — return as number only (e.g. 5), null if none. If only standard 10% is mentioned return 10",
-  "purchaser1_name": "Purchaser 1 Full Name as per ID",
-  "purchaser1_email": "Purchaser 1 Email",
+  "purchaser1_name": "Purchaser 1 Full Name as per ID — copy exactly character-by-character from the extracted text",
+  "purchaser1_email": "Purchaser 1 Email — copy exactly from the extracted text",
   "purchaser1_mobile": "Purchaser 1 mobile — first number from 'Purchaser 1 & 2 Mobile No'",
-  "purchaser2_name": "Purchaser 2 Full Name as per ID, null if none",
-  "purchaser2_email": "Purchaser 2 Email, null if none",
+  "purchaser2_name": "Purchaser 2 Full Name as per ID — copy exactly character-by-character from the extracted text, null if none",
+  "purchaser2_email": "Purchaser 2 Email — copy exactly from the extracted text, null if none",
   "purchaser2_mobile": "Purchaser 2 mobile — second number from 'Purchaser 1 & 2 Mobile No', null if none",
   "purchaser_postcode": "postcode from purchaser address",
   "purchaser_suburb": "suburb from purchaser address",
@@ -2163,7 +2224,14 @@ Return ONLY the JSON object, no other text.`;
     }
 
     // ── RULE: ID name must match purchaser name — warning ─────────
-    const normName = n => String(n || '').toLowerCase().trim().replace(/\s+/g, ' ');
+    // normName: lowercase, strip punctuation, collapse whitespace, sort words so
+    // "MAHARJAN Ujjwal" (ID surname-first) matches "Ujjwal Maharjan" (form given-first)
+    const normName = n => String(n || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, ' ')   // strip punctuation (hyphens, apostrophes etc)
+      .trim()
+      .replace(/\s+/g, ' ')
+      .split(' ').filter(Boolean).sort().join(' '); // sort words — handles surname-first IDs
     const idNameWarnings = [];
     if (extracted.id1_name && extracted.purchaser1_name) {
       if (normName(extracted.id1_name) !== normName(extracted.purchaser1_name)) {
@@ -2982,11 +3050,15 @@ function openCfsNote(excelRow, lotNo, btnEl) {
   const existing = rowData ? String(rowData.salesNotes || '').trim() : '';
   cfsNoteCtx = { excelRow, lotNo, existing };
 
+  const _today = new Date();
+  const _datePrefix = String(_today.getDate()).padStart(2,'0') + '-' +
+    ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][_today.getMonth()] + ' - ';
   document.getElementById('cfsnote-lot-label').textContent = 'Lot ' + lotNo;
   document.getElementById('cfsnote-existing').textContent  = existing || '—';
-  document.getElementById('cfsnote-input').value = '';
+  const _inp = document.getElementById('cfsnote-input');
+  _inp.value = _datePrefix;
   document.getElementById('cfsnote-overlay').style.display = 'flex';
-  setTimeout(() => document.getElementById('cfsnote-input').focus(), 100);
+  setTimeout(() => { _inp.focus(); _inp.setSelectionRange(_inp.value.length, _inp.value.length); }, 100);
 }
 
 function closeCfsNote() {
@@ -2998,12 +3070,7 @@ async function saveCfsNote() {
   if (!cfsNoteCtx) return;
   const noteText = document.getElementById('cfsnote-input').value.trim();
   if (!noteText) { toast('Please enter a note', 'error'); return; }
-
-  // Format: "6-Apr-2026 <note>"
-  const today = new Date();
-  const datePrefix = today.getDate() + '-' +
-    ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][today.getMonth()];
-  const newEntry = datePrefix + ' - ' + noteText;
+  const newEntry = noteText;
 
   // Prepend to existing (newest first)
   const combined = cfsNoteCtx.existing
@@ -4072,6 +4139,7 @@ function setSyncStatus(state) {
 
 
 
+document.addEventListener('DOMContentLoaded', () => { initScanDropZone(); });
 window.addEventListener('resize', () => {
   if (isDesktop() && allData.length) initDesktop();
 });
