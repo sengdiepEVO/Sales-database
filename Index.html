@@ -188,6 +188,12 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 .search-input{flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:20px;font-family:"Aptos",sans-serif;font-size:12px;background:var(--surface2);color:var(--ink);outline:none}
 .filter-toggle-btn{display:flex;align-items:center;gap:5px;padding:8px 12px;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--ink);font-size:12px;font-family:"Aptos",sans-serif;cursor:pointer;white-space:nowrap;flex-shrink:0}
 .filter-toggle-btn.has-filters{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
+.dt-qf-btn{padding:5px 12px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-family:Aptos,sans-serif;cursor:pointer;background:var(--surface);color:var(--ink);white-space:nowrap}
+.dt-qf-btn.dt-qf-active{font-weight:600}
+.dt-qf-pen.dt-qf-active{background:#faeeda;color:#7a4900;border-color:#f5c842}
+.dt-qf-dep.dt-qf-active{background:#e8f0fd;color:#1a3a8b;border-color:#4a7fd4}
+.dt-qf-exc.dt-qf-active{background:#eaf3de;color:#2e6b0e;border-color:#7bc45a}
+.dt-qf-set.dt-qf-active{background:#fde8e8;color:#a01a1a;border-color:#e87c7c}
 .filter-count-badge{background:var(--accent);color:white;border-radius:50%;width:16px;height:16px;font-size:9px;display:flex;align-items:center;justify-content:center}
 .filter-drawer{background:var(--surface2);border-bottom:1px solid var(--border);padding:10px 14px;display:none;flex-direction:column;gap:8px;flex-shrink:0}
 .filter-drawer.open{display:flex}
@@ -318,7 +324,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
   <div class="login-card">
     <div class="login-icon">&#128202;</div>
     <div class="login-title">Sales DB</div>
-    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">v2.31</div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">v2.37</div>
     <div class="login-sub">Sign in with your Microsoft account to access your OneDrive sales data.</div>
     <button class="ms-btn" onclick="signIn()">
       <div class="ms-logo"><div></div><div></div><div></div><div></div></div>
@@ -342,7 +348,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 <!-- APP -->
 <div id="app-wrapper" style="display:none">
   <div class="app-header">
-    <div class="header-logo">Sales<strong>DB</strong><span class="header-version">v2.31</span></div>
+    <div class="header-logo">Sales<strong>DB</strong><span class="header-version">v2.37</span></div>
     <div class="header-right">
       <div class="user-pill">
         <div class="user-avatar" id="user-avatar">?</div>
@@ -374,6 +380,15 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 
       <!-- DESKTOP DATA SCREEN -->
       <div class="desktop-screen active" id="dscreen-data">
+        <!-- Desktop filter bar -->
+        <div style="background:var(--surface);border-bottom:1px solid var(--border);padding:8px 16px;display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap">
+          <input type="text" id="dt-search" placeholder="Search..." oninput="applyFilters()" style="flex:1;min-width:160px;padding:6px 12px;border:1px solid var(--border);border-radius:20px;font-family:Aptos,sans-serif;font-size:12px;background:var(--surface2);color:var(--ink);outline:none">
+          <button id="dt-qf-pending"  onclick="deskToggleQF(this,'2. Pending SA')" class="dt-qf-btn dt-qf-pen">Pending SA</button>
+          <button id="dt-qf-deposit"  onclick="deskToggleQF(this,'3. Deposit')"    class="dt-qf-btn dt-qf-dep">Deposit</button>
+          <button id="dt-qf-exchange" onclick="deskToggleQF(this,'4. Exchanged')"  class="dt-qf-btn dt-qf-exc">Exchanged</button>
+          <button id="dt-qf-settled"  onclick="deskToggleQF(this,'5. Settled')"    class="dt-qf-btn dt-qf-set">Settled</button>
+          <button onclick="clearFilters()" style="padding:5px 12px;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--muted);font-size:12px;cursor:pointer;font-family:Aptos,sans-serif">&#10005; Clear</button>
+        </div>
         <div class="dt-toolbar">
           <span style="font-size:11px;color:var(--muted)" id="dt-active-filters"></span>
           <span class="dt-rec-count" id="dt-rec-count">— records</span>
@@ -416,11 +431,18 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
       <!-- DESKTOP REPORTS SCREEN -->
       <div class="desktop-screen" id="dscreen-reports">
         <div class="desktop-reports">
+          <div style="font-size:10px;color:var(--muted);padding:4px 0 4px;font-weight:600;letter-spacing:0.05em">JAN–JUL 2026 (excl. Stage C)</div>
           <div class="desktop-stats">
             <div class="desktop-stat"><div class="desktop-stat-label">Pending SA</div><div class="desktop-stat-val-row"><div class="desktop-stat-val" id="d-stat-pending">&#8212;</div><div class="desktop-stat-rev" id="d-stat-pending-rev"></div></div></div>
             <div class="desktop-stat"><div class="desktop-stat-label">Deposit</div><div class="desktop-stat-val-row"><div class="desktop-stat-val" id="d-stat-deposit">&#8212;</div><div class="desktop-stat-rev" id="d-stat-deposit-rev"></div></div></div>
             <div class="desktop-stat"><div class="desktop-stat-label">Exchanged</div><div class="desktop-stat-val-row"><div class="desktop-stat-val" id="d-stat-exchanged">&#8212;</div><div class="desktop-stat-rev" id="d-stat-exchanged-rev"></div></div></div>
             <div class="desktop-stat"><div class="desktop-stat-label">Settled</div><div class="desktop-stat-val-row"><div class="desktop-stat-val" id="d-stat-settled">&#8212;</div><div class="desktop-stat-rev" id="d-stat-settled-rev"></div></div></div>
+          </div>
+          <div style="font-size:10px;color:var(--muted);padding:4px 0 4px;font-weight:600;letter-spacing:0.05em" id="d-stat-month-label">THIS MONTH (excl. Stage C)</div>
+          <div class="desktop-stats">
+            <div class="desktop-stat"><div class="desktop-stat-label">Deposit</div><div class="desktop-stat-val-row"><div class="desktop-stat-val" id="d-stat-mth-dep">&#8212;</div><div class="desktop-stat-rev" id="d-stat-mth-dep-rev"></div></div></div>
+            <div class="desktop-stat"><div class="desktop-stat-label">Exchanged</div><div class="desktop-stat-val-row"><div class="desktop-stat-val" id="d-stat-mth-exc">&#8212;</div><div class="desktop-stat-rev" id="d-stat-mth-exc-rev"></div></div></div>
+            <div class="desktop-stat"><div class="desktop-stat-label">Settled</div><div class="desktop-stat-val-row"><div class="desktop-stat-val" id="d-stat-mth-set">&#8212;</div><div class="desktop-stat-rev" id="d-stat-mth-set-rev"></div></div></div>
           </div>
           <div class="desktop-report-grid">
             <div class="desktop-report-btn" onclick="openSalesTarget()">
@@ -477,26 +499,15 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
     <!-- PHONE DATA -->
     <div id="screen-data" class="screen active">
       <div class="filter-header">
-        <input type="text" class="search-input" id="search-input" placeholder="Search (e.g. Realtisan, 2B)..." oninput="applyFilters()">
-        <button class="filter-toggle-btn" id="filter-toggle-btn" onclick="toggleFilterDrawer()">
-          Filters <span id="filter-count-badge" class="filter-count-badge" style="display:none">0</span>
-        </button>
+        <input type="text" class="search-input" id="search-input" placeholder="Search lots..." oninput="applyFilters()">
       </div>
-      <div class="filter-drawer" id="filter-drawer">
-        <div class="filter-drawer-row">
-          <select class="filter-select" id="f-stage" onchange="applyFilters()"><option value="">All stages</option></select>
-          <select class="filter-select" id="f-condition" onchange="applyFilters()"><option value="">All conditions</option></select>
-          <select class="filter-select" id="f-channel" onchange="applyFilters()"><option value="">All channels</option></select>
-          <select class="filter-select" id="f-partner" onchange="applyFilters()"><option value="">All partners</option></select>
-        </div>
-        <div class="filter-drawer-row">
-          <select class="filter-select" id="f-productline" onchange="applyFilters()"><option value="">All product lines</option></select>
-          <select class="filter-select" id="f-market" onchange="applyFilters()"><option value="">All markets</option></select>
-          <select class="filter-select" id="f-year" onchange="applyFilters()"><option value="">All years</option></select>
-          <button class="filter-clear-btn" onclick="clearFilters()">&#10005; Clear</button>
-        </div>
+      <div style="padding:6px 14px;display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-shrink:0;border-bottom:1px solid var(--border);background:var(--surface)">
+        <button class="qf-btn qf-pen" id="qf-pending"  onclick="toggleQuickFilter(this,'2. Pending SA')">Pending SA</button>
+        <button class="qf-btn qf-dep" id="qf-deposit"  onclick="toggleQuickFilter(this,'3. Deposit')">Deposit</button>
+        <button class="qf-btn qf-exc" id="qf-exchange" onclick="toggleQuickFilter(this,'4. Exchanged')">Exchanged</button>
+        <button class="qf-btn qf-set" id="qf-settled"  onclick="toggleQuickFilter(this,'5. Settled')">Settled</button>
+        <button onclick="clearFilters()" style="padding:5px 10px;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--muted);font-size:11px;cursor:pointer;font-family:Aptos,sans-serif;white-space:nowrap;flex-shrink:0">&#10005;</button>
       </div>
-      <div class="active-pills" id="active-pills"></div>
       <div class="sync-bar" id="sync-bar">
         <div class="sync-dot" id="sync-dot"></div>
         <span class="sync-text" id="sync-text">Synced with OneDrive</span>
@@ -504,12 +515,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
       </div>
       <div class="rec-bar">
         <span id="rec-count">&#8212; records</span>
-        <div style="display:flex;gap:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-shrink:0;max-width:70%">
-          <button class="qf-btn qf-pen" id="qf-pending" onclick="toggleQuickFilter(this,'2. Pending SA')">Pending SA</button>
-          <button class="qf-btn qf-dep" id="qf-deposit" onclick="toggleQuickFilter(this,'3. Deposit')">Deposit</button>
-          <button class="qf-btn qf-exc" id="qf-exchange" onclick="toggleQuickFilter(this,'4. Exchanged')">Exchanged</button>
-          <button class="qf-btn qf-set" id="qf-settled" onclick="toggleQuickFilter(this,'5. Settled')">Settled</button>
-        </div>
+
       </div>
       <div class="lot-list" id="lot-list">
         <div class="empty-state">Your sales data will appear here after signing in.</div>
@@ -581,11 +587,18 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
     <!-- PHONE REPORTS -->
     <div id="screen-reports" class="screen" style="background:var(--bg);overflow-y:auto">
       <div class="sub-header"><span class="sub-title">Reports</span></div>
+      <div style="font-size:10px;color:var(--muted);padding:6px 14px 2px;font-weight:600;letter-spacing:0.05em">JAN–JUL 2026 (excl. Stage C)</div>
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-label">Pending SA</div><div class="stat-val-row"><div class="stat-val" id="stat-pending">&#8212;</div><div class="stat-rev" id="stat-pending-rev"></div></div></div>
         <div class="stat-card"><div class="stat-label">Deposit</div><div class="stat-val-row"><div class="stat-val" id="stat-deposit">&#8212;</div><div class="stat-rev" id="stat-deposit-rev"></div></div></div>
         <div class="stat-card"><div class="stat-label">Exchanged</div><div class="stat-val-row"><div class="stat-val" id="stat-exchanged">&#8212;</div><div class="stat-rev" id="stat-exchanged-rev"></div></div></div>
         <div class="stat-card"><div class="stat-label">Settled</div><div class="stat-val-row"><div class="stat-val" id="stat-settled">&#8212;</div><div class="stat-rev" id="stat-settled-rev"></div></div></div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);padding:6px 14px 2px;font-weight:600;letter-spacing:0.05em" id="stat-month-label">THIS MONTH (excl. Stage C)</div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Deposit</div><div class="stat-val-row"><div class="stat-val" id="stat-mth-dep">&#8212;</div><div class="stat-rev" id="stat-mth-dep-rev"></div></div></div>
+        <div class="stat-card"><div class="stat-label">Exchanged</div><div class="stat-val-row"><div class="stat-val" id="stat-mth-exc">&#8212;</div><div class="stat-rev" id="stat-mth-exc-rev"></div></div></div>
+        <div class="stat-card"><div class="stat-label">Settled</div><div class="stat-val-row"><div class="stat-val" id="stat-mth-set">&#8212;</div><div class="stat-rev" id="stat-mth-set-rev"></div></div></div>
       </div>
       <div class="section-title">Generate AI reports</div>
       <div class="report-btn-card" onclick="openSalesTarget()"><div class="report-icon" style="background:#fde8e8">&#127919;</div><div class="report-info"><div class="report-title">Sales Target</div><div class="report-sub">Deposit, Exchange & Settlement vs targets</div></div></div>
@@ -715,7 +728,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
     <div id="scan-step-upload" style="padding:24px;display:flex;flex-direction:column;align-items:center;gap:16px">
       <label for="scan-pdf-input" style="width:100%;border:2px dashed var(--border);border-radius:8px;padding:32px 16px;text-align:center;cursor:pointer;transition:border-color 0.2s" id="scan-drop-zone">
         <div style="font-size:32px;margin-bottom:8px">&#128196;</div>
-        <div style="font-size:14px;font-weight:500;color:var(--ink)">Tap to select PDF</div>
+        <div style="font-size:14px;font-weight:500;color:var(--ink)">Tap or drag &amp; drop PDF</div>
         <div style="font-size:11px;color:var(--muted);margin-top:4px" id="scan-file-name">No file selected</div>
         <input type="file" id="scan-pdf-input" accept=".pdf" style="display:none" onchange="onScanFileSelected(event)">
       </label>
@@ -979,10 +992,10 @@ async function loadFileFromOneDrive() {
     const r = await graphGet('https://graph.microsoft.com/v1.0/me/drive/root:/Sales%20Platform/Sales%20DB/SalesDB-Main.xlsx');
     if (r?.id) { itemId = r.id; driveId = r.parentReference?.driveId; }
   } catch(e) {}
-  // 2. Try own OneDrive search
+  // 2. Try own OneDrive search by exact filename
   if (!itemId) {
     try {
-      const r = await graphGet(`https://graph.microsoft.com/v1.0/me/drive/search(q='Sales DB - Claude.xlsx')`);
+      const r = await graphGet(`https://graph.microsoft.com/v1.0/me/drive/search(q='SalesDB-Main.xlsx')`);
       const f = (r.value||[]).find(f => f.name === FILE_NAME);
       if (f) { itemId = f.id; driveId = f.parentReference?.driveId; }
     } catch(e) {}
@@ -994,24 +1007,22 @@ async function loadFileFromOneDrive() {
       const r = await graphGet(`https://graph.microsoft.com/v1.0/me/drive/sharedWithMe`);
       const f = (r.value||[]).find(f => f.name === FILE_NAME);
       if (f) {
-        // For shared items the real ID and driveId live inside remoteItem
         itemId = f.remoteItem?.id || f.id;
         driveId = f.remoteItem?.parentReference?.driveId || f.parentReference?.driveId;
       }
     } catch(e) {}
   }
-  // 4. Try searching shared with broader name match
+  // 4. Hardcoded fallback — direct access via known driveId/fileId (for shared users)
   if (!itemId) {
+    showLoading('Trying direct file access...');
     try {
-      const r = await graphGet(`https://graph.microsoft.com/v1.0/me/drive/sharedWithMe`);
-      const f = (r.value||[]).find(f => (f.name||'').toLowerCase().includes('sales db'));
-      if (f) {
-        itemId = f.remoteItem?.id || f.id;
-        driveId = f.remoteItem?.parentReference?.driveId || f.parentReference?.driveId;
-      }
+      const OWNER_DRIVE_ID = 'b!UWcAmYWyCEWBmcznjprYM_mkLkrX_LxPjnwaTG0HT6XUqqEU0Yo2RJPyf5hCDY7v';
+      const OWNER_FILE_ID  = '01OZWGZ4X4UHXUAK52OBAZUVICXBJ6JVCA';
+      const r = await graphGet(`https://graph.microsoft.com/v1.0/drives/${OWNER_DRIVE_ID}/items/${OWNER_FILE_ID}`);
+      if (r?.id) { itemId = r.id; driveId = OWNER_DRIVE_ID; }
     } catch(e) {}
   }
-  if (!itemId) throw new Error(`Could not find "${FILE_NAME}".\n\nChecked:\n• Your OneDrive (path & search)\n• Files shared with you\n\nAsk the file owner to share it with your Microsoft account.`);
+  if (!itemId) throw new Error(`Could not find "${FILE_NAME}".\n\nChecked:\n• Your OneDrive (path & search)\n• Files shared with you\n• Direct file access\n\nAsk the file owner to share it with your Microsoft account.`);
   fileId = itemId;
   fileDriveId = driveId;
   showLoading('Downloading...');
@@ -1022,16 +1033,22 @@ async function loadFileFromOneDrive() {
   if (!res.ok) throw new Error(`Download failed: ${res.status}`);
   const buf = await res.arrayBuffer();
   const wb = XLSX.read(buf, { type: 'array' });
-  const ws = wb.Sheets[wb.SheetNames[0]];
-  const rawJson = XLSX.utils.sheet_to_json(ws, { defval: '' });
-  if (!rawJson.length) throw new Error('File is empty');
-  // Trim trailing/leading spaces from all header keys
-  const json = rawJson.map(row => {
-    const clean = {};
-    Object.keys(row).forEach(k => { clean[k.trim()] = row[k]; });
-    return clean;
+  const ws = wb.Sheets['Database'] || wb.Sheets[wb.SheetNames[0]];
+  // Use header:1 to get raw arrays, then dedup duplicate header names with .1/.2 suffixes
+  const rawRows = XLSX.utils.sheet_to_json(ws, { defval: '', header: 1 });
+  if (!rawRows.length) throw new Error('File is empty');
+  const rawHdrs = rawRows[0].map(h => String(h || '').trim());
+  const seen = {};
+  headers = rawHdrs.map(h => {
+    if (!h) return '__EMPTY';
+    if (seen[h] === undefined) { seen[h] = 0; return h; }
+    seen[h]++; return h + '.' + seen[h];
   });
-  headers = Object.keys(json[0]);
+  const json = rawRows.slice(1).map((row, i) => {
+    const obj = { __excelRow: i + 2 }; // Excel row = rawRows index+1 (1-based) +1 (header)
+    headers.forEach((h, j) => { obj[h] = row[j] ?? ''; });
+    return obj;
+  }).filter(r => headers.some(h => h !== '__excelRow' && r[h] !== ''));
   allData = json;
   filteredData = [...allData];
   populateDropdowns();
@@ -1064,23 +1081,17 @@ async function syncToOneDrive() {
     const token = await getToken();
 
     // Use Excel Graph API to update only changed cells — preserves all formatting
-    // Get actual sheet name
     const driveBase = fileDriveId
       ? `https://graph.microsoft.com/v1.0/drives/${fileDriveId}/items/${fileId}`
       : `https://graph.microsoft.com/v1.0/me/drive/items/${fileId}`;
-    const sheetsRes = await fetch(`${driveBase}/workbook/worksheets`, {
-      headers: { Authorization: 'Bearer ' + token }
-    });
-    const sheetsData = await sheetsRes.json();
-    console.log('Sheets:', JSON.stringify(sheetsData));
-    const sheetName = sheetsData.value?.[0]?.name || 'Sheet1';
-    const encodedSheet = encodeURIComponent(sheetName);
+    const encodedSheet = encodeURIComponent('Database');
     const baseUrl = `${driveBase}/workbook/worksheets/${encodedSheet}/`;
 
     // Build list of cell updates
     const updates = [];
     for (const [rowIdx, cols] of Object.entries(pendingEdits)) {
-      const excelRow = parseInt(rowIdx) + 2; // +1 for header, +1 for 1-based
+      const dataRow = allData[parseInt(rowIdx)];
+      const excelRow = dataRow?.__excelRow ?? (parseInt(rowIdx) + 2);
       for (const [colName, value] of Object.entries(cols)) {
         const colIdx = headers.indexOf(colName);
         if (colIdx < 0) continue;
@@ -1091,7 +1102,6 @@ async function syncToOneDrive() {
 
     if (updates.length === 0) {
       setSyncStatus('synced');
-      toastLong('✓ Saved to OneDrive', 'success');
       return;
     }
 
@@ -1110,7 +1120,6 @@ async function syncToOneDrive() {
 
     pendingEdits = {};
     setSyncStatus('synced');
-    toastLong('✓ Saved to OneDrive', 'success');
   } catch(e) {
     setSyncStatus('error');
     toastLong('✗ Not saved: ' + e.message, 'error');
@@ -1141,6 +1150,19 @@ function populateDropdowns() {
 }
 
 let activeQuickFilter = '';
+let activeDeskQF = '';
+
+function deskToggleQF(btn, condition) {
+  if (activeDeskQF === condition) {
+    activeDeskQF = '';
+    document.querySelectorAll('.dt-qf-btn').forEach(b => b.classList.remove('dt-qf-active'));
+  } else {
+    activeDeskQF = condition;
+    document.querySelectorAll('.dt-qf-btn').forEach(b => b.classList.remove('dt-qf-active'));
+    btn.classList.add('dt-qf-active');
+  }
+  applyFilters();
+}
 
 function toggleQuickFilter(btn, condition) {
   if (activeQuickFilter === condition) {
@@ -1155,7 +1177,11 @@ function toggleQuickFilter(btn, condition) {
 }
 
 function applyFilters() {
-  const terms = document.getElementById('search-input').value.split(',').map(t=>t.trim().toLowerCase()).filter(Boolean);
+  const mobSearch = document.getElementById('search-input')?.value || '';
+  const dskSearch = document.getElementById('dt-search')?.value || '';
+  const searchVal = isDesktop() ? dskSearch : mobSearch;
+  // Support both comma and space as separators; each term is OR'd against all columns
+  const terms = searchVal.split(/[,\s]+/).map(t=>t.trim().toLowerCase()).filter(Boolean);
   const dropVals = {}; let activeCount = 0;
   Object.entries(FILTER_MAP).forEach(([id, col]) => {
     const mob = document.getElementById(id);
@@ -1169,17 +1195,17 @@ function applyFilters() {
     if (val) activeCount++;
   });
   filteredData = allData.filter(row => {
-    if (activeQuickFilter) {
-      const cond = String(row['Sales Condition']||row['Sales Condition']||'').trim();
-      if (cond !== activeQuickFilter) return false;
-    }
-    if (terms.length) { const text = Object.values(row).join(' ').toLowerCase(); if (!terms.every(t => text.includes(t))) return false; }
+    const cond = String(row['Sales Condition']||'').trim();
+    if (activeQuickFilter && cond !== activeQuickFilter) return false;
+    if (activeDeskQF && cond !== activeDeskQF) return false;
+    if (terms.length) { const text = Object.entries(row).filter(([k])=>k!=='__excelRow').map(([,v])=>v).join(' ').toLowerCase(); if (!terms.some(t => text.includes(t))) return false; }
     return Object.entries(dropVals).every(([col, val]) => !val || String(row[col]||'').trim() === val);
   });
   const total = activeCount + (terms.length ? 1 : 0);
   const badge = document.getElementById('filter-count-badge');
-  badge.style.display = total ? 'flex' : 'none'; badge.textContent = total;
-  document.getElementById('filter-toggle-btn').classList.toggle('has-filters', total > 0);
+  if (badge) { badge.style.display = total ? 'flex' : 'none'; badge.textContent = total; }
+  const ftBtn = document.getElementById('filter-toggle-btn');
+  if (ftBtn) ftBtn.classList.toggle('has-filters', total > 0);
   renderActivePills(terms, dropVals);
   renderLotList();
   if (isDesktop()) renderDesktopTable();
@@ -1191,7 +1217,7 @@ function applyFilters() {
 }
 
 function renderActivePills(terms, dropVals) {
-  const c = document.getElementById('active-pills'); c.innerHTML = '';
+  const c = document.getElementById('active-pills'); if (!c) return; c.innerHTML = '';
   terms.forEach(t => { const p = document.createElement('div'); p.className = 'pill'; p.innerHTML = `"${t}" <span class="pill-x" onclick="removeSearchTerm('${t}')">×</span>`; c.appendChild(p); });
   Object.entries(dropVals).forEach(([col, val]) => {
     if (!val) return;
@@ -1207,7 +1233,7 @@ function removeSearchTerm(term) {
   applyFilters();
 }
 function clearDropdown(id) { const el = document.getElementById(id); if (el) { el.value = ''; el.classList.remove('active'); } applyFilters(); }
-function clearFilters() { document.getElementById('search-input').value = ''; const dts = document.getElementById('dt-search'); if(dts) dts.value=''; Object.keys(FILTER_MAP).forEach(id => { ['','dt-'].forEach(p => { const el = document.getElementById(p+id); if (el) { el.value = ''; el.classList.remove('active'); } }); }); applyFilters(); }
+function clearFilters() { document.getElementById('search-input').value = ''; const dts = document.getElementById('dt-search'); if(dts) dts.value=''; activeDeskQF=''; activeQuickFilter=''; document.querySelectorAll('.dt-qf-btn,.qf-btn').forEach(b=>b.classList.remove('dt-qf-active','active')); Object.keys(FILTER_MAP).forEach(id => { ['','dt-'].forEach(p => { const el = document.getElementById(p+id); if (el) { el.value = ''; el.classList.remove('active'); } }); }); applyFilters(); }
 function toggleFilterDrawer() { filterDrawerOpen = !filterDrawerOpen; document.getElementById('filter-drawer').classList.toggle('open', filterDrawerOpen); }
 
 function fmtDate(v) {
@@ -1284,7 +1310,8 @@ function updateStats() {
   const pendingRows   = allData.filter(r => sc(r).includes('Pending'));
   const depositRows   = allData.filter(r => sc(r).includes('Deposit'));
   const exchangedRows = allData.filter(r => sc(r).includes('Exchanged'));
-  const settledRows   = allData.filter(r => sc(r).includes('Settled'));
+  const yr26s = new Date(2026,0,1), yr26e = new Date(2026,7,1);
+  const settledRows   = allData.filter(r => sc(r).includes('Settled') && r['Sales Advice Received Date'] && (() => { const dt = stParseDate(r['Settled Date']); return dt && dt >= yr26s && dt < yr26e; })());
 
   const n = v => parseFloat(String(v||'0').replace(/[^0-9.-]/g,''))||0;
   const pendingRev   = pendingRows.reduce((s,r)   => s + n(r['$LIST']), 0);
@@ -1328,7 +1355,23 @@ function openModal(idx) {
 
 function closeModal(e) {}
 function closeModalDirect() { showScreen('data'); }
-function editFromDetail() { closeModalDirect(); editRowIdx = modalRowIdx; populateEditForm(allData[editRowIdx]); }
+function editFromDetail() {
+  const row = allData[modalRowIdx];
+  const lotNum = String(row['Lot #'] || row['Lot#'] || '').trim();
+  closeModalDirect();
+  editRowIdx = modalRowIdx;
+  populateEditForm(allData[editRowIdx]);
+  // Check lock in background after opening
+  checkLock(lotNum).then(lock => {
+    if (lock) {
+      showLockError(lotNum, lock);
+      editRowIdx = -1;
+      showScreen('data');
+      return;
+    }
+    acquireLock(lotNum);
+  });
+}
 
 function populateEditForm(row) {
   document.getElementById('edit-fields').innerHTML = headers.map(h => {
@@ -1430,15 +1473,160 @@ async function addRecord() {
   }
 }
 
+
+// ─── LOT LOCKING ─────────────────────────────────────────────────────────────
+const LOCK_SHEET   = 'Locks';
+const LOCK_EXPIRE  = 30 * 60 * 1000; // 30 minutes in ms
+let currentLockLot = null;
+
+function getLockDriveBase() {
+  return fileDriveId
+    ? `https://graph.microsoft.com/v1.0/drives/${fileDriveId}/items/${fileId}`
+    : `https://graph.microsoft.com/v1.0/me/drive/items/${fileId}`;
+}
+
+async function ensureLockSheet() {
+  const token = await getToken();
+  const driveBase = getLockDriveBase();
+  // Check if sheet exists
+  const res = await fetch(`${driveBase}/workbook/worksheets`, {
+    headers: { Authorization: 'Bearer ' + token }
+  });
+  const data = await res.json();
+  const exists = (data.value||[]).some(s => s.name === LOCK_SHEET);
+  if (!exists) {
+    // Create it
+    await fetch(`${driveBase}/workbook/worksheets`, {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: LOCK_SHEET })
+    });
+    // Add headers
+    await fetch(`${driveBase}/workbook/worksheets/${encodeURIComponent(LOCK_SHEET)}/range(address='A1:C1')`, {
+      method: 'PATCH',
+      headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ values: [['Lot', 'User', 'Timestamp']] })
+    });
+  }
+}
+
+async function readLocks() {
+  try {
+    const token = await getToken();
+    const driveBase = getLockDriveBase();
+    const res = await fetch(
+      `${driveBase}/workbook/worksheets/${encodeURIComponent(LOCK_SHEET)}/usedRange`,
+      { headers: { Authorization: 'Bearer ' + token } }
+    );
+    if (!res.ok) return [];
+    const data = await res.json();
+    const rows = (data.values || []).slice(1); // skip header
+    const now = Date.now();
+    return rows
+      .filter(r => r[0] && r[1] && r[2])
+      .map(r => ({ lot: String(r[0]).trim(), user: String(r[1]).trim(), ts: Number(r[2]) }))
+      .filter(r => (now - r.ts) < LOCK_EXPIRE);
+  } catch(e) { return []; }
+}
+
+async function acquireLock(lotNum) {
+  try {
+    await ensureLockSheet();
+    const token = await getToken();
+    const driveBase = getLockDriveBase();
+    const sheetEnc = encodeURIComponent(LOCK_SHEET);
+
+    // Get current user name
+    const meRes = await fetch('https://graph.microsoft.com/v1.0/me?$select=displayName', {
+      headers: { Authorization: 'Bearer ' + token }
+    });
+    const me = await meRes.json();
+    const userName = me.displayName || 'Unknown';
+
+    // Read existing locks, find first empty row
+    const usedRes = await fetch(`${driveBase}/workbook/worksheets/${sheetEnc}/usedRange`,
+      { headers: { Authorization: 'Bearer ' + token } });
+    const usedData = await usedRes.json();
+    const rowCount = (usedData.values || []).length;
+    const nextRow = rowCount + 1;
+
+    // Write lock
+    await fetch(`${driveBase}/workbook/worksheets/${sheetEnc}/range(address='A${nextRow}:C${nextRow}')`, {
+      method: 'PATCH',
+      headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ values: [[lotNum, userName, Date.now()]] })
+    });
+    currentLockLot = lotNum;
+  } catch(e) {
+    console.warn('Lock acquire failed:', e.message);
+  }
+}
+
+async function releaseLock(lotNum) {
+  if (!lotNum) return;
+  try {
+    const token = await getToken();
+    const driveBase = getLockDriveBase();
+    const sheetEnc = encodeURIComponent(LOCK_SHEET);
+
+    const usedRes = await fetch(`${driveBase}/workbook/worksheets/${sheetEnc}/usedRange`,
+      { headers: { Authorization: 'Bearer ' + token } });
+    if (!usedRes.ok) return;
+    const usedData = await usedRes.json();
+    const rows = usedData.values || [];
+
+    // Find and clear the row for this lot
+    for (let i = 1; i < rows.length; i++) {
+      if (String(rows[i][0]).trim() === String(lotNum).trim()) {
+        await fetch(`${driveBase}/workbook/worksheets/${sheetEnc}/range(address='A${i+1}:C${i+1}')`, {
+          method: 'PATCH',
+          headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ values: [['', '', '']] })
+        });
+        break;
+      }
+    }
+    currentLockLot = null;
+  } catch(e) {
+    console.warn('Lock release failed:', e.message);
+  }
+}
+
+async function checkLock(lotNum) {
+  // Returns null if free, or { user, ts } if locked by someone else
+  try {
+    const locks = await readLocks();
+    const me = await fetch('https://graph.microsoft.com/v1.0/me?$select=displayName', {
+      headers: { Authorization: 'Bearer ' + await getToken() }
+    }).then(r => r.json());
+    const myName = me.displayName || '';
+    const lock = locks.find(l => String(l.lot).trim() === String(lotNum).trim());
+    if (!lock) return null;
+    if (lock.user === myName) return null; // own lock
+    return lock;
+  } catch(e) { return null; }
+}
+
+function showLockError(lotNum, lock) {
+  const mins = Math.floor((Date.now() - lock.ts) / 60000);
+  const timeStr = mins < 1 ? 'just now' : `${mins} min${mins > 1 ? 's' : ''} ago`;
+  toast(`⛔ Lot ${lotNum} is being edited by ${lock.user} (opened ${timeStr})`, 'error');
+}
+// ─── END LOT LOCKING ──────────────────────────────────────────────────────────
+
 function cancelEditCheck() {
   if (formDirty) {
     if (confirm('You have unsaved changes. Save before leaving?')) {
       saveEdit();
     } else {
       formDirty = false;
+      const lot = allData[editRowIdx]?.['Lot #'] || allData[editRowIdx]?.['Lot#'] || null;
+      if (lot) releaseLock(lot);
       showScreen('data');
     }
   } else {
+    const lot = allData[editRowIdx]?.['Lot #'] || allData[editRowIdx]?.['Lot#'] || null;
+    if (lot) releaseLock(lot);
     showScreen('data');
   }
 }
@@ -1446,6 +1634,8 @@ function cancelEditCheck() {
 async function saveEdit() {
   formDirty = false;
   if (editRowIdx < 0) return;
+  const _lockLot = allData[editRowIdx]?.['Lot #'] || allData[editRowIdx]?.['Lot#'] || null;
+  if (_lockLot) releaseLock(_lockLot);
   headers.forEach(h => {
     const input = document.getElementById('edit-' + sid(h));
     const disp = document.getElementById('disp-' + sid(h));
@@ -1467,6 +1657,7 @@ async function saveEdit() {
     await syncToOneDrive();
     showScreen('data');
     if (isDesktop()) renderDesktopTable();
+    toast('✓ Saved to OneDrive', 'success');
   } catch(e) {
     // Stay on edit screen so user can retry
   }
@@ -1555,8 +1746,8 @@ function applyAllFilters() {
 
   filteredData = allData.filter(row => {
     if (terms.length) {
-      const text = Object.values(row).join(' ').toLowerCase();
-      if (!terms.every(t => text.includes(t))) return false;
+      const text = Object.entries(row).filter(([k])=>k!=='__excelRow').map(([,v])=>v).join(' ').toLowerCase();
+      if (!terms.some(t => text.includes(t))) return false;
     }
     if (!Object.entries(dropVals).every(([col, val]) => !val || String(row[col]||'').trim() === val)) return false;
     // Apply column filters
@@ -1773,7 +1964,7 @@ const SCAN_FIELDS = [
   { key: "Purchaser's Suburb",             label: 'Purchaser Suburb',        type: 'text' },
   { key: "Purchaser's Solicitor (P'Sol)",  label: 'Purchaser Solicitor',     type: 'text' },
   { key: "Purchaser's Solicitor Phone",    label: 'Solicitor Phone',         type: 'text' },
-  { key: "Vendors Agent",                  label: 'Agency Full Name',        type: 'text' },
+  { key: "Vendors Agency",                 label: 'Agency Full Name',        type: 'text' },
   { key: "Vendors Agency Agent",           label: "Agent's Name",            type: 'text' },
   { key: "Agent's Email",                  label: 'Agency Admin Email',      type: 'text' },
   { key: "Agent's Mobile",                 label: 'Agency Admin Mobile',     type: 'text' },
@@ -1785,6 +1976,7 @@ let scanExtractedData = {};
 let scanMatchedRowIdx = -1;
 
 function openScanPdf() {
+  initScanDropZone();
   document.getElementById('scan-pdf-overlay').style.display = 'flex';
   resetScanPdf();
   // Pre-set the matched row from whichever edit screen is open
@@ -1841,6 +2033,35 @@ function onScanFileSelected(event) {
   document.getElementById('scan-file-name').textContent = file.name;
   document.getElementById('scan-extract-btn').style.opacity = '1';
   document.getElementById('scan-extract-btn').style.pointerEvents = 'auto';
+}
+
+function setScanFile(file) {
+  if (!file || file.type !== 'application/pdf') { toast('Please drop a PDF file', 'error'); return; }
+  scanPdfFile = file;
+  document.getElementById('scan-file-name').textContent = file.name;
+  document.getElementById('scan-extract-btn').style.opacity = '1';
+  document.getElementById('scan-extract-btn').style.pointerEvents = 'auto';
+}
+
+function initScanDropZone() {
+  const zone = document.getElementById('scan-drop-zone');
+  if (!zone) return;
+  zone.addEventListener('dragover', e => {
+    e.preventDefault();
+    zone.style.borderColor = 'var(--accent)';
+    zone.style.background = 'var(--accent-light)';
+  });
+  zone.addEventListener('dragleave', e => {
+    zone.style.borderColor = '';
+    zone.style.background = '';
+  });
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.style.borderColor = '';
+    zone.style.background = '';
+    const file = e.dataTransfer.files[0];
+    setScanFile(file);
+  });
 }
 
 async function runScanPdf() {
@@ -1940,12 +2161,15 @@ Return ONLY the JSON object, no other text.`;
     scanMatchedRowIdx = rowIdx;
 
     // ── RULE 1: Lot mismatch — hard stop ──────────────────────────
-    // If opened from edit screen, PDF lot must match the edit lot exactly
+    // PDF lot must always match the edit lot — no override
     if (editRowIdx >= 0) {
       const editLot = String(allData[editRowIdx]['Lot #'] || allData[editRowIdx]['Lot#'] || '').trim();
       const pdfLot  = String(extracted.lot_number || '').trim();
-      if (pdfLot && editLot && pdfLot !== editLot) {
-        throw new Error(`Lot mismatch — this PDF is for Lot ${pdfLot} but you are editing Lot ${editLot}. Please load the correct Sales Advice PDF.`);
+      if (!pdfLot) {
+        throw new Error(`Could not read a lot number from this PDF. Please check the PDF and try again.`);
+      }
+      if (pdfLot !== editLot) {
+        throw new Error(`⛔ Lot mismatch — this PDF is for Lot ${pdfLot} but you are editing Lot ${editLot}. You cannot apply this PDF to this lot.`);
       }
     }
 
@@ -1969,7 +2193,14 @@ Return ONLY the JSON object, no other text.`;
     }
 
     // ── RULE: ID name must match purchaser name — warning ─────────
-    const normName = n => String(n || '').toLowerCase().trim().replace(/\s+/g, ' ');
+    // normName: lowercase, strip punctuation, collapse whitespace, sort words so
+    // "MAHARJAN Ujjwal" (ID surname-first) matches "Ujjwal Maharjan" (form given-first)
+    const normName = n => String(n || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, ' ')   // strip punctuation (hyphens, apostrophes etc)
+      .trim()
+      .replace(/\s+/g, ' ')
+      .split(' ').filter(Boolean).sort().join(' '); // sort words — handles surname-first IDs
     const idNameWarnings = [];
     if (extracted.id1_name && extracted.purchaser1_name) {
       if (normName(extracted.id1_name) !== normName(extracted.purchaser1_name)) {
@@ -2029,7 +2260,7 @@ Return ONLY the JSON object, no other text.`;
       "Purchaser's Suburb":            extracted.purchaser_suburb,
       "Purchaser's Solicitor (P'Sol)": extracted.solicitor_name,
       "Purchaser's Solicitor Phone":   extracted.solicitor_phone ? fmtPhone(extracted.solicitor_phone) : null,
-      "Vendors Agent":                 extracted.agency_name,
+      "Vendors Agency":                extracted.agency_name,
       "Vendors Agency Agent":          extracted.agent_name,
       "Agent's Email":                 extracted.agency_email,
       "Agent's Mobile":                extracted.agency_mobile ? fmtPhone(extracted.agency_mobile) : null,
@@ -2180,6 +2411,11 @@ async function refreshSalesTarget() {
 
 function stParseDate(v) {
   if (!v) return null;
+  // Handle Excel serial numbers (e.g. 46007)
+  if (typeof v === 'number' && v > 1000 && v < 100000) {
+    const d = new Date(Date.UTC(1899, 11, 30) + v * 86400000);
+    return isNaN(d) ? null : d;
+  }
   const d = new Date(v);
   return isNaN(d) ? null : d;
 }
@@ -2783,11 +3019,15 @@ function openCfsNote(excelRow, lotNo, btnEl) {
   const existing = rowData ? String(rowData.salesNotes || '').trim() : '';
   cfsNoteCtx = { excelRow, lotNo, existing };
 
+  const _today = new Date();
+  const _datePrefix = String(_today.getDate()).padStart(2,'0') + '-' +
+    ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][_today.getMonth()] + ' - ';
   document.getElementById('cfsnote-lot-label').textContent = 'Lot ' + lotNo;
   document.getElementById('cfsnote-existing').textContent  = existing || '—';
-  document.getElementById('cfsnote-input').value = '';
+  const _inp = document.getElementById('cfsnote-input');
+  _inp.value = _datePrefix;
   document.getElementById('cfsnote-overlay').style.display = 'flex';
-  setTimeout(() => document.getElementById('cfsnote-input').focus(), 100);
+  setTimeout(() => { _inp.focus(); _inp.setSelectionRange(_inp.value.length, _inp.value.length); }, 100);
 }
 
 function closeCfsNote() {
@@ -2799,13 +3039,7 @@ async function saveCfsNote() {
   if (!cfsNoteCtx) return;
   const noteText = document.getElementById('cfsnote-input').value.trim();
   if (!noteText) { toast('Please enter a note', 'error'); return; }
-
-  // Format: "6-Apr-2026 <note>"
-  const today = new Date();
-  const datePrefix = today.getDate() + '-' +
-    ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][today.getMonth()] +
-    '-' + today.getFullYear();
-  const newEntry = datePrefix + ' ' + noteText;
+  const newEntry = noteText;
 
   // Prepend to existing (newest first)
   const combined = cfsNoteCtx.existing
@@ -2856,8 +3090,7 @@ function downloadCfsTrack() {
   const wb = XLSX.utils.book_new();
   const today = new Date();
   const dateStr = today.getDate() + '-' +
-    ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][today.getMonth()] +
-    '-' + today.getFullYear();
+    ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][today.getMonth()];
 
   // ── Styles (using write with cellStyles option via sheetjs-style workaround)
   // We'll use XLSX.utils.aoa_to_sheet then apply styles via !cols and merge approach
@@ -3170,7 +3403,8 @@ function updateDeskStats() {
   const pendingRows   = allData.filter(r => sc(r).includes('Pending'));
   const depositRows   = allData.filter(r => sc(r).includes('Deposit'));
   const exchangedRows = allData.filter(r => sc(r).includes('Exchanged'));
-  const settledRows   = allData.filter(r => sc(r).includes('Settled'));
+  const yr26s = new Date(2026,0,1), yr26e = new Date(2026,7,1);
+  const settledRows   = allData.filter(r => sc(r).includes('Settled') && r['Sales Advice Received Date'] && (() => { const dt = stParseDate(r['Settled Date']); return dt && dt >= yr26s && dt < yr26e; })());
 
   const n = v => parseFloat(String(v||'0').replace(/[^0-9.-]/g,''))||0;
   const pendingRev   = pendingRows.reduce((s,r)   => s + n(r['$LIST']), 0);
@@ -3187,6 +3421,37 @@ function updateDeskStats() {
   document.getElementById('d-stat-deposit-rev').textContent   = fmtM(depositRev);
   document.getElementById('d-stat-exchanged-rev').textContent = fmtM(exchangedRev);
   document.getElementById('d-stat-settled-rev').textContent   = fmtM(settledRev);
+
+  // Current month bar — same logic as Sales Target, dynamic month
+  const now       = new Date();
+  const mthStart  = new Date(now.getFullYear(), now.getMonth(), 1);
+  const mthEnd    = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const mthName   = MONTHS_SHORT[now.getMonth()].toUpperCase() + '-' + String(now.getFullYear()).slice(2);
+  const inMth = d => { const dt = stParseDate(d); return dt && dt >= mthStart && dt < mthEnd; };
+  const no2C2 = r => !String(r['Stage']||'').includes('C');
+
+  const mthDep = allData.filter(r => no2C2(r) && inMth(r['Contract Issued Date']));
+  const mthExc = allData.filter(r => no2C2(r) && inMth(r['Exchanged Date']));
+  const mthSet = allData.filter(r => no2C2(r) && inMth(r['Settled Date']) && r['Sales Advice Received Date']);
+
+  const mthDepRev = mthDep.reduce((s,r) => s + (Number(r['CfS Issued Price'])||0), 0);
+  const mthExcRev = mthExc.reduce((s,r) => s + (Number(r['CfS Exchanged Price ($)'])||0), 0);
+  const mthSetRev = mthSet.reduce((s,r) => s + (Number(r['CfS Settled Price ($)'])||0), 0);
+
+  ['','d-'].forEach(p => {
+    const g = id => document.getElementById(p + id);
+    const lbl = g('stat-month-label');
+    if (lbl) lbl.textContent = mthName + ' (excl. Stage C)';
+    if (!g('stat-mth-dep')) return;
+    g('stat-mth-dep').textContent     = mthDep.length;
+    g('stat-mth-exc').textContent     = mthExc.length;
+    g('stat-mth-set').textContent     = mthSet.length;
+    g('stat-mth-dep-rev').textContent = fmtM(mthDepRev);
+    g('stat-mth-exc-rev').textContent = fmtM(mthExcRev);
+    g('stat-mth-set-rev').textContent = fmtM(mthSetRev);
+  });
+
 }
 
 // ── DESKTOP SPREADSHEET ──
@@ -3197,30 +3462,36 @@ let dtSelectedIdx = -1;
 
 
 function getHeaderColour(h) {
-  const lightblue = ['Project Name','Lot ID','Property Address','Stage','Lot #','CfS Type','Product Line','Product Type','Lot Area (m²)','Lot Frontage (Width) (m)'];
-  const yellow = ['Sales Condition','Pending S/A Date','Pending S/A Days','Pending S/A Agency','$VAL','$BASE','$LIST','Notes.1','March Campaign','OFFER Rebate','SETTLE Rebate','Type Of Purchaser','Special Condilions/Variations','2026 Report','Comments.1'];
-  const darkgrey = ['*LEADS Name'];
-  const peachL = ['Property Type'];
-  const purple = ['StockList','Notes'];
-  const hotpink = ['$CHECK$                   $BASE-$VAL','$CHECK$ $LIST-$BASE'];
-  const landtax = ['Land Tax Per lot Value','Land Tax $Uplift / $Shortfall'];
-  const peach = ['Sales Advice Received Date','Sales Advice Sent To Legal Date','Contract Issued Date','Days From CfS Issued','CfS Issued Price','Proposed Exchanged Date','Exchanged Date','CfS Exchanged Price ($)','Proposed Settled Date','Settled Date','Settled Month','Settled Year','CfS Settled Price ($)','Rebate','Deposit%','Cooling Off Date','FIRB Approval','March Campaign.1','Comments'];
-  const pink = ["(1) Purchaser's Name","(1) Purchaser's Email","(1) Purchaser's Mobile","(2) Purchaser's Name","(2) Purchaser's Email","(2) Purchaser's Mobile","Purchaser's Suburb","Purchaser's Postcode","Purchaser's Solicitor (P'Sol)","Purchaser's Solicitor Phone"];
-  if (lightblue.includes(h)) return '#BDD7EE';
-  if (yellow.includes(h)) return '#FFFF00';
-  if (darkgrey.includes(h)) return '#404040';
-  if (peachL.includes(h)) return '#FCE4D6';
-  if (purple.includes(h)) return '#7030A0';
-  if (hotpink.includes(h)) return '#FF0066';
-  if (landtax.includes(h)) return '#FFFFFF';
-  if (peach.includes(h)) return '#FCE4D6';
-  if (pink.includes(h)) return '#FCE4D6';
+  // Colours extracted directly from SalesDB-Main.xlsx header row
+  const lightblue = ['Project Name','Lot ID','Property Address','Stage','Lot #','Sales Condition']; // #C0E6F5
+  const yellow    = ['Pending S/A Date','Pending S/A Days','Pending S/A Agency','*LEADS Name','$VAL','March Campaign','OFFER Rebate','SETTLE Rebate','Notes.1','Type Of Purchaser','Special Condilions/Variations','2026 Report','Comments.1']; // #FFFF00
+  const darkblue  = ['CfS Type','Product Line','Product Type','Lot Area (m\u00b2)','Lot Frontage (Width) (m)']; // #156082
+  const purple    = ['StockList','Notes']; // #9437FF
+  const magenta   = ['Channel Market','Sales Channel','Channel Partner','Swap to/from Channel Partner','Allocation Date','Allocation Days','Allocation Period (days)','Allocation Days / Allocation Expiry Date','H&L $House (S/S)','$H&L Total (S/S)','H&L $House (D/S)','$H&L Total (D/S)','Vendors Agency','Vendors Agency Agent',"Agent's Mobile","Agent's Email"]; // #A02B93
+  const orange    = ['$BASE']; // #E97132
+  const lime      = ['$LIST']; // #CCFF66
+  const hotpink   = ['$CHECK$                   $BASE-$VAL','$CHECK$ $LIST-$BASE']; // #FF0066
+  const landtax   = ['Land Tax Per lot Value','Land Tax $Uplift / $Shortfall'];
+  const green     = ['Property Type','Sales Advice Received Date','Sales Advice Sent To Legal Date','Contract Issued Date','Days From CfS Issued','CfS Issued Price','Proposed Exchanged Date','Exchanged Date','CfS Exchanged Price ($)','Proposed Settled Date','Settled Date','Settled Month','Settled Year','CfS Settled Price ($)','Rebate','Deposit%','Cooling Off Date','FIRB Approval','March Campaign.1','Comments']; // #4EA72E
+  const peach     = ["(1) Purchaser's Name","(1) Purchaser's Email","(1) Purchaser's Mobile","(2) Purchaser's Name","(2) Purchaser's Email","(2) Purchaser's Mobile","Purchaser's Suburb","Purchaser's Postcode","Purchaser's Solicitor (P'Sol)","Purchaser's Solicitor Phone"]; // #E97132
+  if (lightblue.includes(h)) return '#C0E6F5';
+  if (yellow.includes(h))    return '#FFFF00';
+  if (darkblue.includes(h))  return '#156082';
+  if (purple.includes(h))    return '#9437FF';
+  if (magenta.includes(h))   return '#A02B93';
+  if (orange.includes(h))    return '#E97132';
+  if (lime.includes(h))      return '#CCFF66';
+  if (hotpink.includes(h))   return '#FF0066';
+  if (landtax.includes(h))   return '#FFFFFF';
+  if (green.includes(h))     return '#4EA72E';
+  if (peach.includes(h))     return '#E97132';
   return '#e8e3d8';
 }
 function getHeaderTextColour(bg, h) {
-  if (bg === '#404040' || bg === '#7030A0' || bg === '#FF0066') return '#ffffff';
+  // White text on dark/saturated backgrounds; black on light backgrounds
+  if (['#156082','#9437FF','#A02B93','#E97132','#FF0066'].includes(bg)) return '#ffffff';
   if (h === 'Land Tax Per lot Value' || h === 'Land Tax $Uplift / $Shortfall') return '#FF0000';
-  return '#1a1408';
+  return '#000000';
 }
 
 
@@ -3342,27 +3613,98 @@ function closeDtPanel() {
 
 
 const COL_GROUPS = [
-  { label: 'Property Details', colour: '#C0E6F5', textColour: '#000000', cols: ['Project Name','Lot ID','Property Address','Stage','Lot #','Sales Condition'] },
-  { label: 'Pending SA', colour: '#FFFF00', textColour: '#000000', cols: ['Pending S/A Date','Pending S/A Days','Pending S/A Agency','*LEADS Name'] },
-  { label: 'Property Info', colour: '#156082', textColour: '#ffffff', cols: ['CfS Type','Property Type','Product Line','Product Type','Lot Area (m\u00b2)','Lot Frontage (Width) (m)'] },
-  { label: 'Stock & Notes', colour: '#9437FF', textColour: '#ffffff', cols: ['StockList','Notes'] },
-  { label: 'Channel & Allocation', colour: '#A02B93', textColour: '#ffffff', cols: ['Channel Market','Sales Channel','Channel Partner','Swap to/from Channel Partner','Allocation Date','Allocation Days','Allocation Period (days)','Allocation Days / Allocation Expiry Date'] },
-  { label: 'Pricing', colour: '#FFFF00', textColour: '#000000', cols: ['$VAL','$BASE','$LIST'] },
-  { label: 'Price Checks', colour: '#FF0066', textColour: '#ffffff', cols: ['$CHECK$                   $BASE-$VAL','$CHECK$ $LIST-$BASE'] },
-  { label: 'Land Tax', colour: '#FFFFFF', textColour: '#FF0000', cols: ['Land Tax Per lot Value','Land Tax $Uplift / $Shortfall'] },
-  { label: 'Campaign & Rebates', colour: '#FFFF00', textColour: '#000000', cols: ['March Campaign','OFFER Rebate','SETTLE Rebate','H&L $House (S/S)','$H&L Total (S/S)','H&L $House (D/S)','$H&L Total (D/S)','Notes.1'] },
-  { label: 'Dates & CfS', colour: '#4EA72E', textColour: '#ffffff', cols: ['Sales Advice Received Date','Sales Advice Sent To Legal Date','Contract Issued Date','Days From CfS Issued','CfS Issued Price','Proposed Exchanged Date','Exchanged Date','CfS Exchanged Price ($)','Proposed Settled Date','Settled Date','Settled Month','Settled Year','CfS Settled Price ($)','Rebate','Deposit%','Cooling Off Date','FIRB Approval','March Campaign.1','Comments'] },
-  { label: 'Vendors & Agents', colour: '#A02B93', textColour: '#ffffff', cols: ['Vendors Agency','Vendors Agency Agent',"Agent's Mobile","Agent's Email"] },
-  { label: 'Purchaser Details', colour: '#E97132', textColour: '#ffffff', cols: ["(1) Purchaser's Name","(1) Purchaser's Email","(1) Purchaser's Mobile","(2) Purchaser's Name","(2) Purchaser's Email","(2) Purchaser's Mobile","Purchaser's Suburb","Purchaser's Postcode","Purchaser's Solicitor (P'Sol)","Purchaser's Solicitor Phone"] },
-  { label: 'Other', colour: '#FFFF00', textColour: '#000000', cols: ['Type Of Purchaser','Special Condilions/Variations','2026 Report','Comments.1'] },
+  // Columns A-F: Property Details (#C0E6F5)
+  { label: 'Property Details', colour: '#C0E6F5', textColour: '#000000', cols: [
+    'Project Name','Lot ID','Property Address','Stage','Lot #','Sales Condition'
+  ]},
+  // Columns G-J: Pending SA (#FFFF00)
+  { label: 'Pending SA', colour: '#FFFF00', textColour: '#000000', cols: [
+    'Pending S/A Date','Pending S/A Days','Pending S/A Agency','*LEADS Name'
+  ]},
+  // Column K: CfS Type (#156082)
+  { label: 'Property Info', colour: '#156082', textColour: '#ffffff', cols: [
+    'CfS Type'
+  ]},
+  // Column L: Property Type (#4EA72E)
+  { label: 'Property Type', colour: '#4EA72E', textColour: '#000000', cols: [
+    'Property Type'
+  ]},
+  // Columns M-P: Product Details (#156082)
+  { label: 'Product Details', colour: '#156082', textColour: '#ffffff', cols: [
+    'Product Line','Product Type','Lot Area (m²)','Lot Frontage (Width) (m)'
+  ]},
+  // Columns Q-R: Stock & Notes (#9437FF)
+  { label: 'Stock & Notes', colour: '#9437FF', textColour: '#ffffff', cols: [
+    'StockList','Notes'
+  ]},
+  // Columns S-Z: Channel & Allocation (#A02B93)
+  { label: 'Channel & Allocation', colour: '#A02B93', textColour: '#ffffff', cols: [
+    'Channel Market','Sales Channel','Channel Partner','Swap to/from Channel Partner',
+    'Allocation Date','Allocation Days','Allocation Period (days)',
+    'Allocation Days / Allocation Expiry Date'
+  ]},
+  // Column AA: $VAL (#FFFF00)
+  { label: 'Pricing', colour: '#FFFF00', textColour: '#000000', cols: ['$VAL'] },
+  // Column AB: $BASE (#E97132)
+  { label: 'Base Price', colour: '#E97132', textColour: '#ffffff', cols: ['$BASE'] },
+  // Column AC: $LIST (#CCFF66)
+  { label: 'List Price', colour: '#CCFF66', textColour: '#000000', cols: ['$LIST'] },
+  // Columns AD-AE: Price Checks (#FF0066)
+  { label: 'Price Checks', colour: '#FF0066', textColour: '#ffffff', cols: [
+    '$CHECK$                   $BASE-$VAL','$CHECK$ $LIST-$BASE'
+  ]},
+  // Columns AF-AG: Land Tax (white bg, red text)
+  { label: 'Land Tax', colour: '#FFFFFF', textColour: '#FF0000', cols: [
+    'Land Tax Per lot Value','Land Tax $Uplift / $Shortfall'
+  ]},
+  // Columns AH-AO: Campaign, Rebates, H&L, Notes (#FFFF00)
+  { label: 'Campaign & Rebates', colour: '#FFFF00', textColour: '#000000', cols: [
+    'March Campaign','OFFER Rebate','SETTLE Rebate',
+    'H&L $House (S/S)','$H&L Total (S/S)','H&L $House (D/S)','$H&L Total (D/S)',
+    'Notes.1'
+  ]},
+  // Columns AP-BI: Dates & CfS (#4EA72E)
+  { label: 'Dates & CfS', colour: '#4EA72E', textColour: '#000000', cols: [
+    'Sales Advice Received Date','Sales Advice Sent To Legal Date','Contract Issued Date',
+    'Days From CfS Issued','CfS Issued Price','Proposed Exchanged Date','Exchanged Date',
+    'CfS Exchanged Price ($)','Proposed Settled Date','Settled Date',
+    'Days from Exchanged to Settled','Settled Month','Settled Year','CfS Settled Price ($)',
+    'Rebate','Deposit%','Cooling Off Date','FIRB Approval','March Campaign.1','Comments'
+  ]},
+  // Columns BJ-BM: Vendors & Agents (#A02B93)
+  { label: 'Vendors & Agents', colour: '#A02B93', textColour: '#ffffff', cols: [
+    'Vendors Agency','Vendors Agency Agent',"Agent's Mobile","Agent's Email"
+  ]},
+  // Columns BN-BW: Purchaser Details (#E97132)
+  { label: 'Purchaser Details', colour: '#E97132', textColour: '#ffffff', cols: [
+    "(1) Purchaser's Name","(1) Purchaser's Email","(1) Purchaser's Mobile",
+    "(2) Purchaser's Name","(2) Purchaser's Email","(2) Purchaser's Mobile",
+    "Purchaser's Suburb","Purchaser's Postcode",
+    "Purchaser's Solicitor (P'Sol)","Purchaser's Solicitor Phone"
+  ]},
+  // Columns BX-CA: Other (#FFFF00)
+  { label: 'Other', colour: '#FFFF00', textColour: '#000000', cols: [
+    'Type Of Purchaser','Special Condilions/Variations','2026 Report','Comments.1'
+  ]},
 ];
 
-function deskEditRow(idx) {
+async function deskEditRow(idx) {
   dtSelectedIdx = idx;
   modalRowIdx = allData.indexOf(filteredData[idx]);
+  const row = allData[allData.indexOf(filteredData[idx])];
+  const lotNum = String(row['Lot #'] || row['Lot#'] || '').trim();
   editRowIdx = modalRowIdx;
-  const row = allData[editRowIdx];
-  const lotNum = row['Lot #'] || row['Lot#'] || '';
+  const lotNumDisp = row['Lot #'] || row['Lot#'] || '';
+  // Open edit screen immediately, check lock in background
+  checkLock(lotNum).then(lock => {
+    if (lock) {
+      showLockError(lotNum, lock);
+      editRowIdx = -1;
+      deskShowScreen('data');
+      return;
+    }
+    acquireLock(lotNum);
+  });
   document.getElementById('d-edit-title').textContent = 'Lot ' + lotNum;
   let editHtml = '<table style="width:100%;border-collapse:collapse">';
   const groupedCols = COL_GROUPS.flatMap(g => g.cols);
@@ -3573,6 +3915,8 @@ function deskStartEdit(key, currentVal) {
 async function deskSaveEdit() {
   if (editRowIdx < 0) return;
   formDirty = false;
+  const _deskLockLot = allData[editRowIdx]?.['Lot #'] || allData[editRowIdx]?.['Lot#'] || null;
+  if (_deskLockLot) releaseLock(_deskLockLot);
   headers.forEach(h => {
     const disp = document.getElementById('d-disp-' + sid(h));
     if (!disp) return;
@@ -3595,14 +3939,16 @@ async function deskSaveEdit() {
   try {
     await syncToOneDrive();
     deskShowScreen('data');
+    toast('✓ Saved to OneDrive', 'success');
   } catch(e) {}
 }
 
 function deskCancelEditCheck() {
+  const lot = allData[editRowIdx]?.['Lot #'] || allData[editRowIdx]?.['Lot#'] || null;
   if (formDirty) {
     if (confirm('You have unsaved changes. Save before leaving?')) { deskSaveEdit(); }
-    else { formDirty = false; deskShowScreen('data'); }
-  } else { deskShowScreen('data'); }
+    else { formDirty = false; if (lot) releaseLock(lot); deskShowScreen('data'); }
+  } else { if (lot) releaseLock(lot); deskShowScreen('data'); }
 }
 
 // ── COLUMN FILTER POPUP ──
@@ -3668,7 +4014,7 @@ function applyFiltersWithCol() {
     dropVals[col] = el?.value || '';
   });
   filteredData = allData.filter(row => {
-    if (terms.length) { const text = Object.values(row).join(' ').toLowerCase(); if (!terms.every(t => text.includes(t))) return false; }
+    if (terms.length) { const text = Object.entries(row).filter(([k])=>k!=='__excelRow').map(([,v])=>v).join(' ').toLowerCase(); if (!terms.some(t => text.includes(t))) return false; }
     if (!Object.entries(dropVals).every(([col, val]) => !val || String(row[col]||'').trim() === val)) return false;
     for (const [col, vals] of Object.entries(deskActiveColFilters)) {
       if (!vals.has(String(row[col] ?? '').trim())) return false;
