@@ -324,7 +324,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
   <div class="login-card">
     <div class="login-icon">&#128202;</div>
     <div class="login-title">Sales DB</div>
-    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">v2.33</div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">v2.34</div>
     <div class="login-sub">Sign in with your Microsoft account to access your OneDrive sales data.</div>
     <button class="ms-btn" onclick="signIn()">
       <div class="ms-logo"><div></div><div></div><div></div><div></div></div>
@@ -348,7 +348,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 <!-- APP -->
 <div id="app-wrapper" style="display:none">
   <div class="app-header">
-    <div class="header-logo">Sales<strong>DB</strong><span class="header-version">v2.33</span></div>
+    <div class="header-logo">Sales<strong>DB</strong><span class="header-version">v2.34</span></div>
     <div class="header-right">
       <div class="user-pill">
         <div class="user-avatar" id="user-avatar">?</div>
@@ -1102,7 +1102,6 @@ async function syncToOneDrive() {
 
     if (updates.length === 0) {
       setSyncStatus('synced');
-      toastLong('✓ Saved to OneDrive', 'success');
       return;
     }
 
@@ -1121,7 +1120,6 @@ async function syncToOneDrive() {
 
     pendingEdits = {};
     setSyncStatus('synced');
-    toastLong('✓ Saved to OneDrive', 'success');
   } catch(e) {
     setSyncStatus('error');
     toastLong('✗ Not saved: ' + e.message, 'error');
@@ -1659,6 +1657,7 @@ async function saveEdit() {
     await syncToOneDrive();
     showScreen('data');
     if (isDesktop()) renderDesktopTable();
+    toast('✓ Saved to OneDrive', 'success');
   } catch(e) {
     // Stay on edit screen so user can retry
   }
@@ -3904,6 +3903,7 @@ async function deskSaveEdit() {
   try {
     await syncToOneDrive();
     deskShowScreen('data');
+    toast('✓ Saved to OneDrive', 'success');
   } catch(e) {}
 }
 
