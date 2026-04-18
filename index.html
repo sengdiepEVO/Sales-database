@@ -328,7 +328,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
   <div class="login-card">
     <div class="login-icon">&#128202;</div>
     <div class="login-title">Sales DB</div>
-    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">v2.44</div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">v2.47</div>
     <div class="login-sub">Sign in with your Microsoft account to access your OneDrive sales data.</div>
     <button class="ms-btn" onclick="signIn()">
       <div class="ms-logo"><div></div><div></div><div></div><div></div></div>
@@ -352,7 +352,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 <!-- APP -->
 <div id="app-wrapper" style="display:none">
   <div class="app-header">
-    <div class="header-logo">Sales<strong>DB</strong><span class="header-version">v2.44</span></div>
+    <div class="header-logo">Sales<strong>DB</strong><span class="header-version">v2.47</span></div>
     <div class="header-right">
       <div class="user-pill">
         <div class="user-avatar" id="user-avatar">?</div>
@@ -750,55 +750,31 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
     </div>
     <!-- Review step -->
     <div id="scan-step-review" style="display:none;flex-direction:column;overflow:hidden;flex:1">
-      <div style="padding:12px 20px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0">
+      <!-- Header: lot match info -->
+      <div style="padding:10px 20px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between">
         <div style="font-size:12px;color:var(--muted)">Matched to: <strong id="scan-matched-lot" style="color:var(--ink)">—</strong></div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px">Review and edit fields before saving</div>
+        <div id="scan-summary-badge" style="font-size:11px;color:var(--muted)"></div>
       </div>
-      <!-- Resc/Exch warning banner — shown only when applicable -->
-      <div id="scan-resc-banner" style="display:none;padding:10px 20px;background:#fff3cd;border-bottom:2px solid #e6a817;flex-shrink:0">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:18px">⚠️</span>
-          <div>
-            <div style="font-size:13px;font-weight:600;color:#7d4e00">Rescission / Exchange Lot</div>
-            <div style="font-size:11px;color:#7d4e00;margin-top:1px">CfS Type is <strong>2.Resc / Exch</strong> — please verify all fields carefully before applying</div>
+      <!-- Two-column body (desktop: row, mobile: column) -->
+      <div id="scan-review-body" style="display:flex;overflow:hidden;flex:1;min-height:0">
+        <!-- LEFT: Validation Summary -->
+        <div id="scan-summary-panel" style="width:260px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;background:var(--surface)">
+          <div style="padding:10px 14px;border-bottom:1px solid var(--border);background:var(--surface2);flex-shrink:0">
+            <div style="font-size:12px;font-weight:600;color:var(--ink)">📋 Validation Summary</div>
           </div>
+          <div id="scan-validation-list" style="flex:1;overflow-y:auto;padding:10px 12px"></div>
+          <div id="scan-summary-footer" style="padding:10px 14px;border-top:1px solid var(--border);background:var(--surface2);font-size:11px;flex-shrink:0"></div>
+        </div>
+        <!-- RIGHT: Fields -->
+        <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0">
+          <div style="padding:8px 14px;background:#FFFBEB;border-bottom:2px solid #C8860A;flex-shrink:0;display:flex;align-items:center;gap:6px">
+            <span style="font-size:15px">✏️</span>
+            <div style="font-size:11px;color:#7A5200"><strong>Review &amp; correct before confirming.</strong> Amber <span style="background:#C8860A;color:#fff;padding:0 4px;border-radius:2px;font-size:9px">CHECK</span> fields need careful review.</div>
+          </div>
+          <div id="scan-fields-list" style="overflow-y:auto;flex:1;padding:0"></div>
         </div>
       </div>
-      <div id="scan-price-banner" style="display:none;padding:10px 20px;background:#fef2f2;border-bottom:2px solid #dc2626;flex-shrink:0">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:18px">⚠️</span>
-          <div>
-            <div style="font-size:13px;font-weight:600;color:#991b1b">Land Price Below $LIST</div>
-            <div style="font-size:11px;color:#991b1b;margin-top:1px" id="scan-price-msg"></div>
-            <div style="font-size:11px;color:#991b1b;margin-top:2px">You can still proceed — verify before saving.</div>
-          </div>
-        </div>
-      </div>
-      <div id="scan-idname-banner" style="display:none;padding:10px 20px;background:#fef2f2;border-bottom:2px solid #dc2626;flex-shrink:0">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:18px">⚠️</span>
-          <div>
-            <div style="font-size:13px;font-weight:600;color:#991b1b">ID Name Mismatch</div>
-            <div style="font-size:11px;color:#991b1b;margin-top:1px" id="scan-idname-msg"></div>
-            <div style="font-size:11px;color:#991b1b;margin-top:2px">Please verify before saving.</div>
-          </div>
-        </div>
-      </div>
-      <div id="scan-trust-banner" style="display:none;padding:10px 20px;background:#fef2f2;border-bottom:2px solid #dc2626;flex-shrink:0">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:18px">⚠️</span>
-          <div>
-            <div style="font-size:13px;font-weight:600;color:#991b1b">Missing Trust Receipt</div>
-            <div style="font-size:11px;color:#991b1b;margin-top:1px">No $2,000 trust account receipt found in this PDF.</div>
-            <div style="font-size:11px;color:#991b1b;margin-top:2px">You can still proceed — verify before saving.</div>
-          </div>
-        </div>
-      </div>
-      <div style="padding:10px 20px;background:#FFFBEB;border-bottom:2px solid #C8860A;flex-shrink:0;display:flex;align-items:center;gap:8px">
-        <span style="font-size:18px">✏️</span>
-        <div style="font-size:12px;color:#7A5200"><strong>Review and correct all fields below before confirming.</strong><br>Amber <span style="background:#C8860A;color:#fff;padding:0 5px;border-radius:2px;font-size:10px">CHECK</span> fields are most likely to have errors.</div>
-      </div>
-      <div id="scan-fields-list" style="overflow-y:auto;flex:1;padding:0"></div>
+      <!-- Footer buttons -->
       <div style="padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:10px;flex-shrink:0;background:var(--bg)">
         <button onclick="closeScanPdf()" style="flex:1;padding:11px;background:none;border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer;color:var(--muted)">Cancel</button>
         <button onclick="confirmScanPdf()" style="flex:2;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">&#10003; Apply to Database</button>
@@ -876,7 +852,7 @@ async function getMsal() { if (!msalInstance) msalInstance = await msal.PublicCl
 
 let allData = [], headers = [], filteredData = []
 let scanFilledFields = new Set(); // fields populated by PDF scan — highlighted for review, fileId = null, fileDriveId = null, editRowIdx = -1, modalRowIdx = -1, filterDrawerOpen = false;
-const FILTER_MAP = { 'f-stage':'Stage', 'f-condition':'Sales Condition', 'f-channel':'Sales Channel', 'f-partner':'Channel Partner', 'f-productline':'Product Line', 'f-market':'Channel Market', 'f-year':'Settled Year' };
+const FILTER_MAP = { 'f-stage':'Stage', 'f-condition':'Sales Condition', 'f-channel':'Sales Channel', 'f-partner':'Channel Partner', 'f-productline':'Product Line', 'f-market':'Channel Market', 'f-source':'Source of Enquiry', 'f-year':'Settled Year' };
 
 async function testApiKey() {
   const key = localStorage.getItem('anthropic_key');
@@ -2024,7 +2000,7 @@ function resetScanPdf() {
   document.getElementById('scan-resc-banner').style.display = 'none';
   document.getElementById('scan-price-banner').style.display = 'none';
   document.getElementById('scan-idname-banner').style.display = 'none';
-  document.getElementById('scan-trust-banner').style.display = 'none';
+  // banners replaced by summary panel — no individual resets needed
   showScanStep('upload');
 }
 
@@ -2038,12 +2014,60 @@ function showScanStep(step) {
   if (step === 'review') {
     active.style.display = 'flex';
     active.style.flexDirection = 'column';
+    // Desktop: widen modal + two-column layout
+    const modal = document.querySelector('#scan-pdf-overlay > div');
+    if (modal) modal.style.maxWidth = isDesktop() ? '900px' : '540px';
+    const body = document.getElementById('scan-review-body');
+    const panel = document.getElementById('scan-summary-panel');
+    if (body && panel) {
+      if (isDesktop()) {
+        body.style.flexDirection = 'row';
+        panel.style.width = '260px';
+        panel.style.borderRight = '1px solid var(--border)';
+        panel.style.borderBottom = 'none';
+        panel.style.maxHeight = '';
+      } else {
+        body.style.flexDirection = 'column';
+        panel.style.width = '100%';
+        panel.style.borderRight = 'none';
+        panel.style.borderBottom = '1px solid var(--border)';
+        panel.style.maxHeight = '220px';
+      }
+    }
   } else if (step === 'upload') {
     active.style.display = 'flex';
     active.style.flexDirection = 'column';
+    // Reset modal width
+    const modal = document.querySelector('#scan-pdf-overlay > div');
+    if (modal) modal.style.maxWidth = '540px';
   } else {
     active.style.display = 'block';
   }
+}
+
+function renderScanSummary(results) {
+  const list   = document.getElementById('scan-validation-list');
+  const footer = document.getElementById('scan-summary-footer');
+  const badge  = document.getElementById('scan-summary-badge');
+  if (!list) return;
+  const passes   = results.filter(r => r.type === 'pass').length;
+  const warnings = results.filter(r => r.type === 'warning').length;
+  list.innerHTML = results.map(r => {
+    const icon  = r.type === 'pass' ? '✅' : '⚠️';
+    const color = r.type === 'pass' ? 'var(--ink)' : '#7d4e00';
+    const bg    = r.type === 'pass' ? 'transparent' : '#FFFBEB';
+    const border= r.type === 'pass' ? 'none' : '1px solid #E6A817';
+    const detail= r.detail ? `<div style="font-size:10px;color:#7d4e00;margin-top:3px;padding-left:18px;line-height:1.4">${r.detail}</div>` : '';
+    return `<div style="padding:5px 6px;margin-bottom:3px;background:${bg};border-radius:5px;border:${border}">
+      <div style="font-size:11px;color:${color};display:flex;align-items:flex-start;gap:5px;font-weight:${r.type==='pass'?'400':'500'}">
+        <span style="flex-shrink:0;font-size:12px">${icon}</span><span>${r.text}</span>
+      </div>${detail}
+    </div>`;
+  }).join('');
+  const footerHtml = `<span style="color:var(--accent);font-weight:500">✅ ${passes} passed</span>`
+    + (warnings ? ` &nbsp;·&nbsp; <span style="color:#7d4e00;font-weight:500">⚠️ ${warnings} warning${warnings>1?'s':''}</span>` : '');
+  if (footer) footer.innerHTML = footerHtml;
+  if (badge)  badge.innerHTML  = footerHtml;
 }
 
 function onScanFileSelected(event) {
@@ -2343,36 +2367,74 @@ Return ONLY the JSON object, no other text.`;
     document.getElementById('scan-matched-lot').textContent =
       `Lot ${lotNum} — ${allData[rowIdx]['Project Name'] || ''}`;
 
-    // Show Resc/Exch warning if applicable
+    // ── Build validation summary ─────────────────────────────────────────
     const cfsType = String(allData[rowIdx]['CfS Type'] || allData[rowIdx]['CFS Type'] || '').trim();
     const isRescExch = cfsType.toLowerCase().includes('resc') || cfsType.toLowerCase().includes('exch');
-    document.getElementById('scan-resc-banner').style.display = isRescExch ? 'block' : 'none';
-
-    // Show price warning banner if land price is below $LIST
-    if (priceWarning) {
-      document.getElementById('scan-price-msg').textContent =
-        `Extracted: $${landPrice.toLocaleString()} — $LIST: $${listPrice.toLocaleString()}`;
-      document.getElementById('scan-price-banner').style.display = 'block';
-    } else {
-      document.getElementById('scan-price-banner').style.display = 'none';
-    }
-
-    // Show ID name mismatch banner if names don't match
-    if (idNameWarnings.length > 0) {
-      document.getElementById('scan-idname-msg').innerHTML = idNameWarnings.join('<br>');
-      document.getElementById('scan-idname-banner').style.display = 'block';
-    } else {
-      document.getElementById('scan-idname-banner').style.display = 'none';
-    }
-
-    // Show trust receipt warning if missing
     const hasTrustReceipt = extracted.has_trust_receipt === true || extracted.has_trust_receipt === 'true';
-    document.getElementById('scan-trust-banner').style.display = hasTrustReceipt ? 'none' : 'block';
+
+    // Settlement date check
+    const parseScanDate = s => {
+      if (!s) return null;
+      const m = String(s).match(/(\d{1,2})[\-\/](\w{3,})[\-\/](\d{4})/);
+      if (!m) return null;
+      const months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+      const mon = months.indexOf(m[2].toLowerCase().slice(0,3));
+      return mon >= 0 ? new Date(parseInt(m[3]), mon, parseInt(m[1])) : null;
+    };
+    const exchDateStr = scanExtractedData['Proposed Exchanged Date'];
+    const settDateStr = scanExtractedData['Proposed Settled Date'];
+    const exchDate    = parseScanDate(exchDateStr);
+    const settDate    = parseScanDate(settDateStr);
+    let settleWarn    = null;
+    if (exchDate && settDate) {
+      const diffDays = Math.round((settDate - exchDate) / (1000 * 60 * 60 * 24));
+      if (diffDays !== 42) {
+        const off = diffDays - 42;
+        const dir = off > 0 ? `${off} day${Math.abs(off)!==1?'s':''} too long` : `${Math.abs(off)} day${Math.abs(off)!==1?'s':''} too short`;
+        settleWarn = `${diffDays} days after exchange (expected 42) — ${dir}`;
+      }
+    } else if (exchDate && !settDate) {
+      settleWarn = `Exchange found (${exchDateStr}) but no settlement date`;
+    }
+
+    // Build results array — always show ✅ for hard stops (reached review means they passed)
+    const valResults = [
+      { type:'pass',    text:`Lot ${lotNum} matches` },
+      { type:'pass',    text:'Purchaser 1 signed' },
+    ];
+    if (hasPurchaser2) valResults.push({ type:'pass', text:'Purchaser 2 signed' });
+    valResults.push({ type:'pass', text: hasPurchaser2 ? '2 IDs found — matches 2 purchasers' : '1 ID found — matches 1 purchaser' });
+    valResults.push(priceWarning
+      ? { type:'warning', text:'Land price below $LIST', detail:`Extracted $${landPrice.toLocaleString()} · $LIST $${listPrice.toLocaleString()}` }
+      : { type:'pass',    text:`Land price $${landPrice.toLocaleString()}` });
+    if (isRescExch)
+      valResults.push({ type:'warning', text:'Rescission / Exchange lot', detail:'CfS Type is 2.Resc/Exch — verify all fields carefully' });
+    else
+      valResults.push({ type:'pass', text:'Standard lot (not Resc/Exch)' });
+    if (idNameWarnings.length > 0)
+      idNameWarnings.forEach(w => valResults.push({ type:'warning', text:'ID name mismatch', detail: w }));
+    else
+      valResults.push({ type:'pass', text:'Purchaser names match IDs' });
+    valResults.push(hasTrustReceipt
+      ? { type:'pass',    text:'Trust receipt found' }
+      : { type:'warning', text:'No trust receipt found', detail:'No $2,000 holding deposit receipt in PDF' });
+    valResults.push(settleWarn
+      ? { type:'warning', text:'Settlement date off', detail: settleWarn }
+      : (exchDate && settDate)
+        ? { type:'pass',    text:`Settlement = exchange + 42 days ✓` }
+        : { type:'pass',    text:'Settlement dates not checked (dates missing)' });
+
+    renderScanSummary(valResults);
 
     // Fields where AI misreads are most common — get extra warning marker
     const HIGH_RISK_FIELDS = new Set(['purchaser1_name','purchaser1_email','purchaser2_name','purchaser2_email','agent_name','agency_email']);
     const list = document.getElementById('scan-fields-list');
-    list.innerHTML = SCAN_FIELDS.map(f => {
+    // Filter out P2 fields if only 1 purchaser
+    const visibleFields = SCAN_FIELDS.filter(f => {
+      if (!hasPurchaser2 && (f.key.startsWith("(2) Purchaser") || f.key === 'purchaser2_name' || f.key === 'purchaser2_email' || f.key === 'purchaser2_mobile')) return false;
+      return true;
+    });
+    list.innerHTML = visibleFields.map(f => {
       const val = scanExtractedData[f.key] || '';
       const display = val ? formatCellValue(f.key, val) || val : '';
       const hasVal = !!val;
@@ -3541,7 +3603,7 @@ let dtSelectedIdx = -1;
 function getHeaderColour(h) {
   // Colours extracted directly from SalesDB-Main.xlsx header row
   const lightblue = ['Project Name','Lot ID','Property Address','Stage','Lot #','Sales Condition']; // #C0E6F5
-  const yellow    = ['Pending S/A Date','Pending S/A Days','Pending S/A Agency','*LEADS Name','$VAL','March Campaign','OFFER Rebate','SETTLE Rebate','Notes.1','Type Of Purchaser','Special Condilions/Variations','2026 Report','Comments.1']; // #FFFF00
+  const yellow    = ['Pending S/A Date','Pending S/A Days','Pending S/A Agency','*LEADS Name','$VAL','March Campaign','OFFER Rebate','SETTLE Rebate','Notes.1','Source of Enquiry','Type Of Purchaser','Special Condilions/Variations','2026 Report','Comments.1']; // #FFFF00
   const darkblue  = ['CfS Type','Product Line','Product Type','Lot Area (m\u00b2)','Lot Frontage (Width) (m)']; // #156082
   const purple    = ['StockList','Notes']; // #9437FF
   const magenta   = ['Channel Market','Sales Channel','Channel Partner','Swap to/from Channel Partner','Allocation Date','Allocation Days','Allocation Period (days)','Allocation Days / Allocation Expiry Date','H&L $House (S/S)','$H&L Total (S/S)','H&L $House (D/S)','$H&L Total (D/S)','Vendors Agency','Vendors Agency Agent',"Agent's Mobile","Agent's Email"]; // #A02B93
@@ -3752,7 +3814,9 @@ const COL_GROUPS = [
   { label: 'Vendors & Agents', colour: '#A02B93', textColour: '#ffffff', cols: [
     'Vendors Agency','Vendors Agency Agent',"Agent's Mobile","Agent's Email"
   ]},
-  // Columns BN-BW: Purchaser Details (#E97132)
+  // Column BN: Source of Enquiry (#FFFF00)
+  { label: 'Lead Source', colour: '#FFFF00', textColour: '#000000', cols: ['Source of Enquiry'] },
+  // Columns BO-BX: Purchaser Details (#E97132)
   { label: 'Purchaser Details', colour: '#E97132', textColour: '#ffffff', cols: [
     "(1) Purchaser's Name","(1) Purchaser's Email","(1) Purchaser's Mobile",
     "(2) Purchaser's Name","(2) Purchaser's Email","(2) Purchaser's Mobile",
