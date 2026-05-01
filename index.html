@@ -416,6 +416,44 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 .lc-btn-primary { background: #1a6b3a; color: #fff; border-color: #1a6b3a; }
 .lc-btn-primary:hover { background: #155a2f; }
 .lc-btn-spacer { flex: 1; }
+
+/* ───────────────────────────────────────────────────────────────────────
+   DEPOSIT TRANSITION POPUP (.lcm-) — opens when user clicks Deposit stage
+   ─────────────────────────────────────────────────────────────────────── */
+.lcm-overlay { position: fixed; inset: 0; z-index: 100; background: rgba(15,23,42,0.55); display: none; align-items: center; justify-content: center; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Aptos", sans-serif; }
+.lcm-overlay.show { display: flex; }
+.lcm { background: #fff; border-radius: 12px; box-shadow: 0 16px 48px rgba(0,0,0,0.35); width: 100%; max-width: 540px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; color: #1e293b; }
+.lcm-hdr { background: linear-gradient(to bottom, #000d35 0%, #002675 100%); color: #fff; padding: 18px 22px; flex-shrink: 0; position: relative; }
+.lcm-hdr-eyebrow { font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: rgba(255,255,255,0.6); font-weight: 600; margin-bottom: 4px; }
+.lcm-hdr-title { font-size: 18px; font-weight: 600; line-height: 1.2; }
+.lcm-hdr-sub { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 4px; }
+.lcm-close { position: absolute; top: 14px; right: 14px; width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.1); color: #fff; border: none; cursor: pointer; font-size: 18px; line-height: 1; display: flex; align-items: center; justify-content: center; }
+.lcm-close:hover { background: rgba(255,255,255,0.2); }
+.lcm-banner { background: #FFF8E1; border-bottom: 1px solid #F5D67A; padding: 10px 22px; font-size: 12px; color: #7A5200; flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
+.lcm-banner button { background: none; border: none; color: #002675; text-decoration: underline; padding: 0; font-size: 12px; cursor: pointer; font-family: inherit; }
+.lcm-body { flex: 1; overflow-y: auto; padding: 16px 22px; }
+.lcm-summary { padding: 10px 14px; border-radius: 6px; font-size: 12px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+.lcm-summary.warn { background: #fffbeb; border-color: #fde68a; color: #78350f; }
+.lcm-summary.hidden { display: none; }
+.lcm-row { display: grid; grid-template-columns: 180px 1fr; gap: 16px; align-items: center; padding: 9px 0; border-bottom: 0.5px solid #f1f5f9; }
+.lcm-row:last-child { border-bottom: none; }
+.lcm-label { font-size: 12.5px; color: #475569; font-weight: 500; }
+.lcm-label.required::after { content: ' *'; color: #dc2626; }
+.lcm-input { width: 100%; padding: 8px 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-family: inherit; font-size: 13px; color: #0f172a; background: #fff; outline: none; box-sizing: border-box; }
+.lcm-input:focus { border-color: #002675; box-shadow: 0 0 0 2px rgba(0, 38, 117, 0.1); }
+.lcm-input.empty-required { border-color: #dc2626; background: #fef2f2; }
+.lcm-input.empty-required::placeholder { color: #dc2626; }
+.lcm-pre, .lcm-suf { position: relative; display: flex; align-items: center; }
+.lcm-pre-text { position: absolute; left: 10px; color: #64748b; font-size: 13px; pointer-events: none; }
+.lcm-suf-text { position: absolute; right: 10px; color: #64748b; font-size: 13px; pointer-events: none; }
+.lcm-pre .lcm-input { padding-left: 22px; }
+select.lcm-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
+.lcm-ftr { padding: 12px 22px; border-top: 1px solid #e2e8f0; background: #f8fafc; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.lcm-ftr-spacer { flex: 1; }
+.lcm-btn { padding: 9px 16px; border-radius: 6px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid #e2e8f0; background: #fff; color: #002675; }
+.lcm-btn:hover { background: #f1f5f9; }
+.lcm-btn-primary { background: #1a6b3a; color: #fff; border-color: #1a6b3a; }
+.lcm-btn-primary:hover { background: #155a2f; }
 </style>
 </head>
 <body>
@@ -913,6 +951,9 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 </div>
 
 <!-- COLUMN FILTER POPUP -->
+<!-- Deposit transition popup — populated dynamically by lcOpenDepositPopup() -->
+<div class="lcm-overlay" id="lcm-overlay"></div>
+
 <div id="cf-popup" class="cf-popup" style="display:none">
   <div class="cf-header">
     <span id="cf-title">Filter</span>
@@ -4149,13 +4190,219 @@ function lcSwitchTab(tabId) {
   document.querySelectorAll('.lc-tab-pane').forEach(p => p.classList.toggle('active', p.id === 'lc-pane-' + tabId));
 }
 
-function lcSetCondition(idx) {
-  // Phase 1: open the existing Sales Condition dropdown (the popup will replace this in phase 2)
-  const key = sid('Sales Condition');
+// ─────────────────────────────────────────────────────────────────────────
+// DEPOSIT TRANSITION POPUP
+// Triggered when user clicks the "Deposit" stage in the Sales Condition strip.
+// Captures all SCAN_FIELDS the PDF scan would extract — manual fallback for
+// when the user doesn't have a Contract for Sale to scan.
+// ─────────────────────────────────────────────────────────────────────────
+const LC_DEPOSIT_FIELDS = [
+  { key: 'Sales Advice Received Date',     label: 'SA Received Date',       type: 'date',     req: 'hard' },
+  { key: 'Proposed Exchanged Date',        label: 'Proposed Exchange Date', type: 'date',     req: 'hard' },
+  { key: 'Proposed Settled Date',          label: 'Proposed Settle Date',   type: 'date',     req: 'hard' },
+  { key: 'CfS Issued Price',               label: 'CfS Issued Price',       type: 'currency', req: 'optional' },
+  { key: 'Rebate',                         label: 'Rebate',                 type: 'currency', req: 'soft' },
+  { key: 'Deposit%',                       label: 'Deposit %',              type: 'percent',  req: 'hard' },
+  { key: "(1) Purchaser's Name",           label: 'Purchaser 1 Name',       type: 'text',     req: 'hard' },
+  { key: "(1) Purchaser's Email",          label: 'Purchaser 1 Email',      type: 'email',    req: 'hard' },
+  { key: "(1) Purchaser's Mobile",         label: 'Purchaser 1 Mobile',     type: 'tel',      req: 'hard' },
+  { key: "(2) Purchaser's Name",           label: 'Purchaser 2 Name',       type: 'text',     req: 'optional' },
+  { key: "(2) Purchaser's Email",          label: 'Purchaser 2 Email',      type: 'email',    req: 'optional' },
+  { key: "(2) Purchaser's Mobile",         label: 'Purchaser 2 Mobile',     type: 'tel',      req: 'optional' },
+  { key: "Purchaser's Suburb",             label: 'Purchaser Suburb',       type: 'text',     req: 'optional' },
+  { key: "Purchaser's Postcode",           label: 'Purchaser Postcode',     type: 'text',     req: 'optional' },
+  { key: "Purchaser's Solicitor (P'Sol)",  label: 'Solicitor',              type: 'text',     req: 'hard' },
+  { key: "Purchaser's Solicitor Phone",    label: 'Solicitor Phone',        type: 'tel',      req: 'hard' },
+  { key: 'Vendors Agency',                 label: 'Vendors Agency',         type: 'text',     req: 'hard' },
+  { key: 'Vendors Agency Agent',           label: 'Vendors Agency Agent',   type: 'text',     req: 'hard' },
+  { key: "Agent's Email",                  label: "Agent's Email",          type: 'email',    req: 'hard' },
+  { key: "Agent's Mobile",                 label: "Agent's Mobile",         type: 'tel',      req: 'hard' },
+  { key: 'FIRB Approval',                  label: 'FIRB Approval',          type: 'firb',     req: 'optional' },
+];
+
+function lcOpenDepositPopup(targetIdx, targetLabel) {
+  if (editRowIdx < 0) return;
   const row = allData[editRowIdx];
-  if (!row) return;
-  const currentVal = String(row['Sales Condition'] || '');
-  deskStartEdit(key, currentVal);
+  const lotNum = row['Lot #'] || row['Lot#'] || '—';
+  const propAddr = row['Property Address'] || '';
+
+  let bodyHtml = '<div class="lcm-summary hidden" id="lcm-summary"></div>';
+  LC_DEPOSIT_FIELDS.forEach(f => {
+    const raw = row[f.key];
+    const labelClass = f.req === 'hard' ? 'lcm-label required' : 'lcm-label';
+    const escKey = f.key.replace(/"/g, '&quot;');
+    let inputHtml = '';
+
+    if (f.type === 'firb') {
+      const cur = String(raw ?? '').trim();
+      inputHtml = `<select class="lcm-input" data-field="${escKey}" data-req="${f.req}" data-type="firb">
+        <option value="" ${!cur ? 'selected' : ''}>—</option>
+        <option ${cur === 'Yes' ? 'selected' : ''}>Yes</option>
+        <option ${cur === 'No' ? 'selected' : ''}>No</option>
+        <option ${cur === 'Pending' ? 'selected' : ''}>Pending</option>
+      </select>`;
+    } else if (f.type === 'currency') {
+      const n = Number(String(raw ?? '').replace(/[$,]/g, '').trim());
+      const val = (raw && !isNaN(n)) ? n.toLocaleString() : '';
+      inputHtml = `<div class="lcm-pre"><span class="lcm-pre-text">$</span><input class="lcm-input" type="text" data-field="${escKey}" data-req="${f.req}" data-type="currency" value="${val}"></div>`;
+    } else if (f.type === 'percent') {
+      const n = parseFloat(String(raw ?? '').replace(/%/g, '').trim());
+      const val = !isNaN(n) ? String(n > 0 && n <= 1 ? n * 100 : n) : '';
+      inputHtml = `<div class="lcm-suf"><input class="lcm-input" type="text" data-field="${escKey}" data-req="${f.req}" data-type="percent" value="${val}" placeholder="e.g. 10"><span class="lcm-suf-text">%</span></div>`;
+    } else if (f.type === 'date') {
+      let val = '';
+      if (raw) {
+        let d;
+        if (typeof raw === 'number' && raw > 40000) d = new Date(Math.round((raw - 25569) * 86400 * 1000));
+        else d = new Date(raw);
+        if (!isNaN(d.getTime())) val = d.toISOString().slice(0, 10);
+      }
+      inputHtml = `<input class="lcm-input" type="date" data-field="${escKey}" data-req="${f.req}" data-type="date" value="${val}">`;
+    } else {
+      const v = String(raw ?? '').replace(/"/g, '&quot;');
+      inputHtml = `<input class="lcm-input" type="${f.type}" data-field="${escKey}" data-req="${f.req}" data-type="${f.type}" value="${v}">`;
+    }
+
+    bodyHtml += `<div class="lcm-row"><label class="${labelClass}">${f.label}</label>${inputHtml}</div>`;
+  });
+
+  const safeLabel = String(targetLabel).replace(/'/g, "\\'");
+  const html = `<div class="lcm">
+    <div class="lcm-hdr">
+      <div class="lcm-hdr-eyebrow">Advance Sales Condition</div>
+      <div class="lcm-hdr-title">Move to ${lcEscapeHtml(targetLabel)}</div>
+      <div class="lcm-hdr-sub">Lot ${lcEscapeHtml(lotNum)}${propAddr ? ' · ' + lcEscapeHtml(propAddr) : ''}</div>
+      <button class="lcm-close" onclick="lcCancelPopup()">×</button>
+    </div>
+    <div class="lcm-banner">
+      <span>📄</span>
+      <span><strong>Have the Contract for Sale?</strong> Use <button onclick="lcScanInstead()">Scan PDF</button> to auto-fill from the document.</span>
+    </div>
+    <div class="lcm-body">${bodyHtml}</div>
+    <div class="lcm-ftr">
+      <button class="lcm-btn" onclick="lcScanInstead()">📄 Scan PDF instead</button>
+      <div class="lcm-ftr-spacer"></div>
+      <button class="lcm-btn" onclick="lcCancelPopup()">Cancel</button>
+      <button class="lcm-btn lcm-btn-primary" onclick="lcSavePopup(${targetIdx}, '${safeLabel}')">Save &amp; advance</button>
+    </div>
+  </div>`;
+
+  const overlay = document.getElementById('lcm-overlay');
+  overlay.innerHTML = html;
+  overlay.classList.add('show');
+  lcValidatePopup();
+  overlay.querySelectorAll('.lcm-input').forEach(el => {
+    el.addEventListener('input', lcValidatePopup);
+    el.addEventListener('change', lcValidatePopup);
+  });
+}
+
+function lcValidatePopup() {
+  const overlay = document.getElementById('lcm-overlay');
+  let hardMissing = 0, softMissing = 0;
+  overlay.querySelectorAll('.lcm-input').forEach(el => {
+    const isEmpty = String(el.value || '').trim() === '';
+    const req = el.dataset.req;
+    if (isEmpty && req === 'hard') { el.classList.add('empty-required'); hardMissing++; }
+    else el.classList.remove('empty-required');
+    if (isEmpty && req === 'soft') softMissing++;
+  });
+  const summary = document.getElementById('lcm-summary');
+  if (hardMissing > 0) {
+    summary.classList.remove('hidden', 'warn');
+    summary.innerHTML = `<span>⚠</span><span><strong>${hardMissing} required field${hardMissing > 1 ? 's' : ''} missing</strong> — fields marked <span style="color:#dc2626">*</span> must be filled to advance.</span>`;
+  } else if (softMissing > 0) {
+    summary.classList.remove('hidden');
+    summary.classList.add('warn');
+    summary.innerHTML = `<span>ℹ</span><span><strong>Note:</strong> Rebate is empty. You can still advance without it.</span>`;
+  } else {
+    summary.classList.add('hidden');
+  }
+  return hardMissing === 0;
+}
+
+function lcCancelPopup() {
+  const overlay = document.getElementById('lcm-overlay');
+  overlay.classList.remove('show');
+  overlay.innerHTML = '';
+}
+
+function lcScanInstead() {
+  lcCancelPopup();
+  openScanPdf();
+}
+
+function lcSavePopup(targetIdx, targetLabel) {
+  if (!lcValidatePopup()) return;
+  const overlay = document.getElementById('lcm-overlay');
+  overlay.querySelectorAll('.lcm-input').forEach(el => {
+    const fieldKey = el.dataset.field;
+    const type = el.dataset.type || 'text';
+    const val = String(el.value || '').trim();
+    let displayHtml;
+    if (val === '') {
+      displayHtml = '<span style="color:var(--muted);font-style:italic">&#8212;</span>';
+    } else if (type === 'currency') {
+      const n = Number(String(val).replace(/[$,]/g, ''));
+      displayHtml = isNaN(n) ? lcEscapeHtml(val) : '$' + n.toLocaleString();
+    } else if (type === 'percent') {
+      const n = parseFloat(String(val).replace(/%/g, '').trim());
+      displayHtml = isNaN(n) ? '' : ((n > 0 && n <= 1 ? n * 100 : n) + '%');
+    } else if (type === 'date') {
+      displayHtml = lcEscapeHtml(fmtDate(val));
+    } else {
+      displayHtml = lcEscapeHtml(val);
+    }
+    const dispEl = document.getElementById('d-disp-' + sid(fieldKey));
+    if (dispEl) dispEl.innerHTML = displayHtml;
+  });
+  // Set Sales Condition value
+  const condEl = document.getElementById('d-disp-' + sid('Sales Condition'));
+  if (condEl) condEl.innerHTML = lcEscapeHtml(targetLabel);
+  // Update strip + pill on the card
+  const stages = document.querySelectorAll('#lc-cond-stages .lc-pstage');
+  stages.forEach(s => {
+    const i = Number(s.dataset.idx);
+    s.classList.remove('done', 'current');
+    if (i < targetIdx) s.classList.add('done');
+    else if (i === targetIdx) s.classList.add('current');
+  });
+  const cnt = document.getElementById('lc-cond-count');
+  if (cnt) cnt.textContent = targetIdx + '/5';
+  const pill = document.getElementById('lc-cond-pill');
+  if (pill) pill.innerHTML = '<span class="lc-dot"></span>' + lcEscapeHtml(targetLabel);
+  formDirty = true;
+  lcCancelPopup();
+  toast('Staged — press Save & Sync to push to OneDrive', 'success');
+}
+
+function lcSetCondition(idx) {
+  const stages = document.querySelectorAll('#lc-cond-stages .lc-pstage');
+  let currentStage = 0;
+  stages.forEach(s => { if (s.classList.contains('current')) currentStage = Number(s.dataset.idx); });
+  if (idx === currentStage) return; // no-op when clicking the current stage
+
+  const stage = Array.from(stages).find(s => Number(s.dataset.idx) === idx);
+  if (!stage) return;
+  const targetLabel = stage.dataset.label;
+
+  // Deposit transition (idx 3) opens the popup
+  if (idx === 3) { lcOpenDepositPopup(idx, targetLabel); return; }
+
+  // Other transitions: just set the condition for now (popups for those come later)
+  const condEl = document.getElementById('d-disp-' + sid('Sales Condition'));
+  if (condEl) condEl.innerHTML = lcEscapeHtml(targetLabel);
+  stages.forEach(s => {
+    const i = Number(s.dataset.idx);
+    s.classList.remove('done', 'current');
+    if (i < idx) s.classList.add('done');
+    else if (i === idx) s.classList.add('current');
+  });
+  const cnt = document.getElementById('lc-cond-count');
+  if (cnt) cnt.textContent = idx + '/5';
+  const pill = document.getElementById('lc-cond-pill');
+  if (pill) pill.innerHTML = '<span class="lc-dot"></span>' + lcEscapeHtml(targetLabel);
+  formDirty = true;
 }
 
 async function deskEditRow(idx) {
