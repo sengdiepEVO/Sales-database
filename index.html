@@ -3950,7 +3950,9 @@ const LC_SECTIONS = [
   { idx: 14, label: 'Dates & CfS',          colour: '#4EA72E', columnFlow: true, fields: ['CfS Type','Sales Advice Received Date','Sales Advice Sent To Legal Date','Contract Issued Date','Days From CfS Issued','CfS Issued Price','Proposed Exchanged Date','Exchanged Date','CfS Exchanged Price ($)','Proposed Settled Date','Settled Date','Days from Exchanged to Settled','Settled Month','Settled Year','CfS Settled Price ($)','Rebate','Deposit%','Cooling Off Date','FIRB Approval','March Campaign.1','Comments'] },
   { idx: 15, label: 'Vendors & Agents',     colour: '#A02B93', dark: true,    fields: ['Vendors Agency','Vendors Agency Agent',"Agent's Mobile","Agent's Email"] },
   { idx: 16, label: 'Lead Source',          colour: '#FFFF00',                fields: ['Source of Enquiry'] },
-  { idx: 17, label: 'Purchaser Details',    colour: '#E97132', dark: true, columnFlow: true, fields: ["(1) Purchaser's Name","(1) Purchaser's Email","(1) Purchaser's Mobile","(2) Purchaser's Name","(2) Purchaser's Email","(2) Purchaser's Mobile","Purchaser's Suburb","Purchaser's Postcode","Purchaser's Solicitor (P'Sol)","Purchaser's Solicitor Phone"] },
+  // Order tuned for column-flow split: items 1-5 fill the left column, 6-10 the right.
+  // Left: P1 name/email/mobile + Suburb + Postcode | Right: P2 name/email/mobile + Solicitor + Solicitor Phone
+  { idx: 17, label: 'Purchaser Details',    colour: '#E97132', dark: true, columnFlow: true, fields: ["(1) Purchaser's Name","(1) Purchaser's Email","(1) Purchaser's Mobile","Purchaser's Suburb","Purchaser's Postcode","(2) Purchaser's Name","(2) Purchaser's Email","(2) Purchaser's Mobile","Purchaser's Solicitor (P'Sol)","Purchaser's Solicitor Phone"] },
   { idx: 18, label: 'Other',                colour: '#FFFF00',                fields: ['Type Of Purchaser','Special Condilions/Variations','2026 Report','Comments.1'] },
 ];
 
