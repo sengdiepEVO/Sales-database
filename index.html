@@ -33,7 +33,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 #toast.error{background:var(--danger)}
 
 /* ── APP HEADER ── */
-.app-header{height:var(--header-h);background:#1a1408;display:flex;align-items:center;justify-content:space-between;padding:0 16px;flex-shrink:0}
+.app-header{height:var(--header-h);background:linear-gradient(to bottom, #000d35 0%, #002675 100%);display:flex;align-items:center;justify-content:space-between;padding:0 16px;flex-shrink:0}
 .header-logo{font-size:20px;font-style:italic;color:#90d4a8}
 .header-logo strong{font-style:normal}
 .header-version{font-size:10px;color:#6a8f7a;margin-left:6px}
@@ -465,6 +465,335 @@ select.lcm-input { appearance: none; background-image: url("data:image/svg+xml,%
 .lcm-btn:hover { background: #f1f5f9; }
 .lcm-btn-primary { background: #1a6b3a; color: #fff; border-color: #1a6b3a; }
 .lcm-btn-primary:hover { background: #155a2f; }
+
+/* ───────────────────────────────────────────────────────────────────────
+   PIPELINE FRONT PAGE (.pp-) — Kanban + KPIs + alerts + activity sidebar
+   Source: frontpage-option-D-hybrid.html (mockup)
+   ─────────────────────────────────────────────────────────────────────── */
+.pp-page { padding: 16px 20px 20px; max-width: 1600px; margin: 0 auto; height: 100%; overflow-y: auto; box-sizing: border-box; }
+.pp-hdr { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
+.pp-greeting { font-size: 14px; color: #475569; }
+.pp-greeting strong { color: #1a1408; }
+.pp-sub { font-size: 12px; color: #8a7d65; margin-top: 2px; }
+.pp-view-toggle { display: flex; gap: 4px; background: #fff; border: 1px solid #ddd5c0; border-radius: 8px; padding: 3px; flex-shrink: 0; }
+.pp-view-toggle button { padding: 6px 12px; border: none; background: none; font-family: inherit; font-size: 12px; cursor: pointer; color: #475569; border-radius: 5px; font-weight: 500; }
+.pp-view-toggle button.active { background: #002675; color: #fff; }
+
+/* Compact KPI strip */
+.pp-kpi-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 12px; }
+.pp-kpi-mini { background: #fff; border: 1px solid #ddd5c0; border-left: 3px solid; border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.pp-kpi-mini.blue { border-left-color: #002675; }
+.pp-kpi-mini.green { border-left-color: #1a6b3a; }
+.pp-kpi-mini.gold { border-left-color: #b88a00; }
+.pp-kpi-mini.red { border-left-color: #8b2020; }
+.pp-kpi-mini-label { font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; color: #8a7d65; font-weight: 600; }
+.pp-kpi-mini-value { font-size: 22px; font-weight: 700; color: #1a1408; line-height: 1; font-variant-numeric: tabular-nums; }
+.pp-kpi-mini-meta { font-size: 11px; color: #8a7d65; margin-top: 3px; }
+.pp-kpi-mini-meta .up { color: #1a6b3a; font-weight: 500; }
+.pp-kpi-mini-right { text-align: right; }
+
+/* Alert ribbon */
+.pp-alert-ribbon { background: #fff; border: 1px solid #ddd5c0; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+.pp-alert-ribbon.hidden { display: none; }
+.pp-alert-label { display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-right: 10px; border-right: 1px solid #f0ebe0; }
+.pp-alert-icon { width: 28px; height: 28px; border-radius: 50%; background: #fee; color: #8b2020; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.pp-alert-label-text { font-size: 12px; font-weight: 600; color: #8b2020; }
+.pp-alert-label-count { font-size: 11px; color: #8a7d65; }
+.pp-alert-items { display: flex; gap: 10px; flex: 1; overflow-x: auto; padding-bottom: 2px; }
+.pp-alert-item { background: #faf8f4; border: 1px solid #f0ebe0; border-radius: 6px; padding: 8px 12px; flex-shrink: 0; max-width: 320px; cursor: pointer; }
+.pp-alert-item:hover { background: #fff; border-color: #002675; }
+.pp-alert-item-title { font-size: 12.5px; font-weight: 500; color: #1a1408; }
+.pp-alert-item-meta { font-size: 11px; color: #8a7d65; margin-top: 2px; }
+
+/* Filter bar */
+.pp-filter-bar { background: #fff; border: 1px solid #ddd5c0; border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+.pp-fb-search { flex: 1; min-width: 220px; padding: 8px 12px; border: 1px solid #ddd5c0; border-radius: 6px; font-family: inherit; font-size: 13px; background: #faf8f4; outline: none; }
+.pp-fb-select { padding: 7px 10px; border: 1px solid #ddd5c0; border-radius: 6px; font-family: inherit; font-size: 12px; background: #fff; cursor: pointer; }
+.pp-fb-btn { padding: 7px 14px; border: 1px solid #ddd5c0; border-radius: 6px; background: #fff; color: #002675; font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; }
+.pp-fb-btn-primary { background: #002675; color: #fff; border-color: #002675; }
+
+/* Layout: kanban + activity sidebar */
+.pp-layout { display: grid; grid-template-columns: 1fr 280px; gap: 12px; min-height: 500px; }
+@media (max-width: 1280px) { .pp-layout { grid-template-columns: 1fr; } .pp-activity-side { display: none; } }
+
+.pp-kanban { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; min-height: 0; }
+.pp-col { display: flex; flex-direction: column; min-height: 0; }
+.pp-col-hdr { padding: 9px 11px; background: #fff; border: 1px solid #ddd5c0; border-bottom: 3px solid; border-radius: 8px 8px 0 0; flex-shrink: 0; }
+.pp-col-hdr.pending  { border-bottom-color: #b88a00; }
+.pp-col-hdr.deposit  { border-bottom-color: #002675; }
+.pp-col-hdr.exchange { border-bottom-color: #7a9a3d; }
+.pp-col-hdr.settled  { border-bottom-color: #1a6b3a; }
+.pp-col-title { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #1a1408; }
+.pp-col-count { background: #f0ebe0; color: #475569; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 99px; }
+.pp-col-meta { font-size: 11px; color: #8a7d65; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.pp-col-body { background: #f0ebe0; border: 1px solid #ddd5c0; border-top: none; border-radius: 0 0 8px 8px; padding: 7px; flex: 1; overflow-y: auto; min-height: 200px; max-height: calc(100vh - 360px); display: flex; flex-direction: column; gap: 7px; }
+
+/* Lot tile (in pipeline column) */
+.pp-tile { background: #fff; border: 1px solid #ddd5c0; border-radius: 6px; padding: 9px 11px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.pp-tile:hover { border-color: #002675; box-shadow: 0 2px 8px rgba(0, 38, 117, 0.10); }
+.pp-tile-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.pp-tile-num { font-size: 15px; font-weight: 700; color: #002675; font-variant-numeric: tabular-nums; }
+.pp-tile-stage { font-size: 10px; color: #8a7d65; font-weight: 500; letter-spacing: 0.4px; text-transform: uppercase; }
+.pp-tile-addr { font-size: 12px; color: #1a1408; margin-top: 3px; line-height: 1.3; }
+.pp-tile-comment { font-size: 12px; color: #475569; margin-top: 4px; line-height: 1.4; font-style: italic; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.pp-tile-comment.empty { color: #94a3b8; }
+.pp-tile-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 7px; }
+.pp-tile-val { font-size: 12.5px; font-weight: 600; color: #1a1408; font-variant-numeric: tabular-nums; }
+.pp-tile-partner { font-size: 11px; color: #8a7d65; max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pp-tile-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.pp-tag { font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 500; }
+.pp-tag.firb-pending { background: #fff8e1; color: #7a5200; }
+.pp-tag.cool-off { background: #fee; color: #8b2020; }
+.pp-tag.urgent { background: #fee; color: #8b2020; }
+.pp-tag.recent { background: #e8f4ed; color: #1a6b3a; }
+.pp-tag.resc { background: #ede9fe; color: #5b21b6; }
+.pp-col-empty { padding: 20px 8px; text-align: center; color: #8a7d65; font-size: 11px; font-style: italic; }
+.pp-col-more { background: rgba(0,0,0,0.03); border: 1px dashed #ddd5c0; border-radius: 6px; padding: 8px; text-align: center; font-size: 11px; color: #8a7d65; }
+
+/* Activity sidebar */
+.pp-activity-side { background: #fff; border: 1px solid #ddd5c0; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; max-height: calc(100vh - 320px); }
+.pp-activity-hdr { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid #ddd5c0; background: #faf8f4; }
+.pp-activity-title { font-size: 12px; font-weight: 600; color: #1a1408; }
+.pp-activity-link { font-size: 11px; color: #002675; text-decoration: none; cursor: pointer; }
+.pp-activity-list { flex: 1; overflow-y: auto; }
+.pp-activity-empty { padding: 28px 16px; color: #8a7d65; font-size: 12px; font-style: italic; text-align: center; }
+
+/* ───────────────────────────────────────────────────────────────────────
+   MONTHLY PIPELINE REPORT (.mr-) — full-screen overlay opened from Reports
+   ─────────────────────────────────────────────────────────────────────── */
+.mr-overlay { position: fixed; inset: 0; z-index: 90; background: #f5f0e8; display: none; flex-direction: column; overflow: hidden; }
+.mr-overlay.show { display: flex; }
+.mr-hdr { background: linear-gradient(to bottom, #000d35 0%, #002675 100%); color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.mr-back { background: transparent; border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.9); padding: 6px 14px; border-radius: 4px; font-family: inherit; font-size: 12px; cursor: pointer; }
+.mr-title { font-size: 16px; font-weight: 600; }
+.mr-page { flex: 1; overflow-y: auto; padding: 20px; max-width: 1600px; margin: 0 auto; width: 100%; }
+.mr-page-hdr { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 18px; gap: 14px; flex-wrap: wrap; }
+.mr-page-title { font-size: 22px; font-weight: 600; color: #1a1408; }
+.mr-page-sub { font-size: 13px; color: #8a7d65; margin-top: 2px; }
+.mr-ctrl-bar { display: flex; gap: 8px; }
+.mr-ctrl-select { padding: 7px 10px; border: 1px solid #ddd5c0; border-radius: 6px; background: #fff; font-size: 12px; cursor: pointer; font-family: inherit; }
+.mr-ctrl-btn { padding: 7px 14px; border: 1px solid #ddd5c0; border-radius: 6px; background: #fff; color: #002675; font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; }
+.mr-kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 18px; }
+.mr-kpi { background: #fff; border: 1px solid #ddd5c0; border-top: 3px solid; border-radius: 8px; padding: 12px 14px; }
+.mr-kpi.deposit  { border-top-color: #002675; }
+.mr-kpi.exch-act { border-top-color: #7a9a3d; }
+.mr-kpi.exch-prop{ border-top-color: #b88a00; }
+.mr-kpi.set-act  { border-top-color: #1a6b3a; }
+.mr-kpi.set-prop { border-top-color: #5d6b78; }
+.mr-kpi-label { font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; color: #8a7d65; font-weight: 600; }
+.mr-kpi-value { font-size: 22px; font-weight: 700; color: #1a1408; line-height: 1; margin-top: 6px; font-variant-numeric: tabular-nums; }
+.mr-kpi-meta { font-size: 11px; color: #8a7d65; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.mr-panel { background: #fff; border: 1px solid #ddd5c0; border-radius: 10px; overflow: hidden; margin-bottom: 18px; }
+.mr-panel-hdr { padding: 12px 16px; border-bottom: 1px solid #ddd5c0; background: #faf8f4; display: flex; align-items: baseline; gap: 12px; }
+.mr-panel-title { font-size: 13px; font-weight: 600; color: #1a1408; }
+.mr-panel-sub { font-size: 11.5px; color: #8a7d65; }
+.mr-legend-bar { display: flex; align-items: center; gap: 18px; padding: 8px 16px; background: #faf8f4; border-bottom: 1px solid #ddd5c0; font-size: 11px; color: #475569; }
+.mr-legend-item { display: flex; align-items: center; gap: 6px; }
+.mr-legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+.mr-legend-dot.actual { background: #1a6b3a; }
+.mr-legend-dot.proposed { background: transparent; border: 2px solid #b88a00; }
+.mr-table-wrap { overflow-x: auto; }
+table.mr-report { width: 100%; border-collapse: collapse; font-size: 12px; }
+table.mr-report thead th { background: #faf8f4; padding: 8px 10px; border-bottom: 2px solid #c8c0b0; font-weight: 600; color: #1a1408; text-align: right; white-space: nowrap; font-size: 11px; letter-spacing: 0.3px; text-transform: uppercase; }
+table.mr-report thead th:first-child { text-align: left; position: sticky; left: 0; background: #faf8f4; z-index: 2; min-width: 200px; }
+table.mr-report thead th.total { background: #ede9d4; border-left: 1px solid #c8c0b0; }
+table.mr-report tbody td { padding: 7px 10px; border-bottom: 1px solid #f0ebe0; text-align: right; font-variant-numeric: tabular-nums; }
+table.mr-report tbody td:first-child { text-align: left; position: sticky; left: 0; background: #fff; z-index: 1; font-size: 12px; }
+table.mr-report tbody td.total { background: #faf8f4; border-left: 1px solid #ddd5c0; font-weight: 600; }
+.mr-grp-row td { background: #f0ebe0 !important; padding: 8px 10px !important; font-weight: 700 !important; font-size: 11px !important; letter-spacing: 0.5px; text-transform: uppercase; color: #1a1408 !important; border-bottom: 1px solid #c8c0b0 !important; }
+.mr-grp-row td:first-child { background: #f0ebe0 !important; }
+.mr-grp-row.deposit  td { color: #002675 !important; border-left: 3px solid #002675; }
+.mr-grp-row.exchange td { color: #4d6e25 !important; border-left: 3px solid #7a9a3d; }
+.mr-grp-row.settled  td { color: #0d3d20 !important; border-left: 3px solid #1a6b3a; }
+.mr-sub-row td:first-child { padding-left: 22px; color: #475569; }
+.mr-sub-row.actual td:first-child::before { content: '● '; color: #1a6b3a; font-weight: 700; margin-right: 4px; }
+.mr-sub-row.proposed td:first-child::before { content: '○ '; color: #b88a00; font-weight: 700; margin-right: 4px; }
+.mr-sub-row.dollar td { color: #1a1408; font-weight: 500; }
+.mr-sub-row.dollar td:first-child { font-weight: 400; }
+th.mr-this-month, td.mr-this-month { background: #fff8e1 !important; }
+.mr-foot-note { margin-top: 14px; font-size: 11px; color: #8a7d65; line-height: 1.6; max-width: 1100px; margin-left: auto; margin-right: auto; text-align: center; }
+.mr-foot-note code { background: #f0ebe0; padding: 1px 5px; border-radius: 3px; font-size: 10.5px; }
+
+/* Option B mini-bar cell with traffic-light scheme.
+   Colour reflects the contributing lot's CURRENT stage:
+   🔴 Red = Settled · 🟡 Amber = Exchanged · 🟢 Green = Deposit. */
+.mr-cell { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; min-width: 80px; }
+.mr-cell-main { font-size: 14px; font-weight: 700; color: #1a1408; line-height: 1; font-variant-numeric: tabular-nums; }
+.mr-cell-bar { width: 80px; height: 6px; background: #f0ebe0; border-radius: 2px; overflow: hidden; display: flex; }
+table.mr-report tbody td.mr-tlcell { min-width: 100px; }
+table.mr-report thead th { min-width: 100px; }
+.mr-bar-set { background: #b91c1c; height: 100%; }
+.mr-bar-exc { background: #d97706; height: 100%; }
+.mr-bar-dep { background: #1a6b3a; height: 100%; }
+.mr-cell-split { font-size: 10.5px; color: #475569; line-height: 1; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mr-cell-split .tl-set { color: #8b1818; font-weight: 600; }
+.mr-cell-split .tl-exc { color: #b45309; font-weight: 600; }
+.mr-cell-split .tl-dep { color: #0d3d20; font-weight: 600; }
+.mr-cell-empty { color: #cbd5e1; font-weight: 400; font-size: 14px; }
+table.mr-report tbody td.mr-tlcell { padding: 8px 10px; vertical-align: top; }
+table.mr-report tbody td.mr-tlcell:first-child { padding: 12px 10px; vertical-align: middle; font-weight: 500; }
+.mr-grp-row.tl-dep td { color: #0d3d20 !important; border-left: 3px solid #1a6b3a; }
+.mr-grp-row.tl-exc td { color: #b45309 !important; border-left: 3px solid #d97706; }
+.mr-grp-row.tl-set td { color: #8b1818 !important; border-left: 3px solid #b91c1c; }
+.mr-kpi.tl-dep { border-top-color: #1a6b3a; }
+.mr-kpi.tl-exc { border-top-color: #d97706; }
+.mr-kpi.tl-set { border-top-color: #b91c1c; }
+
+/* Date range controls */
+.mr-range-bar { background: #fff; border: 1px solid #ddd5c0; border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.mr-range-label { font-size: 11px; letter-spacing: 0.4px; text-transform: uppercase; color: #8a7d65; font-weight: 600; }
+.mr-range-input { padding: 6px 10px; border: 1px solid #ddd5c0; border-radius: 6px; font-family: inherit; font-size: 12.5px; background: #faf8f4; color: #1a1408; outline: none; font-variant-numeric: tabular-nums; }
+.mr-range-input:focus { border-color: #002675; background: #fff; }
+.mr-range-presets { display: flex; gap: 6px; margin-left: auto; }
+.mr-range-preset { padding: 5px 11px; border: 1px solid #ddd5c0; border-radius: 99px; background: #fff; font-family: inherit; font-size: 11.5px; color: #475569; cursor: pointer; }
+.mr-range-preset:hover { border-color: #002675; color: #002675; }
+.mr-range-preset.active { background: #002675; color: #fff; border-color: #002675; }
+.mr-range-summary { font-size: 11.5px; color: #8a7d65; }
+
+/* ───────────────────────────────────────────────────────────────────────
+   TARGETS ADMIN MODAL (.tg-) — set $ / qty targets per stage + time frame.
+   Stored in localStorage for now; will move to Supabase post-migration.
+   ─────────────────────────────────────────────────────────────────────── */
+.tg-overlay { position: fixed; inset: 0; z-index: 110; background: rgba(15,23,42,0.55); display: none; align-items: center; justify-content: center; padding: 20px; font-family: inherit; }
+.tg-overlay.show { display: flex; }
+.tg-modal { background: #fff; border-radius: 12px; box-shadow: 0 16px 48px rgba(0,0,0,0.35); width: 100%; max-width: 760px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; color: #1a1408; }
+.tg-hdr { background: linear-gradient(to bottom, #000d35 0%, #002675 100%); color: #fff; padding: 16px 22px; flex-shrink: 0; position: relative; }
+.tg-hdr-title { font-size: 17px; font-weight: 600; }
+.tg-hdr-sub { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 3px; }
+.tg-close { position: absolute; top: 14px; right: 14px; width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.1); color: #fff; border: none; cursor: pointer; font-size: 18px; line-height: 1; display: flex; align-items: center; justify-content: center; }
+.tg-close:hover { background: rgba(255,255,255,0.2); }
+.tg-body { flex: 1; overflow-y: auto; padding: 16px 22px; }
+.tg-section-title { font-size: 12px; font-weight: 600; color: #8a7d65; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tg-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+.tg-empty { padding: 20px; text-align: center; color: #8a7d65; font-size: 12.5px; font-style: italic; background: #faf8f4; border-radius: 8px; }
+.tg-row { background: #faf8f4; border: 1px solid #ddd5c0; border-left: 3px solid; border-radius: 8px; padding: 10px 14px; display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; }
+.tg-row.dep { border-left-color: #1a6b3a; }
+.tg-row.exc { border-left-color: #d97706; }
+.tg-row.set { border-left-color: #b91c1c; }
+.tg-row-info { min-width: 0; }
+.tg-row-label { font-size: 13.5px; font-weight: 600; color: #1a1408; }
+.tg-row-meta { font-size: 11.5px; color: #475569; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.tg-row-meta strong { color: #1a1408; }
+.tg-row-actions { display: flex; gap: 6px; }
+.tg-row-btn { padding: 5px 10px; border: 1px solid #ddd5c0; border-radius: 6px; background: #fff; color: #475569; font-size: 11px; font-family: inherit; cursor: pointer; }
+.tg-row-btn:hover { color: #002675; border-color: #002675; }
+.tg-row-btn.del:hover { color: #8b2020; border-color: #8b2020; }
+
+.tg-form { background: #f5f0e8; border: 1px solid #ddd5c0; border-radius: 8px; padding: 14px 16px; }
+.tg-form.collapsed .tg-form-fields { display: none; }
+.tg-form-toggle { display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+.tg-form-toggle-title { font-size: 13px; font-weight: 600; color: #002675; }
+.tg-form-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+.tg-field { display: flex; flex-direction: column; gap: 4px; }
+.tg-field.full { grid-column: 1 / -1; }
+.tg-field-label { font-size: 11px; letter-spacing: 0.4px; text-transform: uppercase; color: #475569; font-weight: 600; }
+.tg-input, .tg-select { padding: 8px 10px; border: 1px solid #ddd5c0; border-radius: 6px; font-family: inherit; font-size: 13px; background: #fff; color: #1a1408; outline: none; }
+.tg-input:focus, .tg-select:focus { border-color: #002675; }
+.tg-range-row { display: flex; gap: 6px; align-items: center; }
+.tg-range-row select { flex: 1; }
+.tg-form-actions { display: flex; gap: 8px; margin-top: 14px; justify-content: flex-end; }
+.tg-btn { padding: 8px 16px; border: 1px solid #ddd5c0; border-radius: 6px; background: #fff; color: #002675; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; }
+.tg-btn:hover { background: #f1f5f9; }
+.tg-btn.primary { background: #1a6b3a; color: #fff; border-color: #1a6b3a; }
+.tg-btn.primary:hover { background: #155a2f; }
+
+.mr-targets-btn { padding: 5px 11px; border: 1px solid #ddd5c0; border-radius: 99px; background: #fff; font-family: inherit; font-size: 11.5px; color: #475569; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
+.mr-targets-btn:hover { border-color: #002675; color: #002675; }
+
+/* Targets progress (.tgp-) — sales vs targets bars at the bottom of monthly report */
+.tgp-section { margin-top: 22px; }
+.tgp-section-hdr { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }
+.tgp-section-title { font-size: 13px; font-weight: 600; color: #1a1408; }
+.tgp-section-sub { font-size: 11px; color: #8a7d65; }
+.tgp-empty { background: #fff; border: 1px dashed #ddd5c0; border-radius: 8px; padding: 24px; text-align: center; color: #8a7d65; font-size: 12.5px; }
+.tgp-empty button { margin-top: 8px; padding: 6px 14px; background: #002675; color: #fff; border: none; border-radius: 6px; font-family: inherit; font-size: 12px; cursor: pointer; }
+.tgp-card { background: #fff; border: 1px solid #ddd5c0; border-left: 3px solid; border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+.tgp-card.dep { border-left-color: #1a6b3a; }
+.tgp-card.exc { border-left-color: #d97706; }
+.tgp-card.set { border-left-color: #b91c1c; }
+.tgp-card-hdr { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.tgp-card-title { font-size: 14px; font-weight: 600; color: #1a1408; }
+.tgp-card-meta { font-size: 11.5px; color: #8a7d65; font-variant-numeric: tabular-nums; }
+.tgp-card-status { padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; }
+.tgp-card-status.ahead { background: #e8f4ed; color: #0d3d20; }
+.tgp-card-status.ontrack { background: #fff8e1; color: #7a5200; }
+.tgp-card-status.behind { background: #fef2f2; color: #8b1818; }
+.tgp-card-status.over { background: #ede9fe; color: #5b21b6; }
+/* Pace pill — sits next to the status pill, shows the lot/day rate needed
+   to hit the target given days remaining and avg $ per lot. */
+.tgp-card-pills { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.tgp-card-pace { padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: #e0e9f5; color: #002675; cursor: help; }
+.tgp-card-pace.tight { background: #fff8e1; color: #7a5200; }
+.tgp-card-pace.over { background: #fef2f2; color: #8b1818; }
+.tgp-bars { display: flex; flex-direction: column; gap: 8px; }
+.tgp-bar-row { display: flex; flex-direction: column; gap: 4px; }
+.tgp-bar-label { display: flex; justify-content: space-between; font-size: 11.5px; color: #475569; font-variant-numeric: tabular-nums; }
+.tgp-bar-label .tgp-pct { font-weight: 700; color: #1a1408; }
+/* Track is the outer container — overflow visible so spill pills can sit beyond bar.
+   .tgp-bar-clip is the inner clipping wrapper that holds the rounded corners. */
+.tgp-bar-track { height: 18px; position: relative; overflow: visible; }
+.tgp-bar-clip { height: 100%; background: #f0ebe0; border-radius: 9px; overflow: hidden; display: flex; }
+.tgp-bar-seg {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  padding: 0 6px;
+  min-width: 0;
+  transition: width 0.2s;
+  font-variant-numeric: tabular-nums;
+}
+.tgp-bar-seg.set { background: #b91c1c; }
+.tgp-bar-seg.exc { background: #d97706; }
+.tgp-bar-seg.dep { background: #1a6b3a; }
+.tgp-bar-seg.time { background: #002675; }
+.tgp-bar-seg.narrow { color: transparent; padding: 0; }
+.tgp-bar-track.over .tgp-bar-clip::after { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 3px; background: #5b21b6; pointer-events: none; }
+
+/* Spill pill — sits to the right of the bar in the empty area, on the bar's line.
+   Coloured border + arrow points back to its source segment. */
+.tgp-bar-spill {
+  position: absolute;
+  top: 0;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 0 7px;
+  background: #fff;
+  border: 1px solid currentColor;
+  border-radius: 9px;
+  white-space: nowrap;
+  z-index: 2;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  font-variant-numeric: tabular-nums;
+}
+.tgp-bar-spill::before {
+  content: '';
+  position: absolute;
+  left: -5px; top: 50%;
+  transform: translateY(-50%);
+  width: 0; height: 0;
+  border: 5px solid transparent;
+  border-right-color: currentColor;
+}
+.tgp-bar-spill.dep { color: #0d3d20; }
+.tgp-bar-spill.exc { color: #b45309; }
+.tgp-bar-spill.set { color: #8b1818; }
+.tgp-bar-spill.time { color: #001a52; }
+.mr-toggle { display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; padding: 4px 10px; border: 1px solid #ddd5c0; border-radius: 99px; background: #fff; font-size: 11px; color: #475569; }
+.mr-toggle input { cursor: pointer; accent-color: #002675; }
+.mr-toggle.actual.on { background: #e8f4ed; border-color: #1a6b3a; color: #0d3d20; }
+.mr-toggle.proposed.on { background: #fff8e1; border-color: #b88a00; color: #7a5200; }
+/* Row visibility driven by toggles on the panel container */
+.mr-panel:not(.mr-show-actual) .mr-sub-row.actual { display: none; }
+.mr-panel:not(.mr-show-proposed) .mr-sub-row.proposed { display: none; }
 </style>
 </head>
 <body>
@@ -477,12 +806,16 @@ select.lcm-input { appearance: none; background-image: url("data:image/svg+xml,%
   <div class="login-card">
     <div class="login-icon">&#128202;</div>
     <div class="login-title">Sales DB</div>
-    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">v2.47</div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">v3.0</div>
     <div class="login-sub">Sign in with your Microsoft account to access your OneDrive sales data.</div>
     <button class="ms-btn" onclick="signIn()">
       <div class="ms-logo"><div></div><div></div><div></div><div></div></div>
       Sign in with Microsoft
     </button>
+    <button type="button" onclick="loadDemoData()" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:10px;margin-top:10px;background:#fff;color:var(--accent);border:1px solid var(--accent);border-radius:4px;font-family:'Aptos',sans-serif;font-size:12px;cursor:pointer">
+      🧪 Try with demo data (no sign-in)
+    </button>
+    <div style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.5">Loads ~20 sample lots so you can preview the UI. Edits don't save.</div>
     <div class="api-key-section">
       <label>Anthropic API Key</label>
       <div class="api-key-row">
@@ -513,7 +846,8 @@ select.lcm-input { appearance: none; background-image: url("data:image/svg+xml,%
 
   <!-- DESKTOP TOP NAV -->
   <div class="desktop-nav" id="desktop-nav">
-    <button class="desktop-navbtn active" id="dnav-data" onclick="deskShowScreen('data')">Data</button>
+    <button class="desktop-navbtn active" id="dnav-pipeline" onclick="deskShowScreen('pipeline')">Pipeline</button>
+    <button class="desktop-navbtn" id="dnav-data" onclick="deskShowScreen('data')">Data table</button>
     <button class="desktop-navbtn" id="dnav-chat" onclick="deskShowScreen('chat');checkKeyBanner()">Ask Claude</button>
     <button class="desktop-navbtn" id="dnav-reports" onclick="deskShowScreen('reports')">Reports</button>
     <div class="desktop-nav-right">
@@ -531,8 +865,15 @@ select.lcm-input { appearance: none; background-image: url("data:image/svg+xml,%
     <!-- DESKTOP MAIN -->
     <div class="desktop-main" id="desktop-main">
 
-      <!-- DESKTOP DATA SCREEN -->
-      <div class="desktop-screen active" id="dscreen-data">
+      <!-- DESKTOP PIPELINE SCREEN (front page, default landing) -->
+      <div class="desktop-screen active" id="dscreen-pipeline">
+        <div class="pp-page" id="pp-page">
+          <!-- Rendered by renderPipeline() once data is loaded -->
+        </div>
+      </div>
+
+      <!-- DESKTOP DATA SCREEN (existing spreadsheet view, secondary) -->
+      <div class="desktop-screen" id="dscreen-data">
         <!-- Desktop filter bar -->
         <div style="background:var(--surface);border-bottom:1px solid var(--border);padding:8px 16px;display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap">
           <input type="text" id="dt-search" placeholder="Search..." oninput="applyFilters()" style="flex:1;min-width:160px;padding:6px 12px;border:1px solid var(--border);border-radius:20px;font-family:Aptos,sans-serif;font-size:12px;background:var(--surface2);color:var(--ink);outline:none">
@@ -541,6 +882,7 @@ select.lcm-input { appearance: none; background-image: url("data:image/svg+xml,%
           <button id="dt-qf-exchange" onclick="deskToggleQF(this,'4. Exchanged')"  class="dt-qf-btn dt-qf-exc">Exchanged</button>
           <button id="dt-qf-settled"  onclick="deskToggleQF(this,'5. Settled')"    class="dt-qf-btn dt-qf-set">Settled</button>
           <button onclick="clearFilters()" style="padding:5px 12px;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--muted);font-size:12px;cursor:pointer;font-family:Aptos,sans-serif">&#10005; Clear</button>
+          <button onclick="exportData()" title="Export currently filtered rows to .xlsx" style="padding:5px 14px;border:1px solid var(--accent);border-radius:20px;background:var(--accent);color:#fff;font-size:12px;cursor:pointer;font-family:Aptos,sans-serif;font-weight:500">⬇ Export</button>
         </div>
         <div class="dt-toolbar">
           <span style="font-size:11px;color:var(--muted)" id="dt-active-filters"></span>
@@ -965,6 +1307,9 @@ select.lcm-input { appearance: none; background-image: url("data:image/svg+xml,%
 <!-- Deposit transition popup — populated dynamically by lcOpenDepositPopup() -->
 <div class="lcm-overlay" id="lcm-overlay"></div>
 
+<!-- Targets admin modal — populated dynamically by openTargetsAdmin() -->
+<div class="tg-overlay" id="tg-overlay"></div>
+
 <div id="cf-popup" class="cf-popup" style="display:none">
   <div class="cf-header">
     <span id="cf-title">Filter</span>
@@ -984,7 +1329,13 @@ select.lcm-input { appearance: none; background-image: url("data:image/svg+xml,%
 <script>
 
 const CLIENT_ID = 'cd53b987-59ab-4b81-9bfb-178cfa8ee5b2';
-const REDIRECT_URI = 'https://SENDIE1.github.io/Sales-database/';
+// REDIRECT_URI uses the current origin so it works for both:
+//   - Live: https://SENDIE1.github.io/Sales-database/
+//   - Local: http://localhost:8000/  (requires localhost added to Azure app's redirect URIs)
+// File:// URLs won't work — Microsoft requires http(s).
+const REDIRECT_URI = (location.protocol === 'http:' || location.protocol === 'https:')
+  ? location.origin + location.pathname.replace(/[^/]*$/, '')
+  : 'https://SENDIE1.github.io/Sales-database/';
 const FILE_NAME = 'SalesDB-Main.xlsx';
 const SCOPES = ['Files.ReadWrite', 'User.Read'];
 const ANTHROPIC_KEY = () => {
@@ -1195,10 +1546,13 @@ async function loadFileFromOneDrive() {
   filteredData = [...allData];
   populateDropdowns();
   renderLotList();
-  if (isDesktop()) { renderDesktopTable(); }
+  if (isDesktop()) { renderDesktopTable(); renderPipeline(); }
   buildAddForm();
   updateStats();
   setSyncStatus('synced');
+  // Pull the shared sales target from 2.SalesTarget!M3:M4 in the background so
+  // the progress bar on the Monthly Report has it ready when the user opens it.
+  tgFetchTarget().catch(() => {});
 }
 
 async function refreshFromOneDrive() {
@@ -2146,13 +2500,22 @@ function closeScanPdf() {
 
 function resetScanPdf() {
   scanPdfFile = null;
-  document.getElementById('scan-file-name').textContent = 'No file selected';
-  document.getElementById('scan-extract-btn').style.opacity = '0.4';
-  document.getElementById('scan-extract-btn').style.pointerEvents = 'none';
-  document.getElementById('scan-resc-banner').style.display = 'none';
-  document.getElementById('scan-price-banner').style.display = 'none';
-  document.getElementById('scan-idname-banner').style.display = 'none';
-  // banners replaced by summary panel — no individual resets needed
+  scanExtractedData = {};
+  // Reset the file input so the same file can be re-selected
+  const fileInput = document.getElementById('scan-pdf-input');
+  if (fileInput) fileInput.value = '';
+  // Use optional chaining so missing elements don't kill the reset flow
+  // (these banners were removed when the summary panel was introduced — leaving
+  //  the reads in caused getElementById to return null, throwing a TypeError
+  //  on `.style.display` and aborting the function before showScanStep ran.)
+  const fname = document.getElementById('scan-file-name');
+  if (fname) fname.textContent = 'No file selected';
+  const btn = document.getElementById('scan-extract-btn');
+  if (btn) { btn.style.opacity = '0.4'; btn.style.pointerEvents = 'none'; }
+  ['scan-resc-banner', 'scan-price-banner', 'scan-idname-banner'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
   showScanStep('upload');
 }
 
@@ -3597,9 +3960,9 @@ window.addEventListener('popstate', function(e) {
     history.pushState({ app: true }, '');
     if (formDirty) {
       if (confirm('You have unsaved changes. Save before leaving?')) { deskSaveEdit(); }
-      else { formDirty = false; deskShowScreen('data'); }
+      else { formDirty = false; deskShowScreen(_lastNonEditScreen); }
     } else {
-      deskShowScreen('data');
+      deskShowScreen(_lastNonEditScreen);
     }
     return;
   }
@@ -3661,6 +4024,10 @@ window.addEventListener('resize', function() {
 
 function isDesktop() { return window.innerWidth >= 768; }
 
+// Tracks the last non-edit screen so closing the edit overlay returns the user
+// to where they came from (Pipeline / Data table / etc.) instead of always Data.
+let _lastNonEditScreen = 'pipeline';
+
 function deskShowScreen(name) {
   const editScreen = document.getElementById('dscreen-edit');
 
@@ -3672,19 +4039,1385 @@ function deskShowScreen(name) {
   // Hide edit overlay
   editScreen.style.display = 'none';
 
+  // Remember this screen so edit-close returns here
+  _lastNonEditScreen = name;
+
   document.querySelectorAll('.desktop-screen').forEach(s => s.classList.remove('active'));
   document.getElementById('dscreen-' + name)?.classList.add('active');
-  ['data','chat','reports'].forEach(n => {
+  ['pipeline','data','chat','reports'].forEach(n => {
     document.getElementById('dnav-' + n)?.classList.toggle('active', n === name);
   });
   if (name !== 'data') closeDtPanel();
+  if (name === 'pipeline') renderPipeline();
 }
 
 function initDesktop() {
   // Don't set inline display styles — let CSS media query handle visibility.
   // Just render the data.
   renderDesktopTable();
+  renderPipeline();
   updateDeskStats();
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// EXPORT — write currently filtered rows to .xlsx
+// Comments fields (and any future array-valued cell) get joined with newlines
+// so each entry shows on its own line within a single Excel cell. Wrap-text
+// is enabled on those columns so Excel renders the newlines on open.
+// ─────────────────────────────────────────────────────────────────────────
+const EXPORT_COMMENT_COLS = new Set(['Comments', 'Notes', 'Notes.1', 'Special Conditions/Variations']);
+
+function exportData() {
+  if (!filteredData || !filteredData.length) {
+    toast('Nothing to export — filtered list is empty', 'error');
+    return;
+  }
+  if (typeof XLSX === 'undefined') {
+    toast('Export library not loaded yet — try again in a moment', 'error');
+    return;
+  }
+  // Build a 2D array (header row + data rows) so we control column order
+  const aoa = [headers.slice()];
+  filteredData.forEach(row => {
+    aoa.push(headers.map(h => {
+      const v = row[h];
+      // If a future comments thread arrives as an array, join with newlines
+      if (Array.isArray(v)) return v.map(x => String(x ?? '')).join('\n');
+      // Comment-like text fields preserve any embedded newlines (no transform)
+      return v ?? '';
+    }));
+  });
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  // Enable wrap-text on every comment-like column so Excel renders newlines on open
+  headers.forEach((h, colIdx) => {
+    if (!EXPORT_COMMENT_COLS.has(h)) return;
+    for (let rowIdx = 1; rowIdx < aoa.length; rowIdx++) {
+      const cellRef = XLSX.utils.encode_cell({ r: rowIdx, c: colIdx });
+      const cell = ws[cellRef];
+      if (cell) {
+        cell.s = cell.s || {};
+        cell.s.alignment = { wrapText: true, vertical: 'top' };
+      }
+    }
+  });
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Database');
+  const stamp = new Date().toISOString().slice(0, 16).replace(/[T:]/g, '-');
+  const fname = 'SalesDB-Export-' + stamp + '.xlsx';
+  XLSX.writeFile(wb, fname);
+  toast('✓ Exported ' + filteredData.length + ' rows to ' + fname, 'success');
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// DEMO DATA — bypasses OAuth so the UI can be previewed without sign-in.
+// Edits won't save (no OneDrive connection). For local UI testing only.
+// ─────────────────────────────────────────────────────────────────────────
+function loadDemoData() {
+  // Header set chosen to match the real spreadsheet's column structure
+  headers = [
+    'Project Name','Lot ID','Property Address','Stage','Lot #','Sales Condition',
+    'Pending S/A Date','Pending S/A Days','Pending S/A Agency','*LEADS Name',
+    'CfS Type','Property Type','Product Line','Product Type','Lot Area (m²)','Lot Frontage (Width) (m)',
+    'StockList','Notes',
+    'Channel Market','Sales Channel','Channel Partner','Swap to/from Channel Partner',
+    'Allocation Date','Allocation Days','Allocation Period (days)','Allocation Days / Allocation Expiry Date',
+    '$VAL','$BASE','$LIST','$CHECK$                   $BASE-$VAL','$CHECK$ $LIST-$BASE',
+    'Land Tax Per lot Value','Land Tax $Uplift / $Shortfall',
+    'March Campaign','OFFER Rebate','SETTLE Rebate',
+    'H&L $House (S/S)','$H&L Total (S/S)','H&L $House (D/S)','$H&L Total (D/S)','Notes.1',
+    'Sales Advice Received Date','Sales Advice Sent To Legal Date','Contract Issued Date','Days From CfS Issued',
+    'CfS Issued Price','Proposed Exchanged Date','Exchanged Date','CfS Exchanged Price ($)',
+    'Proposed Settled Date','Settled Date','Days from Exchanged to Settled','Settled Month','Settled Year','CfS Settled Price ($)',
+    'Rebate','Deposit%','Cooling Off Date','FIRB Approval','March Campaign.1','Comments',
+    'Vendors Agency','Vendors Agency Agent',"Agent's Mobile","Agent's Email",
+    'Source of Enquiry',
+    "(1) Purchaser's Name","(1) Purchaser's Email","(1) Purchaser's Mobile",
+    "(2) Purchaser's Name","(2) Purchaser's Email","(2) Purchaser's Mobile",
+    "Purchaser's Suburb","Purchaser's Postcode","Purchaser's Solicitor (P'Sol)","Purchaser's Solicitor Phone",
+    'Type Of Purchaser','Special Conditions/Variations','2026 Report',
+  ];
+
+  const today = new Date();
+  const fmtSheetDate = d => { // returns DD-Mmm-YYYY
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return String(d.getDate()).padStart(2,'0') + '-' + months[d.getMonth()] + '-' + d.getFullYear();
+  };
+  const dayOffset = n => { const d = new Date(today); d.setDate(d.getDate() + n); return fmtSheetDate(d); };
+
+  const samples = [
+    // On Sale lots (won't show in pipeline columns; counted in "On Sale inventory")
+    { lot: 2017, addr: '12 Sapphire Drive', cond: '1. On Sale', proj: 'Sapphire Estate', stage: '2B', list: 1007900, partner: 'Sapphire Estate', area: 355 },
+    { lot: 2018, addr: '14 Sapphire Drive', cond: '1. On Sale', proj: 'Sapphire Estate', stage: '2B', list: 997900,  partner: 'Sapphire Estate', area: 350 },
+    { lot: 2020, addr: '18 Sapphire Drive', cond: '1. On Sale', proj: 'Sapphire Estate', stage: '2B', list: 837900,  partner: 'Sapphire Estate', area: 284 },
+    { lot: 2033, addr: '3 Emerald Way',     cond: '1. On Sale', proj: 'Sapphire Estate', stage: '2B', list: 882900,  partner: 'Metricon',         area: 300 },
+    { lot: 2048, addr: '25 Sapphire Drive', cond: '1. On Sale', proj: 'Sapphire Estate', stage: '2B', list: 967900,  partner: 'Sapphire Estate', area: 338 },
+    // Pending SA
+    { lot: 2029, addr: '21 Sapphire Drive', cond: '2. Pending SA', proj: 'Sapphire Estate', stage: '2B', list: 997900, partner: 'McGrath Rouse Hill', pendDate: dayOffset(-18), pendDays: 18, pendAgency: 'McGrath Rouse Hill', firb: 'Pending', buyer1: 'Sanjeewa Monarawila' },
+    { lot: 2040, addr: '7 Ruby Lane',       cond: '2. Pending SA', proj: 'Sapphire Estate', stage: '2B', list: 1042900, partner: 'Realtisan',        pendDate: dayOffset(-5),  pendDays: 5,  pendAgency: 'Realtisan' },
+    { lot: 2042, addr: '11 Ruby Lane',      cond: '2. Pending SA', proj: 'Sapphire Estate', stage: '2B', list: 882900, partner: 'McGrath Rouse Hill', pendDate: dayOffset(-9), pendDays: 9, pendAgency: 'McGrath Rouse Hill', coolOff: dayOffset(1), buyer1: 'James Lee' },
+    { lot: 2045, addr: '15 Ruby Lane',      cond: '2. Pending SA', proj: 'Sapphire Estate', stage: '2B', list: 827900, partner: 'McGrath Rouse Hill', pendDate: dayOffset(-3), pendDays: 3, firb: 'Pending' },
+    // Deposit
+    { lot: 2002, addr: '8 Opal Court',      cond: '3. Deposit', proj: 'Sapphire Estate', stage: '2A', cfsIssued: 850000, partner: 'McGrath Rouse Hill', firb: 'Pending', buyer1: 'Priya Tandon', deposit: '0.1', exchangeProp: dayOffset(7), settleProp: dayOffset(70), saReceived: dayOffset(-3) },
+    { lot: 2007, addr: '21 Louisiana Street', cond: '3. Deposit', proj: 'Sapphire Estate', stage: '2A', cfsIssued: 980000, partner: 'McGrath Rouse Hill', cfsType: '2.Resc/Exch', buyer1: 'Sanjeewa Monarawila', buyer2: 'Gayani Perera', deposit: '0.1', rebate: 10000, exchangeProp: dayOffset(5), settleProp: dayOffset(60), saReceived: dayOffset(-5) },
+    { lot: 2011, addr: '5 Pearl Place',     cond: '3. Deposit', proj: 'Sapphire Estate', stage: '2A', cfsIssued: 915000, partner: 'Direct',            buyer1: 'Maria Costa', deposit: '0.1', exchangeProp: dayOffset(14), settleProp: dayOffset(75), saReceived: dayOffset(-7) },
+    // Exchanged
+    { lot: 1992, addr: '22 Sapphire Drive', cond: '4. Exchanged', proj: 'Sapphire Estate', stage: '1', cfsExchanged: 895000, partner: 'McGrath Rouse Hill', exchangeDate: dayOffset(-30), settleProp: dayOffset(5), buyer1: 'David Chen' },
+    { lot: 1998, addr: '28 Sapphire Drive', cond: '4. Exchanged', proj: 'Sapphire Estate', stage: '1', cfsExchanged: 920000, partner: 'McGrath Rouse Hill', exchangeDate: dayOffset(-42), settleProp: dayOffset(2), buyer1: 'Rajesh Gupta', buyer2: 'Aarti Gupta' },
+    { lot: 2001, addr: '2 Opal Court',      cond: '4. Exchanged', proj: 'Sapphire Estate', stage: '2A', cfsExchanged: 870000, partner: 'Realtisan',         exchangeDate: dayOffset(-15), settleProp: dayOffset(45), buyer1: 'Tom Wilson' },
+    // Settled
+    { lot: 1985, addr: '14 Sapphire Drive', cond: '5. Settled', proj: 'Sapphire Estate', stage: '1', cfsSettled: 880000, partner: 'McGrath Rouse Hill', settleDate: dayOffset(-2), buyer1: 'David & Kim Nguyen' },
+    { lot: 1979, addr: '2 Sapphire Drive',  cond: '5. Settled', proj: 'Sapphire Estate', stage: '1', cfsSettled: 845000, partner: 'McGrath Rouse Hill', settleDate: dayOffset(-12), buyer1: 'Lim Family' },
+    { lot: 1972, addr: '15 Eden Way',       cond: '5. Settled', proj: 'Eden Park',       stage: '1', cfsSettled: 825000, partner: 'Realtisan',         settleDate: dayOffset(-25), buyer1: 'Wong Family' },
+    { lot: 1965, addr: '8 Eden Way',        cond: '5. Settled', proj: 'Eden Park',       stage: '1', cfsSettled: 815000, partner: 'Realtisan',         settleDate: dayOffset(-60), buyer1: 'Patel Family' },
+  ];
+
+  allData = samples.map((s, i) => {
+    const row = { __excelRow: i + 2 };
+    headers.forEach(h => row[h] = '');
+    row['Project Name'] = s.proj;
+    row['Lot ID'] = s.proj.slice(0,3).toUpperCase() + '-' + s.lot;
+    row['Property Address'] = s.addr;
+    row['Stage'] = s.stage;
+    row['Lot #'] = s.lot;
+    row['Sales Condition'] = s.cond;
+    row['CfS Type'] = s.cfsType || '1. New Sale';
+    row['Property Type'] = 'House & Land';
+    row['Product Line'] = 'Standard';
+    row['Product Type'] = 'Detached';
+    row['Lot Area (m²)'] = s.area || 320;
+    row['Channel Partner'] = s.partner || '';
+    row['$LIST'] = s.list || '';
+    if (s.pendDate)     row['Pending S/A Date'] = s.pendDate;
+    if (s.pendDays)     row['Pending S/A Days'] = s.pendDays;
+    if (s.pendAgency)   row['Pending S/A Agency'] = s.pendAgency;
+    if (s.cfsIssued)    row['CfS Issued Price'] = s.cfsIssued;
+    if (s.cfsExchanged) row['CfS Exchanged Price ($)'] = s.cfsExchanged;
+    if (s.cfsSettled)   row['CfS Settled Price ($)'] = s.cfsSettled;
+    if (s.deposit)      row['Deposit%'] = s.deposit;
+    if (s.rebate)       row['Rebate'] = s.rebate;
+    if (s.firb)         row['FIRB Approval'] = s.firb;
+    if (s.coolOff)      row['Cooling Off Date'] = s.coolOff;
+    if (s.exchangeProp) row['Proposed Exchanged Date'] = s.exchangeProp;
+    if (s.exchangeDate) row['Exchanged Date'] = s.exchangeDate;
+    if (s.settleProp)   row['Proposed Settled Date'] = s.settleProp;
+    if (s.settleDate)   row['Settled Date'] = s.settleDate;
+    if (s.saReceived)   row['Sales Advice Received Date'] = s.saReceived;
+    if (s.buyer1)       row["(1) Purchaser's Name"] = s.buyer1;
+    if (s.buyer2)       row["(2) Purchaser's Name"] = s.buyer2;
+    if (s.partner)      row['Vendors Agency'] = s.partner;
+    return row;
+  });
+
+  filteredData = [...allData];
+  // Hide login, show app
+  const login = document.getElementById('screen-login'); if (login) login.style.display = 'none';
+  const wrap  = document.getElementById('app-wrapper'); if (wrap)  wrap.style.display = 'flex';
+  // Set a demo user name
+  if (typeof userDisplayName !== 'undefined') userDisplayName = 'Demo User';
+  const userEl = document.querySelector('.user-name'); if (userEl) userEl.textContent = 'Demo User';
+  const avEl = document.querySelector('.user-avatar'); if (avEl) avEl.textContent = 'DU';
+  // Render everything
+  populateDropdowns();
+  renderLotList();
+  if (isDesktop()) { renderDesktopTable(); renderPipeline(); }
+  buildAddForm();
+  updateStats();
+  setSyncStatus('synced');
+  toast('🧪 Demo mode — edits will not save', 'success');
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// PIPELINE FRONT PAGE — data-driven from allData
+// Renders the 4 active stages (Pending SA / Deposit / Exchanged / Settled),
+// plus KPIs and alerts. Lot tiles open the existing lot card on click.
+// ─────────────────────────────────────────────────────────────────────────
+const PP_STAGES = [
+  { key: 'pending',  label: '2. Pending SA', match: c => c.toLowerCase().includes('pending') },
+  { key: 'deposit',  label: '3. Deposit',    match: c => c.toLowerCase().includes('deposit') },
+  { key: 'exchange', label: '4. Exchanged',  match: c => c.toLowerCase().includes('exchanged') || (c.toLowerCase().includes('exch') && !c.toLowerCase().includes('resc')) },
+  { key: 'settled',  label: '5. Settled',    match: c => c.toLowerCase().includes('settled') },
+];
+
+function ppEscape(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function ppFmtCurrency(v) {
+  const n = Number(String(v ?? '').replace(/[$,]/g, ''));
+  if (isNaN(n) || n === 0) return '';
+  if (n >= 1000000) return '$' + (n / 1000000).toFixed(2) + 'M';
+  return '$' + n.toLocaleString();
+}
+
+function ppDaysSince(dateVal) {
+  if (!dateVal) return null;
+  let d;
+  if (typeof dateVal === 'number' && dateVal > 40000) d = new Date(Math.round((dateVal - 25569) * 86400 * 1000));
+  else d = new Date(dateVal);
+  if (isNaN(d.getTime())) return null;
+  const diff = Math.floor((Date.now() - d.getTime()) / 86400000);
+  return diff;
+}
+function ppDaysUntil(dateVal) {
+  const d = ppDaysSince(dateVal);
+  return d === null ? null : -d;
+}
+
+function ppLotValue(row) {
+  const cond = String(row['Sales Condition'] || '').toLowerCase();
+  let raw = '';
+  if (cond.includes('deposit')) raw = row['CfS Issued Price'];
+  else if (cond.includes('exchanged')) raw = row['CfS Exchanged Price ($)'];
+  else if (cond.includes('settled')) raw = row['CfS Settled Price ($)'];
+  else raw = row['$LIST'] || row['CfS Issued Price'];
+  return ppFmtCurrency(raw);
+}
+
+function ppLotTags(row) {
+  const tags = [];
+  const firb = String(row['FIRB Approval'] || '').trim().toLowerCase();
+  if (firb === 'pending') tags.push({ cls: 'firb-pending', text: 'FIRB pending' });
+  const cfs = String(row['CfS Type'] || row['CFS Type'] || '').toLowerCase();
+  if (cfs.includes('resc')) tags.push({ cls: 'resc', text: 'Resc/Exch' });
+  // Cooling off in next 2 days
+  const coolDays = ppDaysUntil(row['Cooling Off Date']);
+  if (coolDays !== null && coolDays >= 0 && coolDays <= 2) {
+    tags.push({ cls: 'cool-off', text: coolDays === 0 ? 'Cooling off today' : (coolDays === 1 ? 'Cooling off tomorrow' : 'Cooling off ' + coolDays + 'd') });
+  }
+  // Settle in next 7 days
+  const settleDays = ppDaysUntil(row['Proposed Settled Date']);
+  const cond = String(row['Sales Condition'] || '').toLowerCase();
+  if (cond.includes('exchanged') && settleDays !== null && settleDays >= 0 && settleDays <= 7) {
+    tags.push({ cls: 'urgent', text: 'Settle in ' + settleDays + 'd' });
+  }
+  // Pending S/A overdue
+  const pendDays = Number(row['Pending S/A Days'] || 0);
+  if (cond.includes('pending') && pendDays > 14) {
+    tags.push({ cls: 'urgent', text: 'Pending ' + pendDays + 'd' });
+  }
+  // Settled recently
+  const settledAgo = ppDaysSince(row['Settled Date']);
+  if (cond.includes('settled') && settledAgo !== null && settledAgo >= 0 && settledAgo <= 7) {
+    tags.push({ cls: 'recent', text: settledAgo === 0 ? 'Settled today' : (settledAgo === 1 ? 'Settled yesterday' : 'Settled ' + settledAgo + 'd ago') });
+  }
+  return tags;
+}
+
+function ppRenderTile(row, idxInAll) {
+  const lotNum = String(row['Lot #'] || row['Lot#'] || '—');
+  const stage = String(row['Stage'] || '').replace(/^Stage\s*/i, '');
+  // Last comment — pull from spreadsheet text fields in priority order.
+  // Once Supabase comments table exists, switch this to `latestCommentForLot(row)`.
+  const comment = String(row['Comments'] || row['Notes.1'] || '').trim();
+  const partner = String(row['Vendors Agency'] || '').trim();
+  const val = ppLotValue(row);
+  const tags = ppLotTags(row);
+  const tagsHtml = tags.length ? `<div class="pp-tile-tags">${tags.map(t => `<span class="pp-tag ${t.cls}">${ppEscape(t.text)}</span>`).join('')}</div>` : '';
+  const commentHtml = comment
+    ? `<div class="pp-tile-comment" title="${ppEscape(comment)}">"${ppEscape(comment)}"</div>`
+    : `<div class="pp-tile-comment empty">No comments yet</div>`;
+  return `<div class="pp-tile" onclick="ppOpenLot(${idxInAll})">
+    <div class="pp-tile-top"><span class="pp-tile-num">${ppEscape(lotNum)}</span>${stage ? `<span class="pp-tile-stage">Stage ${ppEscape(stage)}</span>` : ''}</div>
+    ${commentHtml}
+    <div class="pp-tile-meta">${val ? `<span class="pp-tile-val">${ppEscape(val)}</span>` : '<span></span>'}${partner ? `<span class="pp-tile-partner">${ppEscape(partner)}</span>` : ''}</div>
+    ${tagsHtml}
+  </div>`;
+}
+
+function ppOpenLot(idxInAll) {
+  // Find this row's index in filteredData (deskEditRow takes a filtered index)
+  const allRow = allData[idxInAll];
+  if (!allRow) return;
+  // Make sure filteredData includes this row — clear filters if needed
+  let filteredIdx = filteredData.indexOf(allRow);
+  if (filteredIdx < 0) {
+    filteredData = [...allData];
+    filteredIdx = filteredData.indexOf(allRow);
+  }
+  if (filteredIdx >= 0) deskEditRow(filteredIdx);
+}
+
+function ppComputeKPIs() {
+  const sc = r => String(r['Sales Condition'] || '').trim();
+  const isInactive = c => /unreleased|withheld|avantaus/i.test(c);
+  const active = allData.filter(r => !isInactive(sc(r)));
+
+  // Settled this month + revenue YTD
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const yearStart = new Date(now.getFullYear(), 0, 1);
+  let settledThisMonth = 0;
+  let revenueYtd = 0;
+  allData.forEach(r => {
+    const settled = r['Settled Date'];
+    if (!settled) return;
+    let d;
+    if (typeof settled === 'number' && settled > 40000) d = new Date(Math.round((settled - 25569) * 86400 * 1000));
+    else d = new Date(settled);
+    if (isNaN(d.getTime())) return;
+    if (d >= monthStart) settledThisMonth++;
+    if (d >= yearStart) {
+      const price = Number(String(r['CfS Settled Price ($)'] ?? '').replace(/[$,]/g, ''));
+      if (!isNaN(price)) revenueYtd += price;
+    }
+  });
+
+  // Needs attention = lots with any urgent tag
+  const needsAttention = active.filter(r => ppLotTags(r).some(t => t.cls === 'urgent' || t.cls === 'cool-off')).length;
+
+  // Project + stage counts
+  const projects = new Set(active.map(r => String(r['Project Name'] || '').trim()).filter(Boolean));
+  const stages = new Set(active.map(r => String(r['Stage'] || '').trim()).filter(Boolean));
+
+  return {
+    active: active.length,
+    activeProjects: projects.size,
+    activeStages: stages.size,
+    settledThisMonth,
+    revenueYtd,
+    needsAttention,
+  };
+}
+
+function ppComputeAlerts() {
+  const alerts = [];
+  allData.forEach(r => {
+    const tags = ppLotTags(r);
+    const lotNum = String(r['Lot #'] || r['Lot#'] || '');
+    const addr = String(r['Property Address'] || '').trim();
+    tags.forEach(t => {
+      if (t.cls === 'urgent' || t.cls === 'cool-off') {
+        alerts.push({
+          lot: lotNum,
+          row: r,
+          title: t.text + ' — Lot ' + lotNum,
+          meta: addr || '—',
+          severity: t.cls,
+        });
+      }
+    });
+  });
+  return alerts;
+}
+
+// Pipeline view state — 'kanban' (current default) or 'report' (monthly view)
+let _ppView = 'kanban';
+function ppSwitchView(view) {
+  _ppView = view;
+  renderPipeline();
+}
+
+function renderPipeline() {
+  const root = document.getElementById('pp-page');
+  if (!root || !allData || !allData.length) {
+    if (root) root.innerHTML = '<div style="padding:40px;text-align:center;color:#8a7d65">Loading…</div>';
+    return;
+  }
+  if (_ppView === 'report') { renderPipelineMonthlyReport(root); return; }
+  const kpis = ppComputeKPIs();
+  const alerts = ppComputeAlerts();
+
+  // Greeting
+  const userName = (typeof userDisplayName !== 'undefined' && userDisplayName) ? userDisplayName.split(' ')[0] : 'there';
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : (hour < 18 ? 'Good afternoon' : 'Good evening');
+  const today = new Date().toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+  // Bucket lots by stage
+  const sc = r => String(r['Sales Condition'] || '').trim();
+  const buckets = PP_STAGES.map(stage => {
+    const rows = allData.map((r, i) => ({ row: r, allIdx: i })).filter(x => stage.match(sc(x.row)));
+    const totalVal = rows.reduce((sum, x) => {
+      const cond = sc(x.row).toLowerCase();
+      let raw;
+      if (cond.includes('deposit')) raw = x.row['CfS Issued Price'];
+      else if (cond.includes('exchanged')) raw = x.row['CfS Exchanged Price ($)'];
+      else if (cond.includes('settled')) raw = x.row['CfS Settled Price ($)'];
+      else raw = x.row['$LIST'];
+      const n = Number(String(raw ?? '').replace(/[$,]/g, ''));
+      return sum + (isNaN(n) ? 0 : n);
+    }, 0);
+    return { stage, rows, totalVal };
+  });
+
+  const onSaleCount = allData.filter(r => sc(r).toLowerCase().includes('on sale')).length;
+
+  // Render
+  const html = `
+    <div class="pp-hdr">
+      <div>
+        <div class="pp-greeting">${greeting}, <strong>${ppEscape(userName)}</strong></div>
+        <div class="pp-sub">${today} · ${kpis.active} active lots · last sync just now</div>
+      </div>
+      <div class="pp-view-toggle">
+        <button class="active" onclick="ppSwitchView('kanban')">📋 Current pipeline</button>
+        <button onclick="ppSwitchView('report')">📊 Monthly report</button>
+      </div>
+    </div>
+
+    <div class="pp-kpi-strip">
+      <div class="pp-kpi-mini blue">
+        <div>
+          <div class="pp-kpi-mini-label">Active lots</div>
+          <div class="pp-kpi-mini-meta">${kpis.activeProjects} project${kpis.activeProjects===1?'':'s'} · ${kpis.activeStages} stage${kpis.activeStages===1?'':'s'}</div>
+        </div>
+        <div class="pp-kpi-mini-right"><div class="pp-kpi-mini-value">${kpis.active}</div></div>
+      </div>
+      <div class="pp-kpi-mini green">
+        <div>
+          <div class="pp-kpi-mini-label">Settled this month</div>
+          <div class="pp-kpi-mini-meta">${new Date().toLocaleDateString('en-AU', { month: 'long', year: 'numeric' })}</div>
+        </div>
+        <div class="pp-kpi-mini-right"><div class="pp-kpi-mini-value">${kpis.settledThisMonth}</div></div>
+      </div>
+      <div class="pp-kpi-mini gold">
+        <div>
+          <div class="pp-kpi-mini-label">Revenue YTD</div>
+          <div class="pp-kpi-mini-meta">CfS Settled prices ${new Date().getFullYear()}</div>
+        </div>
+        <div class="pp-kpi-mini-right"><div class="pp-kpi-mini-value">${kpis.revenueYtd ? ppFmtCurrency(kpis.revenueYtd) : '—'}</div></div>
+      </div>
+      <div class="pp-kpi-mini red">
+        <div>
+          <div class="pp-kpi-mini-label">Needs attention</div>
+          <div class="pp-kpi-mini-meta">${alerts.length} alert${alerts.length===1?'':'s'} across pipeline</div>
+        </div>
+        <div class="pp-kpi-mini-right"><div class="pp-kpi-mini-value">${kpis.needsAttention}</div></div>
+      </div>
+    </div>
+
+    <div class="pp-alert-ribbon ${alerts.length === 0 ? 'hidden' : ''}">
+      <div class="pp-alert-label">
+        <div class="pp-alert-icon">⚠</div>
+        <div>
+          <div class="pp-alert-label-text">Urgent</div>
+          <div class="pp-alert-label-count">${alerts.length} item${alerts.length===1?'':'s'}</div>
+        </div>
+      </div>
+      <div class="pp-alert-items">
+        ${alerts.slice(0, 6).map(a => `
+          <div class="pp-alert-item" onclick="ppOpenLot(${allData.indexOf(a.row)})">
+            <div class="pp-alert-item-title">${ppEscape(a.title)}</div>
+            <div class="pp-alert-item-meta">${ppEscape(a.meta)}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="pp-filter-bar">
+      <input class="pp-fb-search" type="text" id="pp-search" placeholder="🔍 Search lots, addresses, purchasers…" oninput="renderPipelineDebounced()">
+      <button class="pp-fb-btn" onclick="deskShowScreen('data')">📂 On Sale inventory (${onSaleCount})</button>
+      <button class="pp-fb-btn" onclick="deskShowScreen('data')">🗂 Open data table</button>
+    </div>
+
+    <div class="pp-layout">
+      <div class="pp-kanban">
+        ${buckets.map(b => `
+          <div class="pp-col">
+            <div class="pp-col-hdr ${b.stage.key}">
+              <div class="pp-col-title">${ppEscape(b.stage.label)} <span class="pp-col-count">${b.rows.length}</span></div>
+              <div class="pp-col-meta">${b.totalVal ? ppFmtCurrency(b.totalVal) + ' total' : '—'}</div>
+            </div>
+            <div class="pp-col-body">
+              ${b.rows.length === 0 ? '<div class="pp-col-empty">No lots in this stage</div>' :
+                b.rows.slice(0, 12).map(x => ppRenderTile(x.row, x.allIdx)).join('') +
+                (b.rows.length > 12 ? `<div class="pp-col-more">+ ${b.rows.length - 12} more</div>` : '')
+              }
+            </div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="pp-activity-side">
+        <div class="pp-activity-hdr">
+          <div class="pp-activity-title">Recent activity</div>
+          <a class="pp-activity-link">All →</a>
+        </div>
+        <div class="pp-activity-list">
+          <div class="pp-activity-empty">Activity feed will appear here once Comments / interactions are wired (backlog).</div>
+        </div>
+      </div>
+    </div>
+  `;
+  root.innerHTML = html;
+
+  // Apply search filter if any
+  const q = (document.getElementById('pp-search')?.value || '').toLowerCase().trim();
+  if (q) ppApplySearch(q);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// MONTHLY PIPELINE REPORT — data-driven from allData
+// "Proposed" only counts lots currently committed in the pipeline:
+//   - Proposed Exchange = lots in '3. Deposit' with Proposed Exchanged Date in month
+//   - Proposed Settled  = lots in '3. Deposit' OR '4. Exchanged' with Proposed Settled Date in month
+// ─────────────────────────────────────────────────────────────────────────
+function mrParseDate(v) {
+  if (!v) return null;
+  if (typeof v === 'number' && v > 40000) return new Date(Math.round((v - 25569) * 86400 * 1000));
+  const d = new Date(v);
+  return isNaN(d.getTime()) ? null : d;
+}
+function mrInMonth(dateVal, monthStart, monthEnd) {
+  const d = mrParseDate(dateVal);
+  return d && d >= monthStart && d < monthEnd;
+}
+function mrMonthLabel(d) {
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return months[d.getMonth()] + ' ' + String(d.getFullYear()).slice(-2);
+}
+function mrMonthRanges(monthsBack, monthsForward) {
+  const today = new Date();
+  const from = new Date(today.getFullYear(), today.getMonth() - monthsBack, 1);
+  const to   = new Date(today.getFullYear(), today.getMonth() + monthsForward, 1);
+  return mrMonthRangesFromTo(from, to);
+}
+// Build month buckets from any from/to date (inclusive of both months)
+function mrMonthRangesFromTo(fromDate, toDate) {
+  const today = new Date();
+  const start = new Date(fromDate.getFullYear(), fromDate.getMonth(), 1);
+  const end = new Date(toDate.getFullYear(), toDate.getMonth() + 1, 1);
+  const ranges = [];
+  let cursor = new Date(start);
+  let safety = 0;
+  while (cursor < end && safety++ < 240) {  // hard cap at 20 years
+    const monthStart = new Date(cursor);
+    const monthEnd = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+    const isCurrent = today >= monthStart && today < monthEnd;
+    ranges.push({ start: monthStart, end: monthEnd, label: mrMonthLabel(monthStart), isCurrent });
+    cursor = monthEnd;
+  }
+  return ranges;
+}
+
+// ── Date range + filter state for the monthly report ─────────────────────
+// Persisted to localStorage so settings survive across sessions.
+let _mrFromYM = null;
+let _mrToYM = null;
+let _mrPreset = 'default';
+let _mrShowActual = true;     // toggle: show actual portions in cells
+let _mrShowProposed = true;   // toggle: show proposed portions in cells
+
+const MR_MIN_YEAR = 2020, MR_MAX_YEAR = 2035;
+
+function mrIsValidYM(ym) {
+  if (typeof ym !== 'string') return false;
+  const m = ym.match(/^(\d{4})-(\d{2})$/);
+  if (!m) return false;
+  const y = parseInt(m[1], 10), mo = parseInt(m[2], 10);
+  return y >= MR_MIN_YEAR && y <= MR_MAX_YEAR && mo >= 1 && mo <= 12;
+}
+function mrYMToDate(ym) {
+  if (!mrIsValidYM(ym)) return null;
+  const [y, m] = ym.split('-').map(n => parseInt(n, 10));
+  return new Date(y, m - 1, 1);
+}
+function mrDateToYM(d) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+}
+// Persist + restore prefs (range, preset, filters)
+function mrSavePrefs() {
+  try {
+    localStorage.setItem('mrFromYM', _mrFromYM || '');
+    localStorage.setItem('mrToYM', _mrToYM || '');
+    localStorage.setItem('mrPreset', _mrPreset || 'default');
+    localStorage.setItem('mrShowActual', _mrShowActual ? '1' : '0');
+    localStorage.setItem('mrShowProposed', _mrShowProposed ? '1' : '0');
+  } catch (e) {}
+}
+function mrLoadPrefs() {
+  try {
+    const f = localStorage.getItem('mrFromYM');
+    const t = localStorage.getItem('mrToYM');
+    const p = localStorage.getItem('mrPreset');
+    const sa = localStorage.getItem('mrShowActual');
+    const sp = localStorage.getItem('mrShowProposed');
+    if (f && mrIsValidYM(f)) _mrFromYM = f;
+    if (t && mrIsValidYM(t)) _mrToYM = t;
+    if (p) _mrPreset = p;
+    if (sa !== null) _mrShowActual = sa === '1';
+    if (sp !== null) _mrShowProposed = sp === '1';
+  } catch (e) {}
+}
+function mrToggleFilter(kind) {
+  if (kind === 'actual') _mrShowActual = !_mrShowActual;
+  else if (kind === 'proposed') _mrShowProposed = !_mrShowProposed;
+  mrSavePrefs();
+  renderPipeline();
+}
+mrLoadPrefs();   // restore on script load
+
+// ─────────────────────────────────────────────────────────────────────────
+// SALES TARGET — single shared target backed by 2.SalesTarget!M3 (qty) + M4 ($)
+// One target per workbook for now (Jan–Jul 2026 Settled). Multi-target /
+// per-stage / per-period targets will land with the Supabase migration.
+// See: backlog_targets_persistence.md
+// ─────────────────────────────────────────────────────────────────────────
+const TG_STAGE_LABELS = { dep: '🟢 Deposit', exc: '🟡 Exchanged', set: '🔴 Settled' };
+const TG_TARGET_SHEET = '2.SalesTarget';
+const TG_TARGET_QTY_CELL = 'M3';
+const TG_TARGET_VAL_CELL = 'M4';
+const TG_TARGET_FROM_YM = '2026-01';
+const TG_TARGET_TO_YM   = '2026-07';
+const TG_TARGET_LABEL   = 'Jan – Jul 2026 Settled target';
+const TG_TARGET_TYPE    = 'set';
+
+let tgCurrentTarget = null;   // { id, label, type, fromYM, toYM, targetQty, targetVal } or null
+
+// Builds the canonical target object from raw qty/val numbers (or null if both blank).
+function tgBuildTarget(qty, val) {
+  qty = Number(qty) || 0;
+  val = Number(val) || 0;
+  if (qty <= 0 && val <= 0) return null;
+  return {
+    id: 'tg_main',
+    label: TG_TARGET_LABEL,
+    type: TG_TARGET_TYPE,
+    fromYM: TG_TARGET_FROM_YM,
+    toYM: TG_TARGET_TO_YM,
+    targetQty: qty,
+    targetVal: val,
+  };
+}
+
+// Returns the current target in array form for compat with the progress renderer
+// (which iterates an array — supports a future multi-target setup).
+function tgGetTargets() {
+  return tgCurrentTarget ? [tgCurrentTarget] : [];
+}
+
+// Reads M3 (qty) + M4 ($) from 2.SalesTarget and updates the in-memory cache.
+async function tgFetchTarget() {
+  if (!fileId) { tgCurrentTarget = null; return; }
+  try {
+    const token = await getToken();
+    const driveBase = fileDriveId
+      ? `https://graph.microsoft.com/v1.0/drives/${fileDriveId}/items/${fileId}`
+      : `https://graph.microsoft.com/v1.0/me/drive/items/${fileId}`;
+    const sheetEnc = encodeURIComponent(TG_TARGET_SHEET);
+    const range = `${TG_TARGET_QTY_CELL}:${TG_TARGET_VAL_CELL}`;
+    const res = await fetch(
+      `${driveBase}/workbook/worksheets/${sheetEnc}/range(address='${range}')`,
+      { headers: { Authorization: 'Bearer ' + token } }
+    );
+    if (!res.ok) {
+      console.warn('tgFetchTarget: ' + res.status + ' — sheet/range may not exist yet');
+      tgCurrentTarget = null;
+      return;
+    }
+    const data = await res.json();
+    const values = data.values || [];
+    const qty = values[0] && values[0][0] != null ? Number(values[0][0]) : 0;
+    const val = values[1] && values[1][0] != null ? Number(values[1][0]) : 0;
+    tgCurrentTarget = tgBuildTarget(qty, val);
+  } catch (e) {
+    console.warn('tgFetchTarget failed:', e);
+    tgCurrentTarget = null;
+  }
+}
+
+// Writes qty + val back to 2.SalesTarget!M3:M4 and refreshes the cache.
+async function tgSaveTargetCells(qty, val) {
+  if (!fileId) throw new Error('No workbook loaded');
+  const token = await getToken();
+  const driveBase = fileDriveId
+    ? `https://graph.microsoft.com/v1.0/drives/${fileDriveId}/items/${fileId}`
+    : `https://graph.microsoft.com/v1.0/me/drive/items/${fileId}`;
+  const sheetEnc = encodeURIComponent(TG_TARGET_SHEET);
+  const range = `${TG_TARGET_QTY_CELL}:${TG_TARGET_VAL_CELL}`;
+  const res = await fetch(
+    `${driveBase}/workbook/worksheets/${sheetEnc}/range(address='${range}')`,
+    {
+      method: 'PATCH',
+      headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ values: [[Number(qty) || 0], [Number(val) || 0]] }),
+    }
+  );
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error('Save failed (' + res.status + '): ' + text.slice(0, 200));
+  }
+  tgCurrentTarget = tgBuildTarget(qty, val);
+}
+
+function tgFmtCurrency(n) {
+  if (!n) return '—';
+  const x = Number(n);
+  if (isNaN(x) || x === 0) return '—';
+  if (Math.abs(x) >= 1000000) return '$' + (x / 1000000).toFixed(2) + 'M';
+  if (Math.abs(x) >= 1000) return '$' + Math.round(x / 1000) + 'K';
+  return '$' + x.toLocaleString();
+}
+function tgFmtRange(fromYM, toYM) {
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const parse = ym => {
+    const [y, m] = ym.split('-').map(n => parseInt(n, 10));
+    return months[m - 1] + ' ' + String(y).slice(-2);
+  };
+  if (fromYM === toYM) return parse(fromYM);
+  return parse(fromYM) + ' → ' + parse(toYM);
+}
+
+function openTargetsAdmin() {
+  if (!fileId) { toast('Load workbook first', 'error'); return; }
+  const overlay = document.getElementById('tg-overlay');
+  const t = tgCurrentTarget;
+  const qty = t ? t.targetQty : '';
+  const val = t ? t.targetVal : '';
+  const periodLabel = tgFmtRange(TG_TARGET_FROM_YM, TG_TARGET_TO_YM);
+  overlay.innerHTML = `
+    <div class="tg-modal">
+      <div class="tg-hdr">
+        <div class="tg-hdr-title">Sales target</div>
+        <div class="tg-hdr-sub">${TG_TARGET_LABEL} · stored in ${TG_TARGET_SHEET} sheet (cells ${TG_TARGET_QTY_CELL} + ${TG_TARGET_VAL_CELL})</div>
+        <button class="tg-close" onclick="closeTargetsAdmin()">×</button>
+      </div>
+      <div class="tg-body">
+        <div style="background:#e8f4ed;border:1px solid #9ec9ad;border-radius:6px;padding:8px 12px;margin-bottom:14px;font-size:11.5px;color:#0d3d20;line-height:1.5;display:flex;gap:8px;align-items:flex-start">
+          <span style="font-size:14px;line-height:1">✓</span>
+          <span><strong>Synced to workbook.</strong> This target is shared with everyone who opens the file. Saved to <code>${TG_TARGET_SHEET}!${TG_TARGET_QTY_CELL}</code> (qty) and <code>${TG_TARGET_SHEET}!${TG_TARGET_VAL_CELL}</code> (revenue).</span>
+        </div>
+        <div class="tg-form" id="tg-form">
+          <div class="tg-form-fields">
+            <div class="tg-field">
+              <label class="tg-field-label">Stage</label>
+              <input class="tg-input" type="text" value="🔴 Settled" disabled style="background:#f5f0e8;color:#475569">
+            </div>
+            <div class="tg-field">
+              <label class="tg-field-label">Period</label>
+              <input class="tg-input" type="text" value="${periodLabel}" disabled style="background:#f5f0e8;color:#475569">
+            </div>
+            <div class="tg-field">
+              <label class="tg-field-label">Target lots (qty)</label>
+              <input class="tg-input" type="number" id="tg-qty" value="${qty}" placeholder="e.g. 96" min="0">
+            </div>
+            <div class="tg-field">
+              <label class="tg-field-label">Target revenue ($)</label>
+              <input class="tg-input" type="text" id="tg-val" value="${val}" placeholder="e.g. 88831200">
+            </div>
+          </div>
+          <div class="tg-form-actions">
+            <button class="tg-btn primary" id="tg-save-btn" onclick="tgSaveCurrentForm()">Save to workbook</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  overlay.classList.add('show');
+}
+
+function closeTargetsAdmin() {
+  const overlay = document.getElementById('tg-overlay');
+  overlay.classList.remove('show');
+  overlay.innerHTML = '';
+  // Re-render monthly report so the latest target shows up in the progress bar
+  if (typeof renderMonthlyReport === 'function') renderMonthlyReport();
+}
+
+async function tgSaveCurrentForm() {
+  const qty = parseInt(document.getElementById('tg-qty').value, 10) || 0;
+  const valRaw = document.getElementById('tg-val').value.replace(/[$,]/g, '').trim();
+  const val = parseFloat(valRaw) || 0;
+  if (!qty && !val) { alert('Please enter a target qty or revenue (or both).'); return; }
+  const btn = document.getElementById('tg-save-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+  try {
+    await tgSaveTargetCells(qty, val);
+    toast('Target saved to workbook ✓', 'success');
+    closeTargetsAdmin();
+  } catch (e) {
+    toast('Save failed: ' + e.message, 'error');
+    if (btn) { btn.disabled = false; btn.textContent = 'Save to workbook'; }
+  }
+}
+
+// Stubs — old multi-target functions kept as no-ops in case any inline HTML still calls them.
+function tgRenderList() {}
+function tgRenderForm() {}
+function tgEditTarget() {}
+function tgDeleteTarget() {}
+
+// ── Targets progress computation + rendering ────────────────────────────
+function tgComputeProgress(target) {
+  // Date range from target.fromYM .. end of target.toYM (inclusive)
+  const start = mrYMToDate(target.fromYM);
+  const toMonth = mrYMToDate(target.toYM);
+  const end = new Date(toMonth.getFullYear(), toMonth.getMonth() + 1, 1);
+  const inRange = d => {
+    if (!d) return false;
+    const dd = mrParseDate(d);
+    return dd && dd >= start && dd < end;
+  };
+  const num = v => { const n = Number(String(v ?? '').replace(/[$,]/g, '')); return isNaN(n) ? 0 : n; };
+  const sc = r => String(r['Sales Condition'] || '').trim();
+  const isDeposit = r => /deposit/i.test(sc(r));
+  const isExchanged = r => /exchanged/i.test(sc(r)) && !/resc/i.test(sc(r));
+
+  let actQty = 0, actVal = 0;
+  let propExcQty = 0, propExcVal = 0;
+  let propDepQty = 0, propDepVal = 0;
+
+  if (target.type === 'dep') {
+    // Deposit captured by Contract Issued Date (fall back to Sales Advice Received)
+    allData.forEach(r => {
+      if (inRange(r['Contract Issued Date']) || (!r['Contract Issued Date'] && inRange(r['Sales Advice Received Date']))) {
+        actQty++;
+        actVal += num(r['CfS Issued Price']);
+      }
+    });
+  } else if (target.type === 'exc') {
+    // Actual: Exchanged Date in range
+    allData.forEach(r => {
+      if (inRange(r['Exchanged Date'])) {
+        actQty++;
+        actVal += num(r['CfS Exchanged Price ($)']);
+      }
+    });
+    // Proposed: currently-Deposit lots whose Proposed Exchanged Date in range
+    allData.forEach(r => {
+      if (isDeposit(r) && inRange(r['Proposed Exchanged Date'])) {
+        propDepQty++;
+        propDepVal += num(r['CfS Issued Price']);
+      }
+    });
+  } else if (target.type === 'set') {
+    // Actual: Settled Date in range
+    allData.forEach(r => {
+      if (inRange(r['Settled Date'])) {
+        actQty++;
+        actVal += num(r['CfS Settled Price ($)']);
+      }
+    });
+    // Proposed from currently-Exchanged: Proposed Settled Date in range
+    allData.forEach(r => {
+      if (isExchanged(r) && inRange(r['Proposed Settled Date'])) {
+        propExcQty++;
+        propExcVal += num(r['CfS Exchanged Price ($)']);
+      }
+    });
+    // Proposed from currently-Deposit: Proposed Settled Date in range
+    allData.forEach(r => {
+      if (isDeposit(r) && inRange(r['Proposed Settled Date'])) {
+        propDepQty++;
+        propDepVal += num(r['CfS Issued Price']);
+      }
+    });
+  }
+
+  const totalQty = actQty + propExcQty + propDepQty;
+  const totalVal = actVal + propExcVal + propDepVal;
+
+  // Time progress
+  const today = new Date();
+  const totalMs = end - start;
+  const elapsedMs = Math.max(0, Math.min(totalMs, today - start));
+  const totalDays = Math.round(totalMs / 86400000);
+  const elapsedDays = Math.round(elapsedMs / 86400000);
+  const timePct = totalMs > 0 ? (elapsedMs / totalMs) * 100 : 0;
+
+  const valPct = target.targetVal > 0 ? (totalVal / target.targetVal) * 100 : 0;
+  const qtyPct = target.targetQty > 0 ? (totalQty / target.targetQty) * 100 : 0;
+
+  return {
+    actQty, actVal, propExcQty, propExcVal, propDepQty, propDepVal,
+    totalQty, totalVal, timePct, valPct, qtyPct, totalDays, elapsedDays, start, end,
+  };
+}
+
+function tgRenderProgressSection() {
+  const targets = tgGetTargets();
+  if (targets.length === 0) {
+    return `<div class="tgp-section">
+      <div class="tgp-section-hdr">
+        <div class="tgp-section-title">🎯 Sales vs targets</div>
+      </div>
+      <div class="tgp-empty">
+        No targets set yet.<br>
+        <button onclick="openTargetsAdmin()">+ Set your first target</button>
+      </div>
+    </div>`;
+  }
+
+  const cards = targets.map(t => {
+    const p = tgComputeProgress(t);
+    const stageCls = t.type === 'dep' ? 'dep' : (t.type === 'exc' ? 'exc' : 'set');
+    const stageEmoji = t.type === 'dep' ? '🟢' : (t.type === 'exc' ? '🟡' : '🔴');
+    const stageLabel = t.type === 'dep' ? 'Deposit' : (t.type === 'exc' ? 'Exchanged' : 'Settled');
+
+    // Use $ progress if target has a $ value, otherwise qty
+    const usingMoney = t.targetVal > 0;
+    const actualPct = usingMoney ? p.valPct : p.qtyPct;
+
+    // Status: compare actual progress vs time progress
+    let statusCls = 'ontrack', statusText = 'On track';
+    if (actualPct >= 100) { statusCls = 'over'; statusText = 'Target achieved'; }
+    else if (actualPct >= p.timePct + 5) { statusCls = 'ahead'; statusText = 'Ahead'; }
+    else if (actualPct < p.timePct - 5) { statusCls = 'behind'; statusText = 'Behind'; }
+
+    // Compute bar segments. Width is % of target — capped at 100% for display.
+    // Each segment carries qty + val so we can render its label inside (or in a spill pill).
+    const cap = (pct) => Math.min(100, Math.max(0, pct));
+    let segs = [];
+    if (t.type === 'dep') {
+      const pct = usingMoney ? (t.targetVal > 0 ? (p.actVal / t.targetVal) * 100 : 0)
+                              : (t.targetQty > 0 ? (p.actQty / t.targetQty) * 100 : 0);
+      if (pct > 0) segs.push({ cls: 'dep', width: cap(pct), qty: p.actQty, val: p.actVal });
+    } else if (t.type === 'exc') {
+      const actPct = usingMoney ? (t.targetVal > 0 ? (p.actVal / t.targetVal) * 100 : 0)
+                                 : (t.targetQty > 0 ? (p.actQty / t.targetQty) * 100 : 0);
+      const propPct = usingMoney ? (t.targetVal > 0 ? (p.propDepVal / t.targetVal) * 100 : 0)
+                                  : (t.targetQty > 0 ? (p.propDepQty / t.targetQty) * 100 : 0);
+      if (actPct > 0) segs.push({ cls: 'exc', width: cap(actPct), qty: p.actQty, val: p.actVal });
+      if (propPct > 0) segs.push({ cls: 'dep', width: cap(propPct), qty: p.propDepQty, val: p.propDepVal });
+    } else {  // set
+      const actPct = usingMoney ? (t.targetVal > 0 ? (p.actVal / t.targetVal) * 100 : 0)
+                                 : (t.targetQty > 0 ? (p.actQty / t.targetQty) * 100 : 0);
+      const propExcPct = usingMoney ? (t.targetVal > 0 ? (p.propExcVal / t.targetVal) * 100 : 0)
+                                     : (t.targetQty > 0 ? (p.propExcQty / t.targetQty) * 100 : 0);
+      const propDepPct = usingMoney ? (t.targetVal > 0 ? (p.propDepVal / t.targetVal) * 100 : 0)
+                                     : (t.targetQty > 0 ? (p.propDepQty / t.targetQty) * 100 : 0);
+      if (actPct > 0) segs.push({ cls: 'set', width: cap(actPct), qty: p.actQty, val: p.actVal });
+      if (propExcPct > 0) segs.push({ cls: 'exc', width: cap(propExcPct), qty: p.propExcQty, val: p.propExcVal });
+      if (propDepPct > 0) segs.push({ cls: 'dep', width: cap(propDepPct), qty: p.propDepQty, val: p.propDepVal });
+    }
+    // Cap total bar width
+    const segTotal = segs.reduce((s, x) => s + x.width, 0);
+    if (segTotal > 100) {
+      const scale = 100 / segTotal;
+      segs.forEach(x => x.width *= scale);
+    }
+    const isOver = actualPct >= 100;
+
+    // Build sales bar with inline labels + spill pills for narrow segs.
+    // Threshold: a segment narrower than ~10% gets its label spilled to the right of the bar.
+    const NARROW_PCT = 10;
+    const segLabel = (s) => `${s.qty} · ${tgFmtCurrency(s.val)}`;
+    const filledPct = Math.min(100, segs.reduce((sum, x) => sum + x.width, 0));
+    const spills = [];
+    const segHtml = segs.map(s => {
+      const isNarrow = s.width < NARROW_PCT;
+      if (isNarrow) spills.push({ cls: s.cls, label: segLabel(s) });
+      return `<div class="tgp-bar-seg ${s.cls}${isNarrow ? ' narrow' : ''}" style="width:${s.width.toFixed(1)}%">${isNarrow ? '' : segLabel(s)}</div>`;
+    }).join('');
+    const spillHtml = spills.map((sp, i) => {
+      const offset = 10 + (i * 96);  // 96px = approx pill width + gap; queue them horizontally
+      return `<div class="tgp-bar-spill ${sp.cls}" style="left:calc(${filledPct.toFixed(1)}% + ${offset}px)">${sp.label}</div>`;
+    }).join('');
+
+    // Time bar — same narrow / spill treatment for consistency.
+    const timePctCapped = Math.min(100, p.timePct);
+    const timeNarrow = timePctCapped > 0 && timePctCapped < NARROW_PCT;
+    const timeLabel = `${p.elapsedDays}d`;
+    const timeSegHtml = `<div class="tgp-bar-seg time${timeNarrow ? ' narrow' : ''}" style="width:${timePctCapped.toFixed(1)}%">${timeNarrow ? '' : timeLabel}</div>`;
+    const timeSpillHtml = timeNarrow
+      ? `<div class="tgp-bar-spill time" style="left:calc(${timePctCapped.toFixed(1)}% + 10px)">${timeLabel}</div>`
+      : '';
+
+    const targetSummary = [
+      t.targetQty > 0 ? `${t.targetQty} lots` : '',
+      t.targetVal > 0 ? tgFmtCurrency(t.targetVal) : '',
+    ].filter(Boolean).join(' · ');
+
+    const actualSummary = usingMoney
+      ? `${tgFmtCurrency(p.totalVal)} of ${tgFmtCurrency(t.targetVal)}`
+      : `${p.totalQty} of ${t.targetQty} lots`;
+
+    // Pace pill — qty-based daily rate required to hit the target.
+    //   lotsRemaining = targetQty − totalQty (total = actual + forecast)
+    //   daysRemaining = totalDays − elapsedDays
+    //   pace          = daysRemaining / lotsRemaining   ("1 lot every Xd")
+    // Falls back to $/AVG_BASE only if no qty target is set.
+    let lotsRemaining;
+    if ((t.targetQty || 0) > 0) {
+      lotsRemaining = Math.max(0, t.targetQty - p.totalQty);
+    } else if ((t.targetVal || 0) > 0 && AVG_BASE > 0) {
+      lotsRemaining = Math.ceil(Math.max(0, t.targetVal - p.totalVal) / AVG_BASE);
+    } else {
+      lotsRemaining = 0;
+    }
+    const daysRemaining = Math.max(0, p.totalDays - p.elapsedDays);
+    let paceText = '', paceCls = '', paceTitle = '';
+    if (lotsRemaining > 0) {
+      if (daysRemaining <= 0) {
+        paceText = `${lotsRemaining} lot${lotsRemaining === 1 ? '' : 's'} short`;
+        paceCls = 'over';
+        paceTitle = `Target period has ended · ${p.totalQty} sold (incl. forecast) vs ${t.targetQty || '—'} target`;
+      } else {
+        const daysPerLot = daysRemaining / lotsRemaining;
+        if (daysPerLot >= 1) {
+          paceText = `Need 1 lot every ${daysPerLot.toFixed(1)}d`;
+        } else {
+          paceText = `Need ${(lotsRemaining / daysRemaining).toFixed(1)} lots/day`;
+          paceCls = 'tight';
+        }
+        paceTitle = `${lotsRemaining} more lot${lotsRemaining === 1 ? '' : 's'} needed (target ${t.targetQty || '—'} − ${p.totalQty} sold incl. forecast) in ${daysRemaining}d remaining`;
+      }
+    }
+    const pacePill = paceText
+      ? `<div class="tgp-card-pace${paceCls ? ' ' + paceCls : ''}" title="${paceTitle}">${paceText}</div>`
+      : '';
+
+    return `<div class="tgp-card ${stageCls}">
+      <div class="tgp-card-hdr">
+        <div>
+          <div class="tgp-card-title">${stageEmoji} ${ppEscape(t.label)}</div>
+          <div class="tgp-card-meta">${stageLabel} · target ${targetSummary} · ${tgFmtRange(t.fromYM, t.toYM)} (${p.totalDays}d)</div>
+        </div>
+        <div class="tgp-card-pills">
+          ${pacePill}
+          <div class="tgp-card-status ${statusCls}">${statusText} · ${actualPct.toFixed(0)}% sales vs ${p.timePct.toFixed(0)}% time</div>
+        </div>
+      </div>
+      <div class="tgp-bars">
+        <div class="tgp-bar-row">
+          <div class="tgp-bar-label"><span>Sales (${usingMoney ? '$' : 'qty'})</span><span><span class="tgp-pct">${actualPct.toFixed(0)}%</span> · ${actualSummary}</span></div>
+          <div class="tgp-bar-track ${isOver ? 'over' : ''}">
+            <div class="tgp-bar-clip">${segHtml}</div>
+            ${spillHtml}
+          </div>
+        </div>
+        <div class="tgp-bar-row">
+          <div class="tgp-bar-label"><span>Time elapsed</span><span><span class="tgp-pct">${p.timePct.toFixed(0)}%</span> · ${p.elapsedDays}d of ${p.totalDays}d</span></div>
+          <div class="tgp-bar-track">
+            <div class="tgp-bar-clip">${timeSegHtml}</div>
+            ${timeSpillHtml}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  return `<div class="tgp-section">
+    <div class="tgp-section-hdr">
+      <div class="tgp-section-title">🎯 Sales vs targets</div>
+      <div class="tgp-section-sub">${targets.length} target${targets.length===1?'':'s'} · sales bar uses each lot's actual stage colour · time bar shows period elapsed</div>
+    </div>
+    ${cards}
+  </div>`;
+}
+
+// (tgEditTarget / tgDeleteTarget were used by the legacy multi-target list and
+// are now no-ops — the simplified single-target modal has neither edit-by-id
+// nor delete. Stubs are defined at the top of this section.)
+
+function mrCurrentRange() {
+  if (_mrFromYM && _mrToYM && mrIsValidYM(_mrFromYM) && mrIsValidYM(_mrToYM)) {
+    const from = mrYMToDate(_mrFromYM);
+    const to = mrYMToDate(_mrToYM);
+    if (from > to) return mrMonthRangesFromTo(to, from);
+    return mrMonthRangesFromTo(from, to);
+  }
+  return mrMonthRanges(6, 5);
+}
+// Combine year + month dropdown values into 'YYYY-MM'
+function mrSetFromParts(which) {
+  const yEl = document.getElementById('mr-' + which + '-year');
+  const mEl = document.getElementById('mr-' + which + '-month');
+  if (!yEl || !mEl) return;
+  const y = yEl.value, m = mEl.value;
+  if (!y || !m) return;
+  const ym = y + '-' + String(m).padStart(2, '0');
+  if (!mrIsValidYM(ym)) return;
+  if (which === 'from') _mrFromYM = ym;
+  else _mrToYM = ym;
+  _mrPreset = 'custom';
+  mrSavePrefs();
+  renderPipeline();
+}
+function mrPresetRange(name) {
+  const today = new Date();
+  const thisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  if (name === 'default') { _mrFromYM = null; _mrToYM = null; }
+  else if (name === 'last6') {
+    _mrFromYM = mrDateToYM(new Date(today.getFullYear(), today.getMonth() - 5, 1));
+    _mrToYM = mrDateToYM(thisMonth);
+  } else if (name === 'last12') {
+    _mrFromYM = mrDateToYM(new Date(today.getFullYear(), today.getMonth() - 11, 1));
+    _mrToYM = mrDateToYM(thisMonth);
+  } else if (name === 'next6') {
+    _mrFromYM = mrDateToYM(thisMonth);
+    _mrToYM = mrDateToYM(new Date(today.getFullYear(), today.getMonth() + 5, 1));
+  } else if (name === 'cal') {
+    _mrFromYM = today.getFullYear() + '-01';
+    _mrToYM = today.getFullYear() + '-12';
+  } else if (name === 'fy') {
+    const y = today.getMonth() >= 6 ? today.getFullYear() : today.getFullYear() - 1;
+    _mrFromYM = y + '-07';
+    _mrToYM = (y + 1) + '-06';
+  }
+  _mrPreset = name;
+  mrSavePrefs();
+  renderPipeline();
+}
+function mrSumNum(rows, col) {
+  return rows.reduce((s, r) => {
+    const n = Number(String(r[col] ?? '').replace(/[$,]/g, ''));
+    return s + (isNaN(n) ? 0 : n);
+  }, 0);
+}
+function mrFmtCurrency(n) {
+  if (!n || isNaN(n)) return '—';
+  if (Math.abs(n) >= 1000000) return '$' + (n / 1000000).toFixed(1) + 'M';
+  if (Math.abs(n) >= 1000) return '$' + Math.round(n / 1000) + 'K';
+  return '$' + n.toLocaleString();
+}
+
+function mrToggleRow(type, cb) {
+  const panel = document.getElementById('mr-panel');
+  if (!panel) return;
+  const cls = 'mr-show-' + type;
+  panel.classList.toggle(cls, cb.checked);
+  // Update the chip's "on" appearance
+  const label = cb.closest('label.mr-toggle');
+  if (label) label.classList.toggle('on', cb.checked);
+}
+
+function renderPipelineMonthlyReport(root) {
+  const months = mrCurrentRange();
+  const sc = r => String(r['Sales Condition'] || '').trim();
+  const isDeposit = r => /deposit/i.test(sc(r));
+  const isExchanged = r => /exchanged/i.test(sc(r)) && !/resc/i.test(sc(r));
+
+  // Per-month buckets — split proposed-Settled by the lot's current stage
+  // so the bar can show 3-colour breakdown (red + amber + green).
+  const data = months.map(m => {
+    const depRows = allData.filter(r => mrInMonth(r['Sales Advice Received Date'] || r['Contract Issued Date'], m.start, m.end));
+    const exchActRows = allData.filter(r => mrInMonth(r['Exchanged Date'], m.start, m.end));
+    const exchPropRows = allData.filter(r => isDeposit(r) && mrInMonth(r['Proposed Exchanged Date'], m.start, m.end));
+    const setActRows = allData.filter(r => mrInMonth(r['Settled Date'], m.start, m.end));
+    const setPExcRows = allData.filter(r => isExchanged(r) && mrInMonth(r['Proposed Settled Date'], m.start, m.end));
+    const setPDepRows = allData.filter(r => isDeposit(r) && mrInMonth(r['Proposed Settled Date'], m.start, m.end));
+    return {
+      ...m,
+      depQty:    depRows.length,    depVal:    mrSumNum(depRows, 'CfS Issued Price'),
+      exchAQty:  exchActRows.length, exchAVal:  mrSumNum(exchActRows, 'CfS Exchanged Price ($)'),
+      exchPQty:  exchPropRows.length,exchPVal:  mrSumNum(exchPropRows, 'CfS Issued Price'),
+      setAQty:   setActRows.length,  setAVal:   mrSumNum(setActRows, 'CfS Settled Price ($)'),
+      setPExcQty: setPExcRows.length, setPExcVal: mrSumNum(setPExcRows, 'CfS Exchanged Price ($)'),
+      setPDepQty: setPDepRows.length, setPDepVal: mrSumNum(setPDepRows, 'CfS Issued Price'),
+    };
+  });
+
+  const totals = data.reduce((acc, d) => ({
+    depQty: acc.depQty + d.depQty, depVal: acc.depVal + d.depVal,
+    exchAQty: acc.exchAQty + d.exchAQty, exchAVal: acc.exchAVal + d.exchAVal,
+    exchPQty: acc.exchPQty + d.exchPQty, exchPVal: acc.exchPVal + d.exchPVal,
+    setAQty: acc.setAQty + d.setAQty, setAVal: acc.setAVal + d.setAVal,
+    setPExcQty: acc.setPExcQty + d.setPExcQty, setPExcVal: acc.setPExcVal + d.setPExcVal,
+    setPDepQty: acc.setPDepQty + d.setPDepQty, setPDepVal: acc.setPDepVal + d.setPDepVal,
+  }), { depQty:0, depVal:0, exchAQty:0, exchAVal:0, exchPQty:0, exchPVal:0, setAQty:0, setAVal:0, setPExcQty:0, setPExcVal:0, setPDepQty:0, setPDepVal:0 });
+
+  const currentDeposit = allData.filter(isDeposit).length;
+  const currentExchanged = allData.filter(isExchanged).length;
+
+  const userName = (typeof userDisplayName !== 'undefined' && userDisplayName) ? userDisplayName.split(' ')[0] : 'there';
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : (hour < 18 ? 'Good afternoon' : 'Good evening');
+  const today = new Date().toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+  // Build a mini-bar cell. `parts` is an array of { qty, val, cls, splitCls, kind }
+  // where `kind` is 'actual' or 'proposed' — filtered based on _mrShowActual/_mrShowProposed.
+  function tlCell(parts, isMoney, isCurrent, extraClass) {
+    const cls = ['mr-tlcell'];
+    if (isCurrent) cls.push('mr-this-month');
+    if (extraClass) cls.push(extraClass);
+    const visible = parts.filter(p =>
+      (p.kind === 'actual' && _mrShowActual) ||
+      (p.kind === 'proposed' && _mrShowProposed)
+    );
+    const total = visible.reduce((s, p) => s + (isMoney ? p.val : p.qty), 0);
+    if (total === 0) {
+      return `<td class="${cls.join(' ')}"><div class="mr-cell"><div class="mr-cell-empty">—</div></div></td>`;
+    }
+    const main = isMoney ? mrFmtCurrency(total) : total;
+    const nonZero = visible.filter(p => (isMoney ? p.val : p.qty) > 0);
+    const barSegs = nonZero.map(p => {
+      const portion = ((isMoney ? p.val : p.qty) / total) * 100;
+      return `<div class="${p.cls}" style="width:${portion.toFixed(1)}%"></div>`;
+    }).join('');
+    // Only show breakdown text when there's more than one segment — single-segment
+    // cells are redundant (the big number above already says it).
+    const splitHtml = nonZero.length > 1
+      ? `<div class="mr-cell-split">${nonZero.map(p => `<span class="${p.splitCls}">${isMoney ? mrFmtCurrency(p.val) : p.qty}</span>`).join(' + ')}</div>`
+      : '';
+    return `<td class="${cls.join(' ')}">
+      <div class="mr-cell">
+        <div class="mr-cell-main">${main}</div>
+        <div class="mr-cell-bar">${barSegs}</div>
+        ${splitHtml}
+      </div>
+    </td>`;
+  }
+
+  const monthHeadHtml = data.map(d => `<th class="${d.isCurrent ? 'mr-this-month' : ''}">${ppEscape(d.label)}</th>`).join('');
+
+  // Each "part" gets a kind ('actual' | 'proposed') so the filter chips can hide it.
+  // Deposits = always actual (no proposed exists). Exchanges: actual=amber, proposed=green.
+  // Settlements: actual=red, proposed-from-Exchanged=amber, proposed-from-Deposit=green.
+  const depCells = (isMoney) => data.map(d =>
+    tlCell([{ qty: d.depQty, val: d.depVal, cls: 'mr-bar-dep', splitCls: 'tl-dep', kind: 'actual' }], isMoney, d.isCurrent)
+  ).join('');
+  const exchCells = (isMoney) => data.map(d =>
+    tlCell([
+      { qty: d.exchAQty, val: d.exchAVal, cls: 'mr-bar-exc', splitCls: 'tl-exc', kind: 'actual' },
+      { qty: d.exchPQty, val: d.exchPVal, cls: 'mr-bar-dep', splitCls: 'tl-dep', kind: 'proposed' },
+    ], isMoney, d.isCurrent)
+  ).join('');
+  const setCells = (isMoney) => data.map(d =>
+    tlCell([
+      { qty: d.setAQty,    val: d.setAVal,    cls: 'mr-bar-set', splitCls: 'tl-set', kind: 'actual' },
+      { qty: d.setPExcQty, val: d.setPExcVal, cls: 'mr-bar-exc', splitCls: 'tl-exc', kind: 'proposed' },
+      { qty: d.setPDepQty, val: d.setPDepVal, cls: 'mr-bar-dep', splitCls: 'tl-dep', kind: 'proposed' },
+    ], isMoney, d.isCurrent)
+  ).join('');
+
+  const depTotParts = [{ qty: totals.depQty, val: totals.depVal, cls: 'mr-bar-dep', splitCls: 'tl-dep', kind: 'actual' }];
+  const exchTotParts = [
+    { qty: totals.exchAQty, val: totals.exchAVal, cls: 'mr-bar-exc', splitCls: 'tl-exc', kind: 'actual' },
+    { qty: totals.exchPQty, val: totals.exchPVal, cls: 'mr-bar-dep', splitCls: 'tl-dep', kind: 'proposed' },
+  ];
+  const setTotParts = [
+    { qty: totals.setAQty,    val: totals.setAVal,    cls: 'mr-bar-set', splitCls: 'tl-set', kind: 'actual' },
+    { qty: totals.setPExcQty, val: totals.setPExcVal, cls: 'mr-bar-exc', splitCls: 'tl-exc', kind: 'proposed' },
+    { qty: totals.setPDepQty, val: totals.setPDepVal, cls: 'mr-bar-dep', splitCls: 'tl-dep', kind: 'proposed' },
+  ];
+  const depTot = tlCell(depTotParts, false, false, 'total');
+  const depTotMoney = tlCell(depTotParts, true, false, 'total');
+  const exchTot = tlCell(exchTotParts, false, false, 'total');
+  const exchTotMoney = tlCell(exchTotParts, true, false, 'total');
+  const setTot = tlCell(setTotParts, false, false, 'total');
+  const setTotMoney = tlCell(setTotParts, true, false, 'total');
+
+  // Compute current from/to year+month parts for the dropdowns
+  const fromDate = mrYMToDate(_mrFromYM) || months[0].start;
+  const toDate = mrYMToDate(_mrToYM) || months[months.length - 1].start;
+  const presetActive = (name) => _mrPreset === name ? 'active' : '';
+  // Build year + month dropdown options
+  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const yearOpts = (selected) => {
+    let html = '';
+    for (let y = MR_MIN_YEAR; y <= MR_MAX_YEAR; y++) {
+      html += `<option value="${y}" ${y === selected ? 'selected' : ''}>${y}</option>`;
+    }
+    return html;
+  };
+  const monthOpts = (selected) => monthNames.map((n, i) =>
+    `<option value="${i + 1}" ${(i + 1) === selected ? 'selected' : ''}>${n}</option>`
+  ).join('');
+
+  root.innerHTML = `
+    <div class="pp-hdr">
+      <div>
+        <div class="pp-greeting">${greeting}, <strong>${ppEscape(userName)}</strong></div>
+        <div class="pp-sub">${today} · monthly pipeline report · ${months.length} month${months.length===1?'':'s'} (${months[0].label} → ${months[months.length-1].label})</div>
+      </div>
+      <div class="pp-view-toggle">
+        <button onclick="ppSwitchView('kanban')">📋 Current pipeline</button>
+        <button class="active" onclick="ppSwitchView('report')">📊 Monthly report</button>
+      </div>
+    </div>
+
+    <div class="mr-range-bar">
+      <span class="mr-range-label">Date range</span>
+      <select class="mr-range-input" id="mr-from-month" onchange="mrSetFromParts('from')">${monthOpts(fromDate.getMonth() + 1)}</select>
+      <select class="mr-range-input" id="mr-from-year"  onchange="mrSetFromParts('from')">${yearOpts(fromDate.getFullYear())}</select>
+      <span style="color:#8a7d65;font-size:12px">→</span>
+      <select class="mr-range-input" id="mr-to-month"   onchange="mrSetFromParts('to')">${monthOpts(toDate.getMonth() + 1)}</select>
+      <select class="mr-range-input" id="mr-to-year"    onchange="mrSetFromParts('to')">${yearOpts(toDate.getFullYear())}</select>
+      <div class="mr-range-presets">
+        <button class="mr-range-preset ${presetActive('default')}" onclick="mrPresetRange('default')">Default (12mo)</button>
+        <button class="mr-range-preset ${presetActive('last6')}" onclick="mrPresetRange('last6')">Last 6mo</button>
+        <button class="mr-range-preset ${presetActive('last12')}" onclick="mrPresetRange('last12')">Last 12mo</button>
+        <button class="mr-range-preset ${presetActive('next6')}" onclick="mrPresetRange('next6')">Next 6mo</button>
+        <button class="mr-range-preset ${presetActive('cal')}" onclick="mrPresetRange('cal')">${new Date().getFullYear()}</button>
+        <button class="mr-range-preset ${presetActive('fy')}" onclick="mrPresetRange('fy')">FY${(() => { const t = new Date(); const y = t.getMonth() >= 6 ? t.getFullYear() : t.getFullYear() - 1; return String(y).slice(-2) + '/' + String(y + 1).slice(-2); })()}</button>
+        <button class="mr-targets-btn" onclick="openTargetsAdmin()" title="Set $ + lot quantity targets per stage">🎯 Manage targets (${tgGetTargets().length})</button>
+      </div>
+    </div>
+
+    <div class="mr-kpi-row" style="grid-template-columns:repeat(3,1fr)">
+      <div class="mr-kpi tl-dep">
+        <div class="mr-kpi-label">🟢 Deposits — period</div>
+        <div class="mr-kpi-value">${totals.depQty}</div>
+        <div class="mr-kpi-meta">${mrFmtCurrency(totals.depVal)} contracts issued</div>
+      </div>
+      <div class="mr-kpi tl-exc">
+        <div class="mr-kpi-label">🟡 Exchanged (forecast)</div>
+        <div class="mr-kpi-value">${totals.exchAQty + totals.exchPQty}</div>
+        <div class="mr-kpi-meta">${totals.exchAQty} actual + ${totals.exchPQty} from ${currentDeposit} Deposit lot${currentDeposit===1?'':'s'}</div>
+      </div>
+      <div class="mr-kpi tl-set">
+        <div class="mr-kpi-label">🔴 Settled (forecast)</div>
+        <div class="mr-kpi-value">${totals.setAQty + totals.setPExcQty + totals.setPDepQty}</div>
+        <div class="mr-kpi-meta">${totals.setAQty} settled + ${totals.setPExcQty} from Exchanged + ${totals.setPDepQty} from Deposit</div>
+      </div>
+    </div>
+
+    <div class="mr-panel" id="mr-panel">
+      <div class="mr-panel-hdr">
+        <div>
+          <div class="mr-panel-title">By month — forecast (qty &amp; value)</div>
+          <div class="mr-panel-sub">${months.length} month${months.length===1?'':'s'} · current month highlighted · colour reflects each lot's current stage</div>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:8px">
+          <label class="mr-toggle actual ${_mrShowActual ? 'on' : ''}"><input type="checkbox" ${_mrShowActual ? 'checked' : ''} onchange="mrToggleFilter('actual')"><span class="mr-legend-dot actual"></span>Actual</label>
+          <label class="mr-toggle proposed ${_mrShowProposed ? 'on' : ''}"><input type="checkbox" ${_mrShowProposed ? 'checked' : ''} onchange="mrToggleFilter('proposed')"><span class="mr-legend-dot proposed"></span>Proposed</label>
+        </div>
+      </div>
+      <div class="mr-legend-bar">
+        <div class="mr-legend-item"><span class="mr-legend-dot" style="background:#b91c1c"></span>🔴 Red — currently Settled (banked)</div>
+        <div class="mr-legend-item"><span class="mr-legend-dot" style="background:#d97706"></span>🟡 Amber — currently Exchanged</div>
+        <div class="mr-legend-item"><span class="mr-legend-dot" style="background:#1a6b3a"></span>🟢 Green — currently Deposit (further out)</div>
+        <div class="mr-legend-item" style="margin-left:auto">Big number = forecast (act + prop) · split shown below</div>
+      </div>
+      <div class="mr-table-wrap">
+        <table class="mr-report">
+          <thead>
+            <tr><th></th>${monthHeadHtml}<th class="total">Total</th></tr>
+          </thead>
+          <tbody>
+            <tr class="mr-grp-row tl-dep"><td>Deposits</td><td colspan="${months.length + 1}"></td></tr>
+            <tr><td>Qty</td>${depCells(false)}${depTot}</tr>
+            <tr><td>Value</td>${depCells(true)}${depTotMoney}</tr>
+
+            <tr class="mr-grp-row tl-exc"><td>Exchanged (forecast)</td><td colspan="${months.length + 1}"></td></tr>
+            <tr><td>Qty</td>${exchCells(false)}${exchTot}</tr>
+            <tr><td>Value</td>${exchCells(true)}${exchTotMoney}</tr>
+
+            <tr class="mr-grp-row tl-set"><td>Settled (forecast)</td><td colspan="${months.length + 1}"></td></tr>
+            <tr><td>Qty</td>${setCells(false)}${setTot}</tr>
+            <tr><td>Value</td>${setCells(true)}${setTotMoney}</tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    ${tgRenderProgressSection()}
+
+    <div class="mr-foot-note">
+      <strong>How "proposed" is counted:</strong> only lots <em>currently committed in the pipeline</em>.<br>
+      • <strong>Exchanged forecast</strong> = actual exchanges (amber) + lots in <code>Sales Condition = "3. Deposit"</code> with <code>Proposed Exchanged Date</code> in that month (green).<br>
+      • <strong>Settled forecast</strong> = actual settlements (red) + lots in <code>"4. Exchanged"</code> with <code>Proposed Settled Date</code> in month (amber) + lots in <code>"3. Deposit"</code> with <code>Proposed Settled Date</code> in month (green).<br>
+      • Colour gradient = risk: more red/amber = high certainty (already done or close) · more green = depends on more pipeline movement.
+    </div>
+  `;
+}
+
+let _ppSearchTimer = null;
+function renderPipelineDebounced() {
+  clearTimeout(_ppSearchTimer);
+  _ppSearchTimer = setTimeout(() => {
+    const q = (document.getElementById('pp-search')?.value || '').toLowerCase().trim();
+    ppApplySearch(q);
+  }, 200);
+}
+
+function ppApplySearch(q) {
+  document.querySelectorAll('.pp-tile').forEach(tile => {
+    if (!q) { tile.style.display = ''; return; }
+    const text = tile.textContent.toLowerCase();
+    tile.style.display = text.includes(q) ? '' : 'none';
+  });
 }
 
 function updateDeskStats() {
@@ -3755,7 +5488,7 @@ let dtSelectedIdx = -1;
 function getHeaderColour(h) {
   // Colours extracted directly from SalesDB-Main.xlsx header row
   const lightblue = ['Project Name','Lot ID','Property Address','Stage','Lot #','Sales Condition']; // #C0E6F5
-  const yellow    = ['Pending S/A Date','Pending S/A Days','Pending S/A Agency','*LEADS Name','$VAL','March Campaign','OFFER Rebate','SETTLE Rebate','Notes.1','Source of Enquiry','Type Of Purchaser','Special Condilions/Variations','2026 Report','Comments.1']; // #FFFF00
+  const yellow    = ['Pending S/A Date','Pending S/A Days','Pending S/A Agency','*LEADS Name','$VAL','March Campaign','OFFER Rebate','SETTLE Rebate','Notes.1','Source of Enquiry','Type Of Purchaser','Special Conditions/Variations','2026 Report']; // #FFFF00
   const darkblue  = ['CfS Type','Product Line','Product Type','Lot Area (m\u00b2)','Lot Frontage (Width) (m)']; // #156082
   const purple    = ['StockList','Notes']; // #9437FF
   const magenta   = ['Channel Market','Sales Channel','Channel Partner','Swap to/from Channel Partner','Allocation Date','Allocation Days','Allocation Period (days)','Allocation Days / Allocation Expiry Date','H&L $House (S/S)','$H&L Total (S/S)','H&L $House (D/S)','$H&L Total (D/S)','Vendors Agency','Vendors Agency Agent',"Agent's Mobile","Agent's Email"]; // #A02B93
@@ -3976,9 +5709,9 @@ const COL_GROUPS = [
     "Purchaser's Suburb","Purchaser's Postcode",
     "Purchaser's Solicitor (P'Sol)","Purchaser's Solicitor Phone"
   ]},
-  // Columns BX-CA: Other (#FFFF00)
+  // Columns BX-BZ: Other (#FFFF00) — column CA's duplicate `Comments` is intentionally ignored
   { label: 'Other', colour: '#FFFF00', textColour: '#000000', cols: [
-    'Type Of Purchaser','Special Condilions/Variations','2026 Report','Comments.1'
+    'Type Of Purchaser','Special Conditions/Variations','2026 Report'
   ]},
 ];
 
@@ -4006,7 +5739,7 @@ const LC_SECTIONS = [
   // Order tuned for column-flow split: items 1-5 fill the left column, 6-10 the right.
   // Left: P1 name/email/mobile + Suburb + Postcode | Right: P2 name/email/mobile + Solicitor + Solicitor Phone
   { idx: 17, label: 'Purchaser Details',    colour: '#E97132', dark: true, columnFlow: true, fields: ["(1) Purchaser's Name","(1) Purchaser's Email","(1) Purchaser's Mobile","Purchaser's Suburb","Purchaser's Postcode","(2) Purchaser's Name","(2) Purchaser's Email","(2) Purchaser's Mobile","Purchaser's Solicitor (P'Sol)","Purchaser's Solicitor Phone"] },
-  { idx: 18, label: 'Other',                colour: '#FFFF00',                fields: ['Type Of Purchaser','Special Condilions/Variations','2026 Report','Comments.1'] },
+  { idx: 18, label: 'Other',                colour: '#FFFF00',                fields: ['Type Of Purchaser','Special Conditions/Variations','2026 Report'] },
 ];
 
 const LC_TABS = [
@@ -4025,7 +5758,7 @@ const LC_TABS = [
   { id: 'tab-18',      label: 'Other',                primaryColour: '#FFFF00', dark: false, sections: [18] },
 ];
 
-const LC_NOTE_FIELDS = new Set(['Notes', 'Notes.1', 'Comments', 'Comments.1', 'Special Condilions/Variations']);
+const LC_NOTE_FIELDS = new Set(['Notes', 'Notes.1', 'Comments', 'Special Conditions/Variations']);
 
 function lcTabBg(colour) {
   if (colour === '#FFFF00') return '#b88a00';
@@ -4695,7 +6428,7 @@ async function deskSaveEdit() {
   updateDeskStats();
   try {
     await syncToOneDrive();
-    deskShowScreen('data');
+    deskShowScreen(_lastNonEditScreen);
     toast('✓ Saved to OneDrive', 'success');
   } catch(e) {}
 }
@@ -4704,9 +6437,32 @@ function deskCancelEditCheck() {
   const lot = allData[editRowIdx]?.['Lot #'] || allData[editRowIdx]?.['Lot#'] || null;
   if (formDirty) {
     if (confirm('You have unsaved changes. Save before leaving?')) { deskSaveEdit(); }
-    else { formDirty = false; if (lot) releaseLock(lot); deskShowScreen('data'); }
-  } else { if (lot) releaseLock(lot); deskShowScreen('data'); }
+    else { formDirty = false; if (lot) releaseLock(lot); deskShowScreen(_lastNonEditScreen); }
+  } else { if (lot) releaseLock(lot); deskShowScreen(_lastNonEditScreen); }
 }
+
+// Esc key — closes the popup first if open, otherwise closes the lot card.
+// Inside an active form input we let Esc just blur (avoid losing in-progress typing).
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  const popup = document.getElementById('lcm-overlay');
+  if (popup && popup.classList.contains('show')) {
+    e.preventDefault();
+    lcCancelPopup();
+    return;
+  }
+  const editOverlay = document.getElementById('dscreen-edit');
+  if (editOverlay && editOverlay.style.display === 'flex') {
+    // If user is typing in a field, just blur it (let them step out without closing)
+    const tag = (document.activeElement?.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'select' || tag === 'textarea') {
+      document.activeElement.blur();
+      return;
+    }
+    e.preventDefault();
+    deskCancelEditCheck();
+  }
+});
 
 // ── COLUMN FILTER POPUP ──
 function openCfPopup(event, colName) {
