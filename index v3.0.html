@@ -6557,13 +6557,16 @@ function lcRenderField(row, fieldName, opts) {
   const raw = row[fieldName];
   const display = formatCellValue(fieldName, raw) || '';
   const isEmpty = display === '' || display === 'NaN' || display === 'undefined';
-  const valForEdit = String(raw ?? '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  // Store the editable value in data-val (HTML-escaped). Browser decodes the
+  // attribute back to the raw string when JS reads `this.dataset.val` — no
+  // string-interpolation gymnastics, handles newlines/quotes/backslashes safely.
+  const valForEdit = lcEscapeHtml(String(raw ?? ''));
   const cls = ['lc-fval'];
   if (isEmpty) cls.push('empty');
   if (opts && opts.landtax) cls.push('money', 'landtax');
   else if (fieldName.startsWith('$') || /Price|Rebate|Tax/.test(fieldName)) cls.push('money');
   const key = sid(fieldName);
-  return `<div class="lc-frow" id="d-row-${key}" onclick="deskStartEdit('${key}','${valForEdit}')">
+  return `<div class="lc-frow" id="d-row-${key}" data-key="${key}" data-val="${valForEdit}" onclick="deskStartEdit(this.dataset.key, this.dataset.val)">
     <span class="lc-flabel">${lcEscapeHtml(fieldName.trim())}</span>
     <span class="${cls.join(' ')}" id="d-disp-${key}">${isEmpty ? '—' : display}</span>
   </div>`;
@@ -6581,11 +6584,13 @@ function lcRenderSectionBody(row, s) {
   const notesHtml = noteFields.map(f => {
     const raw = row[f];
     const display = String(raw ?? '').trim();
-    const valForEdit = display.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    // Same data-val pattern as lcRenderField — comments often contain newlines
+    // (Alt+Enter in Excel) which silently broke the previous inline-string approach.
+    const valForEdit = lcEscapeHtml(display);
     const key = sid(f);
     return `<div class="lc-note-block">
       <div class="lc-note-label">${lcEscapeHtml(f.trim())}</div>
-      <div class="lc-note-body" id="d-disp-${key}" onclick="deskStartEdit('${key}','${valForEdit}')">${display ? lcEscapeHtml(display) : '—'}</div>
+      <div class="lc-note-body" id="d-disp-${key}" data-key="${key}" data-val="${valForEdit}" onclick="deskStartEdit(this.dataset.key, this.dataset.val)">${display ? lcEscapeHtml(display) : '—'}</div>
     </div>`;
   }).join('');
   return wrapper + notesHtml;
