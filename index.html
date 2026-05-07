@@ -330,7 +330,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
   #dscreen-edit .desktop-edit-actions { display: none; }
   #dscreen-edit .desktop-edit-body { padding: 0; }
 }
-.lc-shell { background: #fff; height: 100%; display: flex; flex-direction: column; min-height: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Aptos", sans-serif; color: #1e293b; }
+.lc-shell { background: #fff; height: 100%; display: flex; flex-direction: column; min-height: 0; font-family: "Aptos", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1e293b; }
 .lc-hdr { background: linear-gradient(to bottom, #000d35 0%, #002675 100%); color: #fff; padding: 20px 22px; display: flex; align-items: center; gap: 18px; flex-shrink: 0; }
 .lc-hdr-tile { width: 96px; height: 96px; border-radius: 12px; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.18); display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; line-height: 1; }
 .lc-hdr-tile span { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.65); font-weight: 600; margin-bottom: 4px; }
@@ -422,7 +422,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 /* ───────────────────────────────────────────────────────────────────────
    DEPOSIT TRANSITION POPUP (.lcm-) — opens when user clicks Deposit stage
    ─────────────────────────────────────────────────────────────────────── */
-.lcm-overlay { position: fixed; inset: 0; z-index: 100; background: rgba(15,23,42,0.55); display: none; align-items: center; justify-content: center; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Aptos", sans-serif; }
+.lcm-overlay { position: fixed; inset: 0; z-index: 100; background: rgba(15,23,42,0.55); display: none; align-items: center; justify-content: center; padding: 20px; font-family: "Aptos", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 .lcm-overlay.show { display: flex; }
 .lcm { background: #fff; border-radius: 12px; box-shadow: 0 16px 48px rgba(0,0,0,0.35); width: 100%; max-width: 540px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; color: #1e293b; }
 .lcm-hdr { background: linear-gradient(to bottom, #000d35 0%, #002675 100%); color: #fff; padding: 18px 22px; flex-shrink: 0; position: relative; }
@@ -545,12 +545,11 @@ select.lcm-input { appearance: none; background-image: url("data:image/svg+xml,%
 .pp-tile:hover { border-color: #002675; box-shadow: 0 2px 8px rgba(0, 38, 117, 0.10); }
 
 /* Hover popover — shows the last 2 comment lines (split on newlines).
-   Positioned below the tile, dark bg for legibility. */
+   Positioned below the tile, dark bg for legibility. Plain (non-italic) text. */
 .pp-tile-popover { display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 50; margin-top: 4px; background: #1a1408; color: #fff; padding: 9px 11px; border-radius: 6px; font-size: 11.5px; line-height: 1.45; box-shadow: 0 6px 18px rgba(0,0,0,0.25); }
 .pp-tile-popover::before { content: ''; position: absolute; top: -5px; left: 14px; border: 5px solid transparent; border-bottom-color: #1a1408; }
-.pp-tile-popover-line { font-style: italic; }
 .pp-tile-popover-line + .pp-tile-popover-line { margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.15); }
-.pp-tile-popover-empty { font-style: italic; color: #94a3b8; }
+.pp-tile-popover-empty { color: #94a3b8; }
 .pp-tile-wrap:hover .pp-tile-popover { display: block; }
 .pp-tile-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 7px 11px; border-bottom: 1px solid #ece6d4; }
 /* Stage-coloured gradient on tile-top, fading to white over ~75% of the width */
@@ -4533,11 +4532,15 @@ function ppRenderTile(row, idxInAll, stageKey) {
   const stage = String(row['Stage'] || '').replace(/^Stage\s*/i, '');
   // Comments — pull from spreadsheet, split on newlines into individual entries
   // (people use Alt+Enter in Excel to append new comments to the same cell).
-  // Show the LAST 2 lines in the hover popover (latest first, append-at-bottom
-  // convention). Once Supabase activities table lands, this becomes a real
-  // join on the comment thread.
+  // The TILE shows the most recent line inline (last entry, append-at-bottom).
+  // The HOVER POPOVER shows the last 2 lines (most recent first).
+  // Once Supabase activities table lands, this becomes a real comment thread.
   const commentRaw = String(row['Comments'] || row['Notes.1'] || '').trim();
   const commentLines = commentRaw ? commentRaw.split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [];
+  const latestComment = commentLines.length ? commentLines[commentLines.length - 1] : '';
+  const commentHtml = latestComment
+    ? `<div class="pp-tile-comment" title="${ppEscape(latestComment)}">"${ppEscape(latestComment)}"</div>`
+    : `<div class="pp-tile-comment empty">No comments yet</div>`;
   const lastTwo = commentLines.slice(-2).reverse();   // most recent first
   const popoverHtml = lastTwo.length
     ? lastTwo.map(line => `<div class="pp-tile-popover-line">"${ppEscape(line)}"</div>`).join('')
@@ -4561,6 +4564,7 @@ function ppRenderTile(row, idxInAll, stageKey) {
     <div class="pp-tile" onclick="ppOpenLot(${idxInAll})">
       <div class="pp-tile-top${stageCls}"><span class="pp-tile-num">${ppEscape(lotNum)}</span>${stage ? `<span class="pp-tile-stage">Stage ${ppEscape(stage)}</span>` : ''}</div>
       <div class="pp-tile-body">
+        ${commentHtml}
         <div class="pp-tile-meta">${val ? `<span class="pp-tile-val">${ppEscape(val)}</span>` : '<span></span>'}${partner ? `<span class="pp-tile-partner" title="${/pending\s*s\/?a/i.test(condition) ? 'Pending S/A Agency' : 'Vendors Agency'}">${ppEscape(partner)}</span>` : ''}</div>
         ${tagsHtml}
       </div>
