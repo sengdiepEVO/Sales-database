@@ -537,10 +537,21 @@ select.lcm-input { appearance: none; background-image: url("data:image/svg+xml,%
 .pp-col-body { background: #f0ebe0; border: 1px solid #ddd5c0; border-top: none; border-radius: 0 0 8px 8px; padding: 7px; flex: 1; overflow-y: auto; min-height: 200px; max-height: calc(100vh - 360px); display: flex; flex-direction: column; gap: 7px; }
 
 /* Lot tile (in pipeline column).
-   Padding is on the inner .pp-tile-top + .pp-tile-body so .pp-tile-top can
-   carry a stage-coloured gradient that bleeds to the tile's edges. */
+   Wrapper hosts the tile + a hover-popover for the last 2 comment lines —
+   wrapper is the hover-detection scope so the popover stays visible while
+   the cursor moves from the tile down into it. */
+.pp-tile-wrap { position: relative; }
 .pp-tile { background: #fff; border: 1px solid #ddd5c0; border-radius: 6px; padding: 0; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04); overflow: hidden; }
 .pp-tile:hover { border-color: #002675; box-shadow: 0 2px 8px rgba(0, 38, 117, 0.10); }
+
+/* Hover popover — shows the last 2 comment lines (split on newlines).
+   Positioned below the tile, dark bg for legibility. */
+.pp-tile-popover { display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 50; margin-top: 4px; background: #1a1408; color: #fff; padding: 9px 11px; border-radius: 6px; font-size: 11.5px; line-height: 1.45; box-shadow: 0 6px 18px rgba(0,0,0,0.25); }
+.pp-tile-popover::before { content: ''; position: absolute; top: -5px; left: 14px; border: 5px solid transparent; border-bottom-color: #1a1408; }
+.pp-tile-popover-line { font-style: italic; }
+.pp-tile-popover-line + .pp-tile-popover-line { margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.15); }
+.pp-tile-popover-empty { font-style: italic; color: #94a3b8; }
+.pp-tile-wrap:hover .pp-tile-popover { display: block; }
 .pp-tile-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 7px 11px; border-bottom: 1px solid #ece6d4; }
 /* Stage-coloured gradient on tile-top, fading to white over ~75% of the width */
 .pp-tile-top.pending  { background: linear-gradient(to right, #fef08a 0%, #fff 75%); }
@@ -4520,9 +4531,18 @@ function ppLotTags(row) {
 function ppRenderTile(row, idxInAll, stageKey) {
   const lotNum = String(row['Lot #'] || row['Lot#'] || '—');
   const stage = String(row['Stage'] || '').replace(/^Stage\s*/i, '');
-  // Last comment — pull from spreadsheet text fields in priority order.
-  // Once Supabase comments table exists, switch this to `latestCommentForLot(row)`.
-  const comment = String(row['Comments'] || row['Notes.1'] || '').trim();
+  // Comments — pull from spreadsheet, split on newlines into individual entries
+  // (people use Alt+Enter in Excel to append new comments to the same cell).
+  // Show the LAST 2 lines in the hover popover (latest first, append-at-bottom
+  // convention). Once Supabase activities table lands, this becomes a real
+  // join on the comment thread.
+  const commentRaw = String(row['Comments'] || row['Notes.1'] || '').trim();
+  const commentLines = commentRaw ? commentRaw.split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [];
+  const lastTwo = commentLines.slice(-2).reverse();   // most recent first
+  const popoverHtml = lastTwo.length
+    ? lastTwo.map(line => `<div class="pp-tile-popover-line">"${ppEscape(line)}"</div>`).join('')
+    : `<div class="pp-tile-popover-empty">No comments yet</div>`;
+
   // Bottom-right tag shows the relevant agency for this stage:
   //   Pending SA  → Pending S/A Agency (the agency that brought the SA)
   //   everything else → Vendors Agency (the listing agency)
@@ -4533,20 +4553,19 @@ function ppRenderTile(row, idxInAll, stageKey) {
   const val = ppLotValue(row);
   const tags = ppLotTags(row);
   const tagsHtml = tags.length ? `<div class="pp-tile-tags">${tags.map(t => `<span class="pp-tag ${t.cls}">${ppEscape(t.text)}</span>`).join('')}</div>` : '';
-  const commentHtml = comment
-    ? `<div class="pp-tile-comment" title="${ppEscape(comment)}">"${ppEscape(comment)}"</div>`
-    : `<div class="pp-tile-comment empty">No comments yet</div>`;
   // stageKey ('pending' | 'deposit' | 'exchange' | 'settled') drives the
   // gradient on .pp-tile-top — passed in from the column renderer so each tile
   // matches its column's stage colour even if the lot's own condition differs.
   const stageCls = stageKey ? ' ' + stageKey : '';
-  return `<div class="pp-tile" onclick="ppOpenLot(${idxInAll})">
-    <div class="pp-tile-top${stageCls}"><span class="pp-tile-num">${ppEscape(lotNum)}</span>${stage ? `<span class="pp-tile-stage">Stage ${ppEscape(stage)}</span>` : ''}</div>
-    <div class="pp-tile-body">
-      ${commentHtml}
-      <div class="pp-tile-meta">${val ? `<span class="pp-tile-val">${ppEscape(val)}</span>` : '<span></span>'}${partner ? `<span class="pp-tile-partner" title="${/pending\s*s\/?a/i.test(condition) ? 'Pending S/A Agency' : 'Vendors Agency'}">${ppEscape(partner)}</span>` : ''}</div>
-      ${tagsHtml}
+  return `<div class="pp-tile-wrap">
+    <div class="pp-tile" onclick="ppOpenLot(${idxInAll})">
+      <div class="pp-tile-top${stageCls}"><span class="pp-tile-num">${ppEscape(lotNum)}</span>${stage ? `<span class="pp-tile-stage">Stage ${ppEscape(stage)}</span>` : ''}</div>
+      <div class="pp-tile-body">
+        <div class="pp-tile-meta">${val ? `<span class="pp-tile-val">${ppEscape(val)}</span>` : '<span></span>'}${partner ? `<span class="pp-tile-partner" title="${/pending\s*s\/?a/i.test(condition) ? 'Pending S/A Agency' : 'Vendors Agency'}">${ppEscape(partner)}</span>` : ''}</div>
+        ${tagsHtml}
+      </div>
     </div>
+    <div class="pp-tile-popover">${popoverHtml}</div>
   </div>`;
 }
 
@@ -6588,7 +6607,11 @@ function lcRenderSectionBody(row, s) {
     // (Alt+Enter in Excel) which silently broke the previous inline-string approach.
     const valForEdit = lcEscapeHtml(display);
     const key = sid(f);
-    return `<div class="lc-note-block">
+    // The lc-note-block wrapper MUST carry id="d-row-${key}" — deskStartEdit's
+    // first guard `if (!row || !disp ...) return;` was bailing silently for
+    // every note-style field (Comments, Notes, Special Conditions/Variations)
+    // because no element matched d-row-${key}. That's why "click does nothing".
+    return `<div class="lc-note-block" id="d-row-${key}">
       <div class="lc-note-label">${lcEscapeHtml(f.trim())}</div>
       <div class="lc-note-body" id="d-disp-${key}" data-key="${key}" data-val="${valForEdit}" onclick="deskStartEdit(this.dataset.key, this.dataset.val)">${display ? lcEscapeHtml(display) : '—'}</div>
     </div>`;
