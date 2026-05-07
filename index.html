@@ -488,6 +488,8 @@ select.lcm-input { appearance: none; background-image: url("data:image/svg+xml,%
 .pp-kpi-mini.red { border-left-color: #8b2020; }
 .pp-kpi-mini-label { font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; color: #8a7d65; font-weight: 600; }
 .pp-kpi-mini-value { font-size: 22px; font-weight: 700; color: #1a1408; line-height: 1; font-variant-numeric: tabular-nums; }
+.pp-kpi-mini-value .sep { color: #b8b09a; font-weight: 400; margin: 0 4px; }
+.pp-kpi-mini-value .rev { font-size: 17px; color: #475569; font-weight: 600; }
 .pp-kpi-mini-meta { font-size: 11px; color: #8a7d65; margin-top: 3px; }
 .pp-kpi-mini-meta .up { color: #1a6b3a; font-weight: 500; }
 .pp-kpi-mini-right { text-align: right; }
@@ -518,24 +520,38 @@ select.lcm-input { appearance: none; background-image: url("data:image/svg+xml,%
 
 .pp-kanban { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; min-height: 0; }
 .pp-col { display: flex; flex-direction: column; min-height: 0; }
-.pp-col-hdr { padding: 9px 11px; background: #fff; border: 1px solid #ddd5c0; border-bottom: 3px solid; border-radius: 8px 8px 0 0; flex-shrink: 0; }
-.pp-col-hdr.pending  { border-bottom-color: #b88a00; }
-.pp-col-hdr.deposit  { border-bottom-color: #002675; }
-.pp-col-hdr.exchange { border-bottom-color: #7a9a3d; }
-.pp-col-hdr.settled  { border-bottom-color: #1a6b3a; }
+/* Pipeline column header — tinted background + 4px coloured left-edge bar.
+   Traffic-light convention: yellow=Pending SA · green=Deposit · amber=Exchanged · red=Settled. */
+.pp-col-hdr { padding: 9px 11px; background: #fff; border: 1px solid #ddd5c0; border-left: 4px solid; border-radius: 8px 8px 0 0; flex-shrink: 0; }
+.pp-col-hdr.pending  { background: #fef9c3; border-color: #fde047; border-left-color: #eab308; }
+.pp-col-hdr.deposit  { background: #e8f4ed; border-color: #9ec9ad; border-left-color: #1a6b3a; }
+.pp-col-hdr.exchange { background: #fff4e0; border-color: #fdba74; border-left-color: #d97706; }
+.pp-col-hdr.settled  { background: #fee2e2; border-color: #fca5a5; border-left-color: #b91c1c; }
+.pp-col-hdr.pending  .pp-col-title { color: #713f12; }
+.pp-col-hdr.deposit  .pp-col-title { color: #0d3d20; }
+.pp-col-hdr.exchange .pp-col-title { color: #7a4d00; }
+.pp-col-hdr.settled  .pp-col-title { color: #7f1d1d; }
 .pp-col-title { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #1a1408; }
 .pp-col-count { background: #f0ebe0; color: #475569; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 99px; }
 .pp-col-meta { font-size: 11px; color: #8a7d65; margin-top: 4px; font-variant-numeric: tabular-nums; }
 .pp-col-body { background: #f0ebe0; border: 1px solid #ddd5c0; border-top: none; border-radius: 0 0 8px 8px; padding: 7px; flex: 1; overflow-y: auto; min-height: 200px; max-height: calc(100vh - 360px); display: flex; flex-direction: column; gap: 7px; }
 
-/* Lot tile (in pipeline column) */
-.pp-tile { background: #fff; border: 1px solid #ddd5c0; border-radius: 6px; padding: 9px 11px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+/* Lot tile (in pipeline column).
+   Padding is on the inner .pp-tile-top + .pp-tile-body so .pp-tile-top can
+   carry a stage-coloured gradient that bleeds to the tile's edges. */
+.pp-tile { background: #fff; border: 1px solid #ddd5c0; border-radius: 6px; padding: 0; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04); overflow: hidden; }
 .pp-tile:hover { border-color: #002675; box-shadow: 0 2px 8px rgba(0, 38, 117, 0.10); }
-.pp-tile-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.pp-tile-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 7px 11px; border-bottom: 1px solid #ece6d4; }
+/* Stage-coloured gradient on tile-top, fading to white over ~75% of the width */
+.pp-tile-top.pending  { background: linear-gradient(to right, #fef08a 0%, #fff 75%); }
+.pp-tile-top.deposit  { background: linear-gradient(to right, #bbf7d0 0%, #fff 75%); }
+.pp-tile-top.exchange { background: linear-gradient(to right, #fed7aa 0%, #fff 75%); }
+.pp-tile-top.settled  { background: linear-gradient(to right, #fecaca 0%, #fff 75%); }
+.pp-tile-body { padding: 7px 11px 9px; }
 .pp-tile-num { font-size: 15px; font-weight: 700; color: #002675; font-variant-numeric: tabular-nums; }
 .pp-tile-stage { font-size: 10px; color: #8a7d65; font-weight: 500; letter-spacing: 0.4px; text-transform: uppercase; }
 .pp-tile-addr { font-size: 12px; color: #1a1408; margin-top: 3px; line-height: 1.3; }
-.pp-tile-comment { font-size: 12px; color: #475569; margin-top: 4px; line-height: 1.4; font-style: italic; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.pp-tile-comment { font-size: 12px; color: #475569; line-height: 1.4; font-style: italic; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .pp-tile-comment.empty { color: #94a3b8; }
 .pp-tile-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 7px; }
 .pp-tile-val { font-size: 12.5px; font-weight: 600; color: #1a1408; font-variant-numeric: tabular-nums; }
@@ -794,6 +810,181 @@ table.mr-report tbody td.mr-tlcell:first-child { padding: 12px 10px; vertical-al
 /* Row visibility driven by toggles on the panel container */
 .mr-panel:not(.mr-show-actual) .mr-sub-row.actual { display: none; }
 .mr-panel:not(.mr-show-proposed) .mr-sub-row.proposed { display: none; }
+
+/* ───────────────────────────────────────────────────────────────────────
+   AGENCY & AGENT PERFORMANCE REPORT (.aap-)
+   Two leaderboard tables (agency + agent) on the Table tab, two chart
+   sub-tabs (agency / agent) on the Chart tab — each with a Qty/Revenue
+   toggle that re-renders the pie + proportional-width stacked bars.
+   ─────────────────────────────────────────────────────────────────────── */
+.aap-overlay { position: fixed; inset: 0; z-index: 100; background: #f5f0e8; display: none; flex-direction: column; overflow: hidden; }
+.aap-overlay.show { display: flex; }
+.aap-modal { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.aap-hdr { background: linear-gradient(to bottom, #000d35 0%, #002675 100%); color: #fff; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.aap-hdr-title { font-size: 17px; font-weight: 600; }
+.aap-hdr-sub { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 3px; }
+.aap-close { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.12); color: #fff; border: none; cursor: pointer; font-size: 18px; line-height: 1; display: flex; align-items: center; justify-content: center; }
+.aap-close:hover { background: rgba(255,255,255,0.22); }
+.aap-body { flex: 1; overflow-y: auto; padding: 20px 24px; max-width: 1400px; margin: 0 auto; width: 100%; }
+
+.aap-range-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 12px 14px; background: #fff; border: 1px solid #ddd5c0; border-radius: 8px; margin-bottom: 16px; }
+.aap-range-label { font-size: 11.5px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.4px; margin-right: 4px; }
+.aap-range-input { padding: 6px 8px; border: 1px solid #ddd5c0; border-radius: 6px; font-family: inherit; font-size: 12px; background: #fff; color: #1a1408; }
+.aap-range-presets { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
+.aap-range-preset { padding: 5px 11px; border: 1px solid #ddd5c0; border-radius: 99px; background: #fff; font-family: inherit; font-size: 11.5px; color: #475569; cursor: pointer; }
+.aap-range-preset:hover { border-color: #002675; color: #002675; }
+.aap-range-preset.active { background: #002675; color: #fff; border-color: #002675; }
+
+.aap-tab-strip { display: flex; gap: 4px; border-bottom: 2px solid #ddd5c0; margin-bottom: 16px; }
+.aap-tab-btn { padding: 10px 18px; background: none; border: none; font-family: inherit; font-size: 13px; font-weight: 600; color: #8a7d65; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; }
+.aap-tab-btn:hover { color: #002675; }
+.aap-tab-btn.active { color: #002675; border-bottom-color: #002675; }
+.aap-tab-panel { display: none; }
+.aap-tab-panel.active { display: block; }
+
+.aap-sub-tab-bar { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+.aap-sub-tab-strip { display: flex; gap: 6px; }
+.aap-sub-tab-btn { padding: 6px 14px; border: 1px solid #ddd5c0; border-radius: 99px; background: #fff; font-family: inherit; font-size: 12px; color: #475569; cursor: pointer; font-weight: 500; }
+.aap-sub-tab-btn:hover { border-color: #002675; color: #002675; }
+.aap-sub-tab-btn.active { background: #002675; color: #fff; border-color: #002675; }
+.aap-sub-panel { display: none; }
+.aap-sub-panel.active { display: block; }
+
+.aap-metric-toggle { display: inline-flex; padding: 3px; background: #f0ebe0; border: 1px solid #ddd5c0; border-radius: 99px; }
+.aap-metric-toggle button { padding: 5px 14px; border: none; background: transparent; font-family: inherit; font-size: 11.5px; font-weight: 600; color: #475569; cursor: pointer; border-radius: 99px; }
+.aap-metric-toggle button.active { background: #fff; color: #002675; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+.aap-tables-row { display: grid; grid-template-columns: 540px 1fr; gap: 22px; align-items: start; }
+@media (max-width: 1100px) { .aap-tables-row { grid-template-columns: 1fr; } }
+.aap-leaderboard { border: 2px solid #1a3a8b; border-radius: 6px; overflow: hidden; }
+.aap-lb-title { background: #5b9bd5; color: #fff; text-align: center; padding: 8px; font-weight: 700; font-size: 14px; border-bottom: 2px solid #1a3a8b; letter-spacing: 0.3px; }
+table.aap-lb { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.aap-lb th, table.aap-lb td { border: 1px solid #1a3a8b; padding: 7px 10px; }
+table.aap-lb thead th { background: #d6e6f4; color: #1a3a8b; font-weight: 700; text-align: center; vertical-align: middle; }
+table.aap-lb thead th.lcell { text-align: left; }
+table.aap-lb tbody td { text-align: center; background: #fff; font-variant-numeric: tabular-nums; }
+table.aap-lb tbody td.lcell { text-align: left; font-weight: 500; }
+table.aap-lb tfoot td { background: #d6e6f4; font-weight: 700; color: #1a3a8b; text-align: center; font-variant-numeric: tabular-nums; }
+table.aap-lb tfoot td.lcell { text-align: left; }
+.aap-dash { color: #8a7d65; }
+.aap-empty { padding: 24px; text-align: center; color: #8a7d65; font-size: 12.5px; font-style: italic; }
+
+.aap-chart-grid { display: grid; grid-template-columns: 360px 1fr; gap: 24px; align-items: start; }
+@media (max-width: 900px) { .aap-chart-grid { grid-template-columns: 1fr; } }
+.aap-chart-card { border: 1px solid #ddd5c0; border-radius: 8px; padding: 16px 18px; background: #fff; }
+.aap-chart-card-hdr { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.aap-chart-card-title { font-size: 13px; font-weight: 600; color: #1a1408; }
+.aap-chart-card-sub { font-size: 11px; color: #8a7d65; margin-top: 2px; }
+.aap-chart-svg-wrap { display: flex; justify-content: center; }
+.aap-chart-legend { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 14px; font-size: 11.5px; color: #475569; }
+.aap-legend-item { display: inline-flex; align-items: center; gap: 6px; }
+.aap-legend-swatch { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
+.aap-pie-svg .aap-slice { transition: opacity 0.12s; cursor: pointer; }
+.aap-pie-svg .aap-slice:hover { opacity: 0.78; }
+
+.aap-stacked-bars { display: flex; flex-direction: column; gap: 9px; }
+.aap-sb-row { display: grid; grid-template-columns: 200px 1fr 110px; gap: 12px; align-items: center; font-size: 12px; }
+.aap-sb-name { font-weight: 500; color: #1a1408; min-width: 0; }
+.aap-sb-name small { color: #8a7d65; font-weight: 400; display: block; font-size: 10.5px; margin-top: 1px; }
+.aap-sb-track-wrap { background: transparent; border-bottom: 1px dotted #e5dfd0; height: 24px; position: relative; }
+.aap-sb-track { display: flex; height: 22px; background: transparent; border-radius: 11px; overflow: hidden; position: absolute; left: 0; top: 1px; }
+.aap-sb-seg { display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 600; white-space: nowrap; padding: 0 4px; min-width: 0; overflow: hidden; }
+.aap-sb-seg.set { background: #b91c1c; }
+.aap-sb-seg.exc { background: #d97706; }
+.aap-sb-seg.dep { background: #1a6b3a; }
+.aap-sb-total { text-align: right; font-variant-numeric: tabular-nums; color: #475569; font-size: 11.5px; }
+.aap-sb-total strong { color: #1a1408; font-size: 12.5px; }
+
+/* ───────────────────────────────────────────────────────────────────────
+   PRINT STYLESHEET — "Export PDF" via window.print(). Goals:
+     1. WHITE background everywhere — save ink, no cream/navy heavy fills
+     2. Hide ALL chrome (date pickers, buttons, tabs, toggles) UNCONDITIONALLY
+        regardless of whether scope was set, so Cmd+P works the same as the
+        "Export PDF" button
+     3. Each report scope (mr / aap / st) hides its sibling overlays so only
+        the active report's content prints
+     4. Charts kept colour for legibility
+   ─────────────────────────────────────────────────────────────────────── */
+@media print {
+  /* Page setup */
+  @page { size: A4; margin: 14mm 12mm 18mm; }
+  html, body { background: #fff !important; background-image: none !important; color: #000 !important; padding: 0 !important; margin: 0 !important; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+  /* Force white on heavy-fill containers (kills the cream + navy backgrounds
+     that waste ink). Charts and pill labels keep colour because they're more
+     specific or use their own fills. */
+  .aap-overlay, .aap-modal, .aap-body, #sales-target-overlay,
+  .pp-page, .mr-overlay, .mr-page, .desktop-screen,
+  .top-bar, .top-bar > *, header, .pp-hdr {
+    background: #fff !important;
+    background-image: none !important;
+  }
+  /* The dark navy report header — replaced by the lightweight print-cover.
+     Hide it in print so we don't double up + waste ink on a big dark fill. */
+  .aap-hdr, #sales-target-overlay > div > div:first-child { display: none !important; }
+
+  /* Hide ALL chrome unconditionally — date pickers, tabs, toggles, buttons.
+     The print-cover (added by the print button) replaces them. */
+  button { display: none !important; }
+  .aap-range-bar, .aap-tab-strip, .aap-sub-tab-bar, .aap-metric-toggle, .aap-close,
+  .pp-view-toggle, .mr-range-bar, .mr-toggle, .mr-targets-btn,
+  .pp-hdr, .pp-greeting, .pp-sub,
+  .desktop-sidebar, .top-bar, nav,
+  #st-save-bar {
+    display: none !important;
+  }
+
+  /* Print ONLY what the user is currently viewing. Inactive tabs / sub-tabs
+     keep their default display:none — their SVG charts wouldn't render anyway
+     since aapDrawPie/aapDrawBars only populate the active sub-panel.
+     User picks Agency or Agent sub-tab, then exports — gets exactly that. */
+  .aap-tab-panel:not(.active), .aap-sub-panel:not(.active) { display: none !important; }
+
+  /* Don't break inside cards/tables */
+  .tgp-card, .aap-leaderboard, .aap-chart-card, .mr-table, .mr-section-card, .pp-kpi-mini { page-break-inside: avoid; }
+
+  /* Compact charts for print so both fit on one A4 page */
+  .aap-chart-grid { grid-template-columns: 1fr !important; gap: 6mm !important; }
+  .aap-chart-card { padding: 6mm 8mm !important; }
+  .aap-pie-svg { max-width: 180px !important; }
+  .aap-stacked-bars { gap: 5px !important; }
+  .aap-sb-row { grid-template-columns: 160px 1fr 80px !important; font-size: 11px !important; }
+  .aap-chart-card-title { font-size: 12pt !important; }
+  .aap-chart-card-sub { font-size: 9pt !important; }
+  .aap-chart-card-period { font-size: 9pt !important; }
+
+  /* ── Scope: Monthly Report ─────────────────────────────────────── */
+  html[data-print-scope="mr"] body > *:not(#desktop-screens):not(script):not(style):not(.print-footer) { display: none !important; }
+  html[data-print-scope="mr"] #desktop-screens > *:not(#desktop-screen-pipeline) { display: none !important; }
+  html[data-print-scope="mr"] #desktop-screen-pipeline > *:not(#pp-page) { display: none !important; }
+  html[data-print-scope="mr"] .mr-panel .mr-sub-row { display: table-row !important; }
+
+  /* ── Scope: Agency & Agent Performance ─────────────────────────── */
+  html[data-print-scope="aap"] body > *:not(#aap-overlay):not(script):not(style) { display: none !important; }
+  html[data-print-scope="aap"] #aap-overlay { display: block !important; position: static !important; height: auto !important; overflow: visible !important; }
+  html[data-print-scope="aap"] .aap-body { overflow: visible !important; padding: 0 !important; max-width: none !important; }
+
+  /* ── Scope: Sales Target Report ────────────────────────────────── */
+  html[data-print-scope="st"] body > *:not(#sales-target-overlay):not(script):not(style) { display: none !important; }
+  html[data-print-scope="st"] #sales-target-overlay { position: static !important; padding: 0 !important; display: block !important; }
+  html[data-print-scope="st"] #sales-target-overlay > div { box-shadow: none !important; max-width: none !important; }
+
+  /* Print-only header — title, period, generated-by line */
+  .print-cover { display: block !important; margin-bottom: 6mm; padding-bottom: 4mm; border-bottom: 2px solid #002675; }
+  .print-cover-title { font-size: 16pt; font-weight: 700; color: #000; }
+  .print-cover-sub   { font-size: 10pt; color: #555; margin-top: 2pt; }
+  .print-cover-meta  { font-size: 8pt;  color: #777; margin-top: 6pt; }
+
+  /* Print footer */
+  .print-footer { position: fixed; bottom: 6mm; left: 12mm; right: 12mm; font-size: 8pt; color: #777; border-top: 1px solid #ddd; padding-top: 2mm; display: flex !important; justify-content: space-between; }
+}
+/* Hide print-only blocks on screen */
+.print-cover, .print-footer { display: none; }
+
+/* On-screen styling for the period sub-line on chart cards (visible always so
+   screenshots include the date range as context). */
+.aap-chart-card-period { font-size: 11px; color: #1a3a8b; font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
 </style>
 </head>
 <body>
@@ -943,6 +1134,10 @@ table.mr-report tbody td.mr-tlcell:first-child { padding: 12px 10px; vertical-al
             <div class="desktop-report-btn" onclick="openSalesTarget()">
               <div class="report-icon" style="background:#fde8e8;border-radius:8px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">&#127919;</div>
               <div class="desktop-report-info"><div class="report-title">Sales Target</div><div class="report-sub">Deposit, Exchange & Settlement vs targets</div></div>
+            </div>
+            <div class="desktop-report-btn" onclick="openAgencyPerf()">
+              <div class="report-icon" style="background:#fef2f2;border-radius:8px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">&#127942;</div>
+              <div class="desktop-report-info"><div class="report-title">Agency &amp; Agent Performance</div><div class="report-sub">Lots / revenue by vendor agency &amp; agent</div></div>
             </div>
             <div class="desktop-report-btn" onclick="openCfsTrack()">
               <div class="desktop-report-icon" style="background:#e8f0fd">&#128203;</div>
@@ -1101,6 +1296,7 @@ table.mr-report tbody td.mr-tlcell:first-child { padding: 12px 10px; vertical-al
       </div>
       <div class="section-title">Generate AI reports</div>
       <div class="report-btn-card" onclick="openSalesTarget()"><div class="report-icon" style="background:#fde8e8">&#127919;</div><div class="report-info"><div class="report-title">Sales Target</div><div class="report-sub">Deposit, Exchange & Settlement vs targets</div></div></div>
+      <div class="report-btn-card" onclick="openAgencyPerf()"><div class="report-icon" style="background:#fef2f2">&#127942;</div><div class="report-info"><div class="report-title">Agency &amp; Agent Performance</div><div class="report-sub">Lots / revenue by vendor agency &amp; agent</div></div></div>
       <div class="report-btn-card" onclick="openCfsTrack()"><div class="report-icon" style="background:#e8f0fd">&#128203;</div><div class="report-info"><div class="report-title">CfS Track</div><div class="report-sub">Deposit lots · notes · follow-up actions</div></div></div>
       <div class="report-btn-card" onclick="genReport('summary')"><div class="report-icon" style="background:#e8f4ed">&#128202;</div><div class="report-info"><div class="report-title">Sales summary</div><div class="report-sub">Revenue, counts, key insights</div></div></div>
       <div class="report-btn-card" onclick="genReport('pipeline')"><div class="report-icon" style="background:#eeedfe">&#128270;</div><div class="report-info"><div class="report-title">Pipeline forecast</div><div class="report-sub">Open deals & risk assessment</div></div></div>
@@ -1130,6 +1326,7 @@ table.mr-report tbody td.mr-tlcell:first-child { padding: 12px 10px; vertical-al
         <div style="font-size:11px;color:#a8d0d0;margin-top:2px">Deposit · Exchanged · Settled vs targets</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
+        <button onclick="stPrint()" style="padding:5px 12px;background:rgba(255,255,255,0.15);color:white;border:none;border-radius:6px;font-size:11px;cursor:pointer" title="Open browser print dialog → Save as PDF">📄 Export PDF</button>
         <button onclick="refreshSalesTarget()" style="padding:5px 12px;background:rgba(255,255,255,0.15);color:white;border:none;border-radius:6px;font-size:11px;cursor:pointer">&#8635; Refresh</button>
         <button onclick="closeSalesTarget()" style="background:none;border:none;font-size:20px;cursor:pointer;color:white;padding:4px">&#10005;</button>
       </div>
@@ -1157,6 +1354,23 @@ table.mr-report tbody td.mr-tlcell:first-child { padding: 12px 10px; vertical-al
   </div>
 </div>
 
+
+<!-- AGENCY & AGENT PERFORMANCE OVERLAY — populated by aapRender() -->
+<div id="aap-overlay" class="aap-overlay">
+  <div class="aap-modal">
+    <div class="aap-hdr">
+      <div>
+        <div class="aap-hdr-title">🏆 Agency &amp; Agent Performance Report</div>
+        <div class="aap-hdr-sub" id="aap-hdr-sub">Lots / revenue by vendor agency &amp; agent</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button onclick="aapPrint()" style="padding:6px 12px;background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.25);border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit" title="Open browser print dialog → Save as PDF">📄 Export PDF</button>
+        <button class="aap-close" onclick="closeAgencyPerf()" title="Close (Esc)">&times;</button>
+      </div>
+    </div>
+    <div class="aap-body" id="aap-body"></div>
+  </div>
+</div>
 
 <!-- CFS TRACK MODAL -->
 <div id="cfstrack-overlay" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.5);align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto">
@@ -4303,24 +4517,36 @@ function ppLotTags(row) {
   return tags;
 }
 
-function ppRenderTile(row, idxInAll) {
+function ppRenderTile(row, idxInAll, stageKey) {
   const lotNum = String(row['Lot #'] || row['Lot#'] || '—');
   const stage = String(row['Stage'] || '').replace(/^Stage\s*/i, '');
   // Last comment — pull from spreadsheet text fields in priority order.
   // Once Supabase comments table exists, switch this to `latestCommentForLot(row)`.
   const comment = String(row['Comments'] || row['Notes.1'] || '').trim();
-  const partner = String(row['Vendors Agency'] || '').trim();
+  // Bottom-right tag shows the relevant agency for this stage:
+  //   Pending SA  → Pending S/A Agency (the agency that brought the SA)
+  //   everything else → Vendors Agency (the listing agency)
+  const condition = String(row['Sales Condition'] || '').trim();
+  const partner = /pending\s*s\/?a/i.test(condition)
+    ? String(row['Pending S/A Agency'] || '').trim()
+    : String(row['Vendors Agency'] || '').trim();
   const val = ppLotValue(row);
   const tags = ppLotTags(row);
   const tagsHtml = tags.length ? `<div class="pp-tile-tags">${tags.map(t => `<span class="pp-tag ${t.cls}">${ppEscape(t.text)}</span>`).join('')}</div>` : '';
   const commentHtml = comment
     ? `<div class="pp-tile-comment" title="${ppEscape(comment)}">"${ppEscape(comment)}"</div>`
     : `<div class="pp-tile-comment empty">No comments yet</div>`;
+  // stageKey ('pending' | 'deposit' | 'exchange' | 'settled') drives the
+  // gradient on .pp-tile-top — passed in from the column renderer so each tile
+  // matches its column's stage colour even if the lot's own condition differs.
+  const stageCls = stageKey ? ' ' + stageKey : '';
   return `<div class="pp-tile" onclick="ppOpenLot(${idxInAll})">
-    <div class="pp-tile-top"><span class="pp-tile-num">${ppEscape(lotNum)}</span>${stage ? `<span class="pp-tile-stage">Stage ${ppEscape(stage)}</span>` : ''}</div>
-    ${commentHtml}
-    <div class="pp-tile-meta">${val ? `<span class="pp-tile-val">${ppEscape(val)}</span>` : '<span></span>'}${partner ? `<span class="pp-tile-partner">${ppEscape(partner)}</span>` : ''}</div>
-    ${tagsHtml}
+    <div class="pp-tile-top${stageCls}"><span class="pp-tile-num">${ppEscape(lotNum)}</span>${stage ? `<span class="pp-tile-stage">Stage ${ppEscape(stage)}</span>` : ''}</div>
+    <div class="pp-tile-body">
+      ${commentHtml}
+      <div class="pp-tile-meta">${val ? `<span class="pp-tile-val">${ppEscape(val)}</span>` : '<span></span>'}${partner ? `<span class="pp-tile-partner" title="${/pending\s*s\/?a/i.test(condition) ? 'Pending S/A Agency' : 'Vendors Agency'}">${ppEscape(partner)}</span>` : ''}</div>
+      ${tagsHtml}
+    </div>
   </div>`;
 }
 
@@ -4342,23 +4568,41 @@ function ppComputeKPIs() {
   const isInactive = c => /unreleased|withheld|avantaus/i.test(c);
   const active = allData.filter(r => !isInactive(sc(r)));
 
-  // Settled this month + revenue YTD
+  // Settled this month + revenue YTD + deposits (contracts issued) this month
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const yearStart = new Date(now.getFullYear(), 0, 1);
-  let settledThisMonth = 0;
-  let revenueYtd = 0;
-  allData.forEach(r => {
-    const settled = r['Settled Date'];
-    if (!settled) return;
+  const parseExcelDate = v => {
+    if (!v) return null;
     let d;
-    if (typeof settled === 'number' && settled > 40000) d = new Date(Math.round((settled - 25569) * 86400 * 1000));
-    else d = new Date(settled);
-    if (isNaN(d.getTime())) return;
-    if (d >= monthStart) settledThisMonth++;
-    if (d >= yearStart) {
-      const price = Number(String(r['CfS Settled Price ($)'] ?? '').replace(/[$,]/g, ''));
-      if (!isNaN(price)) revenueYtd += price;
+    if (typeof v === 'number' && v > 40000) d = new Date(Math.round((v - 25569) * 86400 * 1000));
+    else d = new Date(v);
+    return isNaN(d.getTime()) ? null : d;
+  };
+  let settledThisMonth = 0;
+  let settledRevThisMonth = 0;
+  let settledYtd = 0;
+  let revenueYtd = 0;
+  let depositedThisMonth = 0;
+  let depositedRevThisMonth = 0;
+  allData.forEach(r => {
+    const dSettled = parseExcelDate(r['Settled Date']);
+    if (dSettled) {
+      const sPrice = Number(String(r['CfS Settled Price ($)'] ?? '').replace(/[$,]/g, ''));
+      if (dSettled >= monthStart) {
+        settledThisMonth++;
+        if (!isNaN(sPrice)) settledRevThisMonth += sPrice;
+      }
+      if (dSettled >= yearStart) {
+        settledYtd++;
+        if (!isNaN(sPrice)) revenueYtd += sPrice;
+      }
+    }
+    const dContract = parseExcelDate(r['Contract Issued Date']);
+    if (dContract && dContract >= monthStart) {
+      depositedThisMonth++;
+      const cPrice = Number(String(r['CfS Issued Price'] ?? '').replace(/[$,]/g, ''));
+      if (!isNaN(cPrice)) depositedRevThisMonth += cPrice;
     }
   });
 
@@ -4374,6 +4618,10 @@ function ppComputeKPIs() {
     activeProjects: projects.size,
     activeStages: stages.size,
     settledThisMonth,
+    settledRevThisMonth,
+    settledYtd,
+    depositedThisMonth,
+    depositedRevThisMonth,
     revenueYtd,
     needsAttention,
   };
@@ -4458,24 +4706,30 @@ function renderPipeline() {
     <div class="pp-kpi-strip">
       <div class="pp-kpi-mini blue">
         <div>
-          <div class="pp-kpi-mini-label">Active lots</div>
-          <div class="pp-kpi-mini-meta">${kpis.activeProjects} project${kpis.activeProjects===1?'':'s'} · ${kpis.activeStages} stage${kpis.activeStages===1?'':'s'}</div>
+          <div class="pp-kpi-mini-label">Lots Deposited this month</div>
+          <div class="pp-kpi-mini-meta">${new Date().toLocaleDateString('en-AU', { month: 'long', year: 'numeric' })}</div>
         </div>
-        <div class="pp-kpi-mini-right"><div class="pp-kpi-mini-value">${kpis.active}</div></div>
+        <div class="pp-kpi-mini-right">
+          <div class="pp-kpi-mini-value">${kpis.depositedThisMonth}<span class="sep">:</span><span class="rev">${kpis.depositedRevThisMonth ? ppFmtCurrency(kpis.depositedRevThisMonth) : '—'}</span></div>
+        </div>
       </div>
       <div class="pp-kpi-mini green">
         <div>
           <div class="pp-kpi-mini-label">Settled this month</div>
           <div class="pp-kpi-mini-meta">${new Date().toLocaleDateString('en-AU', { month: 'long', year: 'numeric' })}</div>
         </div>
-        <div class="pp-kpi-mini-right"><div class="pp-kpi-mini-value">${kpis.settledThisMonth}</div></div>
+        <div class="pp-kpi-mini-right">
+          <div class="pp-kpi-mini-value">${kpis.settledThisMonth}<span class="sep">:</span><span class="rev">${kpis.settledRevThisMonth ? ppFmtCurrency(kpis.settledRevThisMonth) : '—'}</span></div>
+        </div>
       </div>
       <div class="pp-kpi-mini gold">
         <div>
-          <div class="pp-kpi-mini-label">Revenue YTD</div>
-          <div class="pp-kpi-mini-meta">CfS Settled prices ${new Date().getFullYear()}</div>
+          <div class="pp-kpi-mini-label">Settled YTD</div>
+          <div class="pp-kpi-mini-meta">${new Date().getFullYear()} · CfS Settled prices</div>
         </div>
-        <div class="pp-kpi-mini-right"><div class="pp-kpi-mini-value">${kpis.revenueYtd ? ppFmtCurrency(kpis.revenueYtd) : '—'}</div></div>
+        <div class="pp-kpi-mini-right">
+          <div class="pp-kpi-mini-value">${kpis.settledYtd}<span class="sep">:</span><span class="rev">${kpis.revenueYtd ? ppFmtCurrency(kpis.revenueYtd) : '—'}</span></div>
+        </div>
       </div>
       <div class="pp-kpi-mini red">
         <div>
@@ -4520,7 +4774,7 @@ function renderPipeline() {
             </div>
             <div class="pp-col-body">
               ${b.rows.length === 0 ? '<div class="pp-col-empty">No lots in this stage</div>' :
-                b.rows.slice(0, 12).map(x => ppRenderTile(x.row, x.allIdx)).join('') +
+                b.rows.slice(0, 12).map(x => ppRenderTile(x.row, x.allIdx, b.stage.key)).join('') +
                 (b.rows.length > 12 ? `<div class="pp-col-more">+ ${b.rows.length - 12} more</div>` : '')
               }
             </div>
@@ -5100,6 +5354,532 @@ function tgRenderProgressSection() {
 // are now no-ops — the simplified single-target modal has neither edit-by-id
 // nor delete. Stubs are defined at the top of this section.)
 
+// ─────────────────────────────────────────────────────────────────────────
+// PDF EXPORT — print stylesheet + window.print() approach.
+// Each report calls appPrintReport(scope, title, period) which:
+//   1. injects a print-only cover header into the page
+//   2. sets <html data-print-scope="..."> so CSS hides everything else
+//   3. calls window.print() — browser shows preview → user picks "Save as PDF"
+//   4. cleans up after the dialog closes
+// ─────────────────────────────────────────────────────────────────────────
+function appPrintReport(scope, title, period, mountSelector) {
+  const mount = document.querySelector(mountSelector);
+  if (!mount) { toast('Could not find the report to export', 'error'); return; }
+
+  // Build the print cover (title + period + generated-by line)
+  const userName = (typeof userDisplayName !== 'undefined' && userDisplayName) ? userDisplayName : '';
+  const today = new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
+  const cover = document.createElement('div');
+  cover.className = 'print-cover';
+  cover.innerHTML = `
+    <div class="print-cover-title">${title}</div>
+    ${period ? `<div class="print-cover-sub">${period}</div>` : ''}
+    <div class="print-cover-meta">Generated ${today}${userName ? ' by ' + userName : ''} · Sales DB</div>
+  `;
+  mount.insertBefore(cover, mount.firstChild);
+
+  const footer = document.createElement('div');
+  footer.className = 'print-footer';
+  footer.innerHTML = `<span>${title}</span><span>${today}</span>`;
+  document.body.appendChild(footer);
+
+  // Set scope, print, clean up
+  document.documentElement.dataset.printScope = scope;
+  const cleanup = () => {
+    delete document.documentElement.dataset.printScope;
+    if (cover.parentNode) cover.parentNode.removeChild(cover);
+    if (footer.parentNode) footer.parentNode.removeChild(footer);
+    window.removeEventListener('afterprint', cleanup);
+  };
+  window.addEventListener('afterprint', cleanup);
+  // Small delay so the cover is in the DOM before browser snapshots for print
+  setTimeout(() => window.print(), 50);
+}
+
+// Wrappers for each report — each computes its own title / period
+function aapPrint() {
+  const period = (typeof aapRangeLabel === 'function') ? aapRangeLabel() : '';
+  appPrintReport('aap', '🏆 Agency & Agent Performance Report', period, '#aap-body');
+}
+function mrPrint() {
+  // Monthly Report lives inside #pp-page when _ppView === 'report'
+  const r = (typeof mrCurrentRange === 'function') ? mrCurrentRange() : null;
+  let period = '';
+  if (r && r.length) period = r[0].label + ' – ' + r[r.length - 1].label;
+  appPrintReport('mr', '📊 Monthly Pipeline Report', period, '#pp-page');
+}
+function stPrint() {
+  appPrintReport('st', '🎯 Sales Target Report', 'Jan – Jul 2026 · settled targets', '#sales-target-overlay > div');
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// AGENCY & AGENT PERFORMANCE REPORT (.aap-) — full-page overlay
+// Data sources:
+//   Vendors Agency           (col BI) — agency name (group key)
+//   Vendors Agency Agent     (col BJ) — agent name (sub-group key)
+//   Contract Issued Date     — counts a lot in "Contract Issued" if date in range
+//   Exchanged Date           — counts a lot in "Exchanged"        if date in range
+//   Settled Date             — counts a lot in "Settled"          if date in range
+//   CfS Issued Price         — revenue for Contract Issued
+//   CfS Exchanged Price ($)  — revenue for Exchanged
+//   CfS Settled Price ($)    — revenue for Settled
+// ─────────────────────────────────────────────────────────────────────────
+let _aapFromYM = null, _aapToYM = null, _aapPreset = 'default';
+let _aapTab = 'table';                                        // 'table' | 'chart'
+let _aapSubTab = 'agency';                                    // 'agency' | 'agent'
+const _aapMetric = { agency: 'qty', agent: 'qty' };           // per-panel toggle: 'qty' | 'revenue'
+
+const AAP_PALETTE = [
+  '#b91c1c', '#d97706', '#1a6b3a', '#5b9bd5',
+  '#9437FF', '#A02B93', '#E97132', '#7a5200',
+  '#02b875', '#1a3a8b', '#5a3d00', '#475569',
+  '#0d9488', '#dc2626', '#7c3aed', '#0891b2',
+];
+function aapColorFor(name) {
+  // Stable hash → palette index so the same agency/agent always gets the same colour
+  let h = 0;
+  const s = String(name || '');
+  for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+  return AAP_PALETTE[Math.abs(h) % AAP_PALETTE.length];
+}
+
+function aapSavePrefs() {
+  try {
+    localStorage.setItem('aapFromYM', _aapFromYM || '');
+    localStorage.setItem('aapToYM', _aapToYM || '');
+    localStorage.setItem('aapPreset', _aapPreset || 'default');
+    localStorage.setItem('aapTab', _aapTab);
+    localStorage.setItem('aapSubTab', _aapSubTab);
+    localStorage.setItem('aapMetricAgency', _aapMetric.agency);
+    localStorage.setItem('aapMetricAgent', _aapMetric.agent);
+  } catch (e) {}
+}
+function aapLoadPrefs() {
+  try {
+    const f = localStorage.getItem('aapFromYM'), t = localStorage.getItem('aapToYM');
+    const p = localStorage.getItem('aapPreset');
+    if (f && mrIsValidYM(f)) _aapFromYM = f;
+    if (t && mrIsValidYM(t)) _aapToYM = t;
+    if (p) _aapPreset = p;
+    const tab = localStorage.getItem('aapTab'); if (tab === 'table' || tab === 'chart') _aapTab = tab;
+    const sub = localStorage.getItem('aapSubTab'); if (sub === 'agency' || sub === 'agent') _aapSubTab = sub;
+    const ma = localStorage.getItem('aapMetricAgency'); if (ma === 'qty' || ma === 'revenue') _aapMetric.agency = ma;
+    const mg = localStorage.getItem('aapMetricAgent'); if (mg === 'qty' || mg === 'revenue') _aapMetric.agent = mg;
+  } catch (e) {}
+}
+
+function aapCurrentRange() {
+  if (_aapFromYM && _aapToYM && mrIsValidYM(_aapFromYM) && mrIsValidYM(_aapToYM)) {
+    const from = mrYMToDate(_aapFromYM);
+    const to = mrYMToDate(_aapToYM);
+    return from > to ? { start: mrYMToDate(_aapToYM), end: new Date(from.getFullYear(), from.getMonth() + 1, 1) }
+                     : { start: from,                  end: new Date(to.getFullYear(),   to.getMonth() + 1, 1) };
+  }
+  // Default: last 12 months ending this month
+  const today = new Date();
+  return {
+    start: new Date(today.getFullYear(), today.getMonth() - 11, 1),
+    end: new Date(today.getFullYear(), today.getMonth() + 1, 1),
+  };
+}
+function aapRangeLabel() {
+  const r = aapCurrentRange();
+  const lastMonth = new Date(r.end.getFullYear(), r.end.getMonth() - 1, 1);
+  return mrMonthLabel(r.start) + ' – ' + mrMonthLabel(lastMonth);
+}
+
+function aapSetFromParts(which) {
+  const yEl = document.getElementById('aap-' + which + '-year');
+  const mEl = document.getElementById('aap-' + which + '-month');
+  if (!yEl || !mEl) return;
+  const ym = yEl.value + '-' + String(mEl.value).padStart(2, '0');
+  if (!mrIsValidYM(ym)) return;
+  if (which === 'from') _aapFromYM = ym; else _aapToYM = ym;
+  _aapPreset = 'custom';
+  aapSavePrefs();
+  aapRender();
+}
+function aapPresetRange(name) {
+  const today = new Date();
+  const thisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  if (name === 'default')      { _aapFromYM = null; _aapToYM = null; }
+  else if (name === 'last6')   { _aapFromYM = mrDateToYM(new Date(today.getFullYear(), today.getMonth() - 5, 1));  _aapToYM = mrDateToYM(thisMonth); }
+  else if (name === 'last12')  { _aapFromYM = mrDateToYM(new Date(today.getFullYear(), today.getMonth() - 11, 1)); _aapToYM = mrDateToYM(thisMonth); }
+  else if (name === 'next6')   { _aapFromYM = mrDateToYM(thisMonth); _aapToYM = mrDateToYM(new Date(today.getFullYear(), today.getMonth() + 5, 1)); }
+  else if (name === 'cal')     { _aapFromYM = today.getFullYear() + '-01'; _aapToYM = today.getFullYear() + '-12'; }
+  else if (name === 'fy')      { const y = today.getMonth() >= 6 ? today.getFullYear() : today.getFullYear() - 1; _aapFromYM = y + '-07'; _aapToYM = (y + 1) + '-06'; }
+  _aapPreset = name;
+  aapSavePrefs();
+  aapRender();
+}
+
+function aapNum(v) { const n = Number(String(v ?? '').replace(/[$,]/g, '')); return isNaN(n) ? 0 : n; }
+function aapFmtRev(n) {
+  if (!n) return '$0';
+  if (Math.abs(n) >= 1000000) return '$' + (n / 1000000).toFixed(1) + 'M';
+  if (Math.abs(n) >= 1000) return '$' + Math.round(n / 1000) + 'K';
+  return '$' + Math.round(n).toLocaleString();
+}
+function aapFmtVal(v, mode) { return mode === 'revenue' ? aapFmtRev(v) : String(v); }
+
+// ── Aggregation ──────────────────────────────────────────────────────────
+// "New business" view: only lots whose Contract Issued Date is in the period
+// are counted. Segments / table columns then show how those lots progressed.
+//
+// Per-item fields:
+//   Funnel counts (table columns) — nested subsets of the in-period contract pool:
+//     contract = lots with Contract Issued in period (= total)
+//     exch     = of those, lots that have an Exchanged Date (any time)
+//     settled  = of those, lots that have a Settled Date   (any time)
+//   Mutually-exclusive buckets by HIGHEST stage reached so far (bars):
+//     bucket_settled  = settled (any time)
+//     bucket_exch     = exchanged but not yet settled
+//     bucket_contract = contract issued but not yet exchanged
+//   Sum of buckets = contract (= total lots brought in this period).
+function aapAggregate(byKey) {
+  const r = aapCurrentRange();
+  const map = new Map();
+  for (const row of allData) {
+    const agency = String(row['Vendors Agency'] || '').trim();
+    const agent  = String(row['Vendors Agency Agent'] || '').trim();
+    const key    = byKey === 'agency' ? agency : agent;
+    if (!key) continue;  // skip rows with no agency/agent
+
+    const cDate = mrParseDate(row['Contract Issued Date']);
+    const inC = cDate && cDate >= r.start && cDate < r.end;
+    if (!inC) continue;  // only count lots whose contract was issued in this period
+
+    // Has the lot ever reached these stages? (any date, not bounded by period)
+    const hasE = !!mrParseDate(row['Exchanged Date']);
+    const hasS = !!mrParseDate(row['Settled Date']);
+
+    let item = map.get(key);
+    if (!item) {
+      item = { name: key, agency: byKey === 'agent' ? agency : undefined,
+               contract: 0, exch: 0, settled: 0, contractRev: 0, exchRev: 0, settledRev: 0,
+               bucket_settled: 0, bucket_exch: 0, bucket_contract: 0,
+               bucketRev_settled: 0, bucketRev_exch: 0, bucketRev_contract: 0,
+               color: aapColorFor(key) };
+      map.set(key, item);
+    }
+
+    // Funnel counts (always count contract; count exch/settled if reached at any time)
+    item.contract += 1; item.contractRev += aapNum(row['CfS Issued Price']);
+    if (hasE) { item.exch    += 1; item.exchRev    += aapNum(row['CfS Exchanged Price ($)']); }
+    if (hasS) { item.settled += 1; item.settledRev += aapNum(row['CfS Settled Price ($)']); }
+
+    // Highest-stage bucket (mutually exclusive — each lot counted once)
+    if (hasS)      { item.bucket_settled  += 1; item.bucketRev_settled  += aapNum(row['CfS Settled Price ($)']); }
+    else if (hasE) { item.bucket_exch     += 1; item.bucketRev_exch     += aapNum(row['CfS Exchanged Price ($)']); }
+    else           { item.bucket_contract += 1; item.bucketRev_contract += aapNum(row['CfS Issued Price']); }
+  }
+  // Sort by total lots brought in (= contract count)
+  return [...map.values()].sort((a, b) => b.contract - a.contract);
+}
+
+// ── Rendering ───────────────────────────────────────────────────────────
+function openAgencyPerf() {
+  if (!allData || !allData.length) { toast('Load data first', 'error'); return; }
+  aapLoadPrefs();
+  document.getElementById('aap-overlay').classList.add('show');
+  aapRender();
+  document.addEventListener('keydown', aapEscHandler);
+}
+function closeAgencyPerf() {
+  document.getElementById('aap-overlay').classList.remove('show');
+  document.removeEventListener('keydown', aapEscHandler);
+}
+function aapEscHandler(e) { if (e.key === 'Escape') closeAgencyPerf(); }
+
+function aapShowTab(name) { _aapTab = name; aapSavePrefs(); aapRender(); }
+function aapShowSubTab(name) { _aapSubTab = name; aapSavePrefs(); aapRender(); }
+function aapSetMetric(panel, mode) { _aapMetric[panel] = mode; aapSavePrefs(); aapRender(); }
+
+function aapRender() {
+  const body = document.getElementById('aap-body');
+  if (!body) return;
+
+  // Subtitle
+  const sub = document.getElementById('aap-hdr-sub');
+  if (sub) sub.textContent = 'Lots / revenue by vendor agency & agent · ' + aapRangeLabel();
+
+  const r = aapCurrentRange();
+  const fromDate = r.start;
+  const toDate = new Date(r.end.getFullYear(), r.end.getMonth() - 1, 1);
+  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const monthOpts = (selected) => monthNames.map((n, i) => `<option value="${i + 1}" ${(i + 1) === selected ? 'selected' : ''}>${n}</option>`).join('');
+  const yearOpts = (selected) => { let h = ''; for (let y = MR_MIN_YEAR; y <= MR_MAX_YEAR; y++) h += `<option value="${y}" ${y === selected ? 'selected' : ''}>${y}</option>`; return h; };
+  const presetActive = (n) => _aapPreset === n ? 'active' : '';
+  const tabActive = (n) => _aapTab === n ? 'active' : '';
+  const subActive = (n) => _aapSubTab === n ? 'active' : '';
+
+  const today = new Date();
+  const fyShort = (() => { const y = today.getMonth() >= 6 ? today.getFullYear() : today.getFullYear() - 1; return String(y).slice(-2) + '/' + String(y + 1).slice(-2); })();
+
+  body.innerHTML = `
+    <div class="aap-range-bar">
+      <span class="aap-range-label">Date range</span>
+      <select class="aap-range-input" id="aap-from-month" onchange="aapSetFromParts('from')">${monthOpts(fromDate.getMonth() + 1)}</select>
+      <select class="aap-range-input" id="aap-from-year"  onchange="aapSetFromParts('from')">${yearOpts(fromDate.getFullYear())}</select>
+      <span style="color:#475569">→</span>
+      <select class="aap-range-input" id="aap-to-month"   onchange="aapSetFromParts('to')">${monthOpts(toDate.getMonth() + 1)}</select>
+      <select class="aap-range-input" id="aap-to-year"    onchange="aapSetFromParts('to')">${yearOpts(toDate.getFullYear())}</select>
+      <div class="aap-range-presets">
+        <button class="aap-range-preset ${presetActive('default')}" onclick="aapPresetRange('default')">Default (12mo)</button>
+        <button class="aap-range-preset ${presetActive('last6')}"  onclick="aapPresetRange('last6')">Last 6mo</button>
+        <button class="aap-range-preset ${presetActive('last12')}" onclick="aapPresetRange('last12')">Last 12mo</button>
+        <button class="aap-range-preset ${presetActive('next6')}"  onclick="aapPresetRange('next6')">Next 6mo</button>
+        <button class="aap-range-preset ${presetActive('cal')}"    onclick="aapPresetRange('cal')">${today.getFullYear()}</button>
+        <button class="aap-range-preset ${presetActive('fy')}"     onclick="aapPresetRange('fy')">FY${fyShort}</button>
+      </div>
+    </div>
+
+    <div class="aap-tab-strip">
+      <button class="aap-tab-btn ${tabActive('table')}" onclick="aapShowTab('table')">📋 Table</button>
+      <button class="aap-tab-btn ${tabActive('chart')}" onclick="aapShowTab('chart')">📊 Chart</button>
+    </div>
+
+    <div class="aap-tab-panel ${tabActive('table')}">${_aapTab === 'table' ? aapRenderTablesTab() : ''}</div>
+    <div class="aap-tab-panel ${tabActive('chart')}">${_aapTab === 'chart' ? aapRenderChartTab(subActive) : ''}</div>
+  `;
+
+  // After HTML is in the DOM, populate SVG charts (need real DOM nodes)
+  if (_aapTab === 'chart') {
+    const data = _aapSubTab === 'agency' ? aapAggregate('agency') : aapAggregate('agent');
+    aapDrawPie(_aapSubTab, data, _aapMetric[_aapSubTab]);
+    aapDrawBars(_aapSubTab, data, _aapMetric[_aapSubTab]);
+  }
+}
+
+function aapRenderTablesTab() {
+  const agencies = aapAggregate('agency');
+  const agents   = aapAggregate('agent');
+  const dash = '<span class="aap-dash">–</span>';
+  const fmt = n => n > 0 ? n : dash;
+
+  const aTotals = agencies.reduce((t, a) => ({ contract: t.contract + a.contract, exch: t.exch + a.exch, settled: t.settled + a.settled }), { contract: 0, exch: 0, settled: 0 });
+  const agencyBody = agencies.map(a => `<tr>
+    <td class="lcell">${ppEscape(a.name)}</td>
+    <td>${fmt(a.contract)}</td>
+    <td>${fmt(a.exch)}</td>
+    <td>${fmt(a.settled)}</td>
+  </tr>`).join('') || `<tr><td colspan="4" class="aap-empty">No agencies in this period</td></tr>`;
+
+  const gTotals = agents.reduce((t, a) => ({ contract: t.contract + a.contract, exch: t.exch + a.exch, settled: t.settled + a.settled }), { contract: 0, exch: 0, settled: 0 });
+  const agentBody = agents.map(a => `<tr>
+    <td class="lcell">${ppEscape(a.name)}</td>
+    <td class="lcell" style="color:#475569;font-weight:400">${ppEscape(a.agency || '')}</td>
+    <td>${fmt(a.contract)}</td>
+    <td>${fmt(a.exch)}</td>
+    <td>${fmt(a.settled)}</td>
+  </tr>`).join('') || `<tr><td colspan="5" class="aap-empty">No agents in this period</td></tr>`;
+
+  const period = aapRangeLabel();
+  return `
+    <div class="aap-tables-row">
+      <div class="aap-leaderboard">
+        <div class="aap-lb-title">Agency Leaderboard <span style="font-weight:500;font-size:11.5px;opacity:0.85">· 📅 ${period}</span></div>
+        <table class="aap-lb">
+          <thead><tr>
+            <th class="lcell">Agencies</th>
+            <th>Contract Issued</th>
+            <th>Exch'd</th>
+            <th>Settled</th>
+          </tr></thead>
+          <tbody>${agencyBody}</tbody>
+          ${agencies.length ? `<tfoot><tr>
+            <td class="lcell">Grand Total</td>
+            <td>${aTotals.contract}</td>
+            <td>${aTotals.exch}</td>
+            <td>${aTotals.settled}</td>
+          </tr></tfoot>` : ''}
+        </table>
+      </div>
+      <div class="aap-leaderboard">
+        <div class="aap-lb-title">Agent Leaderboard <span style="font-weight:500;font-size:11.5px;opacity:0.85">· 📅 ${period}</span></div>
+        <table class="aap-lb">
+          <thead><tr>
+            <th class="lcell">Agent</th>
+            <th class="lcell">Agency</th>
+            <th>Contract Issued</th>
+            <th>Exch'd</th>
+            <th>Settled</th>
+          </tr></thead>
+          <tbody>${agentBody}</tbody>
+          ${agents.length ? `<tfoot><tr>
+            <td class="lcell">Grand Total</td>
+            <td class="lcell"></td>
+            <td>${gTotals.contract}</td>
+            <td>${gTotals.exch}</td>
+            <td>${gTotals.settled}</td>
+          </tr></tfoot>` : ''}
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function aapRenderChartTab(subActive) {
+  // Period shown inside each chart card so screenshots are self-contained
+  // (people paste these into emails / decks where the page header isn't visible).
+  const period = aapRangeLabel();
+  const panel = (key, title, totalLabel) => {
+    const m = _aapMetric[key];
+    return `
+      <div class="aap-sub-panel ${subActive(key)}">
+        <div class="aap-chart-grid">
+          <div class="aap-chart-card">
+            <div class="aap-chart-card-hdr">
+              <div>
+                <div class="aap-chart-card-title">📈 ${title} · Contract Issued</div>
+                <div class="aap-chart-card-period">📅 ${period}</div>
+                <div class="aap-chart-card-sub">Total: <span id="aap-${key}-pie-total">—</span></div>
+              </div>
+              <div class="aap-metric-toggle">
+                <button class="${m === 'qty' ? 'active' : ''}"     onclick="aapSetMetric('${key}','qty')">Qty</button>
+                <button class="${m === 'revenue' ? 'active' : ''}" onclick="aapSetMetric('${key}','revenue')">Revenue</button>
+              </div>
+            </div>
+            <div class="aap-chart-svg-wrap">
+              <svg id="aap-${key}-pie-svg" class="aap-pie-svg" viewBox="0 0 280 280" width="100%" style="max-width:300px"></svg>
+            </div>
+            <div class="aap-chart-legend" id="aap-${key}-pie-legend"></div>
+          </div>
+          <div class="aap-chart-card">
+            <div class="aap-chart-card-hdr" style="display:block">
+              <div class="aap-chart-card-title">📊 Funnel ${title.toLowerCase()}</div>
+              <div class="aap-chart-card-period">📅 ${period}</div>
+              <div class="aap-chart-card-sub">Bar length = <span id="aap-${key}-bars-mode">lots with contract issued in period</span>. Each lot counted once at its current highest stage: 🔴 Settled · 🟡 Exchanged (not yet settled) · 🟢 Contract Issued (not yet exchanged).</div>
+            </div>
+            <div class="aap-stacked-bars" id="aap-${key}-bars-body"></div>
+            <div class="aap-chart-legend">
+              <div class="aap-legend-item"><div class="aap-legend-swatch" style="background:#1a6b3a"></div>Contract Issued</div>
+              <div class="aap-legend-item"><div class="aap-legend-swatch" style="background:#d97706"></div>Exchanged</div>
+              <div class="aap-legend-item"><div class="aap-legend-swatch" style="background:#b91c1c"></div>Settled</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  };
+
+  return `
+    <div class="aap-sub-tab-bar">
+      <div class="aap-sub-tab-strip">
+        <button class="aap-sub-tab-btn ${subActive('agency')}" onclick="aapShowSubTab('agency')">🏢 Agency Chart</button>
+        <button class="aap-sub-tab-btn ${subActive('agent')}"  onclick="aapShowSubTab('agent')">👤 Agent Chart</button>
+      </div>
+    </div>
+    ${panel('agency', 'By Agency', 'agencies')}
+    ${panel('agent',  'By Agent',  'agents')}
+  `;
+}
+
+// SVG renderers — operate on pre-aggregated data
+function aapValOf(item, stage, mode) {
+  const qty = item[stage] || 0;
+  if (mode !== 'revenue') return qty;
+  const rev = stage === 'contract' ? item.contractRev : (stage === 'exch' ? item.exchRev : item.settledRev);
+  return rev || 0;
+}
+function aapDrawPie(prefix, data, mode) {
+  const svg = document.getElementById('aap-' + prefix + '-pie-svg');
+  const legend = document.getElementById('aap-' + prefix + '-pie-legend');
+  const totalEl = document.getElementById('aap-' + prefix + '-pie-total');
+  if (!svg || !legend || !totalEl) return;
+
+  const cx = 140, cy = 140, R = 130;
+  const items = data.filter(d => d.contract > 0).map(d => ({ ...d, value: aapValOf(d, 'contract', mode) })).filter(d => d.value > 0);
+  const total = items.reduce((s, x) => s + x.value, 0);
+  totalEl.textContent = total === 0 ? '—' : (mode === 'revenue' ? aapFmtRev(total) : (total + ' lots'));
+
+  if (!items.length) { svg.innerHTML = `<text x="140" y="140" text-anchor="middle" font-size="13" fill="#8a7d65">No data in this period</text>`; legend.innerHTML = ''; return; }
+
+  let startA = 0;
+  const slices = items.map(d => {
+    const sweep = (d.value / total) * 2 * Math.PI;
+    const endA = startA + sweep;
+    const sx = cx + R * Math.sin(startA), sy = cy - R * Math.cos(startA);
+    const ex = cx + R * Math.sin(endA),   ey = cy - R * Math.cos(endA);
+    const large = sweep > Math.PI ? 1 : 0;
+    // Full circle (single slice) needs a special case
+    const path = (items.length === 1)
+      ? `M ${cx} ${cy - R} A ${R} ${R} 0 1 1 ${cx - 0.01} ${cy - R} Z`
+      : `M ${cx} ${cy} L ${sx.toFixed(2)} ${sy.toFixed(2)} A ${R} ${R} 0 ${large} 1 ${ex.toFixed(2)} ${ey.toFixed(2)} Z`;
+    const slice = { ...d, path, sweep, startA, endA, pct: d.value / total * 100 };
+    startA = endA;
+    return slice;
+  });
+
+  const labels = slices.filter(s => s.pct >= 5).map(s => {
+    const midA = (s.startA + s.endA) / 2;
+    const labelR = R * 0.62;
+    const lx = cx + labelR * Math.sin(midA);
+    const ly = cy - labelR * Math.cos(midA);
+    const valLabel = mode === 'revenue' ? aapFmtRev(s.value) : String(s.value);
+    return `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" font-size="${mode==='revenue'?'11':'13'}" font-weight="700" fill="#fff" style="pointer-events:none">${valLabel}</text>
+            <text x="${lx.toFixed(1)}" y="${(ly + (mode==='revenue'?12:13)).toFixed(1)}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.85)" style="pointer-events:none">${s.pct.toFixed(0)}%</text>`;
+  }).join('');
+
+  svg.innerHTML = slices.map(s => {
+    const valLabel = mode === 'revenue' ? aapFmtRev(s.value) : (s.value + ' lots');
+    return `<path d="${s.path}" fill="${s.color}" stroke="#fff" stroke-width="1.5" class="aap-slice"><title>${ppEscape(s.name)} — ${valLabel} (${s.pct.toFixed(1)}%)</title></path>`;
+  }).join('') + labels;
+
+  legend.innerHTML = items.map(d => {
+    const valLabel = mode === 'revenue' ? aapFmtRev(d.value) : d.contract;
+    return `<div class="aap-legend-item"><div class="aap-legend-swatch" style="background:${d.color}"></div>${ppEscape(d.name)} (${valLabel})</div>`;
+  }).join('');
+}
+function aapDrawBars(prefix, data, mode) {
+  // Bars use the mutually-exclusive buckets (each unique lot counted once at its
+  // highest stage reached in period). Bar length = unique lot count;
+  // segments add up cleanly to the total.
+  const body = document.getElementById('aap-' + prefix + '-bars-body');
+  const modeEl = document.getElementById('aap-' + prefix + '-bars-mode');
+  if (!body) return;
+  if (modeEl) modeEl.textContent = mode === 'revenue' ? 'revenue from lots brought in' : 'lots with contract issued in period';
+
+  const items = data.map(d => {
+    const v_contract = mode === 'revenue' ? d.bucketRev_contract : d.bucket_contract;
+    const v_exch     = mode === 'revenue' ? d.bucketRev_exch     : d.bucket_exch;
+    const v_settled  = mode === 'revenue' ? d.bucketRev_settled  : d.bucket_settled;
+    const total = v_contract + v_exch + v_settled;
+    return { ...d, v_contract, v_exch, v_settled, total };
+  }).filter(x => x.total > 0).sort((x, y) => y.total - x.total);
+
+  if (!items.length) { body.innerHTML = `<div class="aap-empty">No ${prefix === 'agency' ? 'agencies' : 'agents'} in this period</div>`; return; }
+
+  const maxTotal = Math.max(...items.map(x => x.total));
+  body.innerHTML = items.map(a => {
+    const barWidthPct = (a.total / maxTotal) * 100;
+    // Segment colour mapping (matches the rest of the app's traffic-light convention):
+    //   .dep (green) = bucket_contract  (Contract Issued · didn't exchange in period)
+    //   .exc (amber) = bucket_exch      (Exchanged · didn't settle in period)
+    //   .set (red)   = bucket_settled   (Settled · final stage)
+    const segs = [
+      { cls: 'dep', val: a.v_contract, raw: a.bucket_contract },
+      { cls: 'exc', val: a.v_exch,     raw: a.bucket_exch     },
+      { cls: 'set', val: a.v_settled,  raw: a.bucket_settled  },
+    ].filter(s => s.val > 0);
+    const segHtml = segs.map(s => {
+      const segPct = (s.val / a.total) * 100;
+      const label = mode === 'revenue' ? aapFmtRev(s.val) : String(s.raw);
+      return `<div class="aap-sb-seg ${s.cls}" style="width:${segPct.toFixed(2)}%" title="${label}">${label}</div>`;
+    }).join('');
+    const subline = a.agency ? `<small>${ppEscape(a.agency)}</small>` : '';
+    const totalLabel = mode === 'revenue' ? aapFmtRev(a.total) : a.total;
+    const totalSuffix = mode === 'revenue' ? '' : ' lots';
+    return `<div class="aap-sb-row">
+      <div class="aap-sb-name">${ppEscape(a.name)}${subline}</div>
+      <div class="aap-sb-track-wrap">
+        <div class="aap-sb-track" style="width:${barWidthPct.toFixed(2)}%">${segHtml}</div>
+      </div>
+      <div class="aap-sb-total"><strong>${totalLabel}</strong>${totalSuffix}</div>
+    </div>`;
+  }).join('');
+}
+
 function mrCurrentRange() {
   if (_mrFromYM && _mrToYM && mrIsValidYM(_mrFromYM) && mrIsValidYM(_mrToYM)) {
     const from = mrYMToDate(_mrFromYM);
@@ -5314,6 +6094,7 @@ function renderPipelineMonthlyReport(root) {
       <div class="pp-view-toggle">
         <button onclick="ppSwitchView('kanban')">📋 Current pipeline</button>
         <button class="active" onclick="ppSwitchView('report')">📊 Monthly report</button>
+        <button onclick="mrPrint()" title="Open browser print dialog → Save as PDF" style="background:#fff;color:#475569;border:1px solid #ddd5c0">📄 Export PDF</button>
       </div>
     </div>
 
@@ -5776,13 +6557,16 @@ function lcRenderField(row, fieldName, opts) {
   const raw = row[fieldName];
   const display = formatCellValue(fieldName, raw) || '';
   const isEmpty = display === '' || display === 'NaN' || display === 'undefined';
-  const valForEdit = String(raw ?? '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  // Store the editable value in data-val (HTML-escaped). Browser decodes the
+  // attribute back to the raw string when JS reads `this.dataset.val` — no
+  // string-interpolation gymnastics, handles newlines/quotes/backslashes safely.
+  const valForEdit = lcEscapeHtml(String(raw ?? ''));
   const cls = ['lc-fval'];
   if (isEmpty) cls.push('empty');
   if (opts && opts.landtax) cls.push('money', 'landtax');
   else if (fieldName.startsWith('$') || /Price|Rebate|Tax/.test(fieldName)) cls.push('money');
   const key = sid(fieldName);
-  return `<div class="lc-frow" id="d-row-${key}" onclick="deskStartEdit('${key}','${valForEdit}')">
+  return `<div class="lc-frow" id="d-row-${key}" data-key="${key}" data-val="${valForEdit}" onclick="deskStartEdit(this.dataset.key, this.dataset.val)">
     <span class="lc-flabel">${lcEscapeHtml(fieldName.trim())}</span>
     <span class="${cls.join(' ')}" id="d-disp-${key}">${isEmpty ? '—' : display}</span>
   </div>`;
@@ -5800,11 +6584,13 @@ function lcRenderSectionBody(row, s) {
   const notesHtml = noteFields.map(f => {
     const raw = row[f];
     const display = String(raw ?? '').trim();
-    const valForEdit = display.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    // Same data-val pattern as lcRenderField — comments often contain newlines
+    // (Alt+Enter in Excel) which silently broke the previous inline-string approach.
+    const valForEdit = lcEscapeHtml(display);
     const key = sid(f);
     return `<div class="lc-note-block">
       <div class="lc-note-label">${lcEscapeHtml(f.trim())}</div>
-      <div class="lc-note-body" id="d-disp-${key}" onclick="deskStartEdit('${key}','${valForEdit}')">${display ? lcEscapeHtml(display) : '—'}</div>
+      <div class="lc-note-body" id="d-disp-${key}" data-key="${key}" data-val="${valForEdit}" onclick="deskStartEdit(this.dataset.key, this.dataset.val)">${display ? lcEscapeHtml(display) : '—'}</div>
     </div>`;
   }).join('');
   return wrapper + notesHtml;
