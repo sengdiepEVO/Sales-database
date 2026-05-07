@@ -7,11 +7,15 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Sales DB</title>
-<link href="https://fonts.googleapis.com/css2?family=Aptos:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- Source Sans 3 from Google Fonts — primary UI font app-wide. Falls back to
+     OS native fonts if the user can't load Google Fonts (rare). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ── RESET & BASE ── */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#f5f0e8;color:#1a1408;overflow:hidden}
+html,body{height:100%;font-family:"Source Sans 3",sans-serif;font-size:13px;background:#f5f0e8;color:#1a1408;overflow:hidden}
 
 /* ── CSS VARIABLES ── */
 :root{
@@ -41,7 +45,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 .user-pill{display:flex;align-items:center;gap:6px}
 .user-avatar{width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;color:white;font-weight:500}
 .user-name{font-size:11px;color:#c8bfa8}
-.header-btn{background:transparent;border:1px solid rgba(255,255,255,0.2);color:#c8bfa8;font-size:11px;padding:5px 10px;border-radius:4px;cursor:pointer;font-family:"Aptos",sans-serif}
+.header-btn{background:transparent;border:1px solid rgba(255,255,255,0.2);color:#c8bfa8;font-size:11px;padding:5px 10px;border-radius:4px;cursor:pointer;font-family:"Source Sans 3",sans-serif}
 
 /* ── LOGIN ── */
 #screen-login{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg);z-index:150}
@@ -49,7 +53,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 .login-icon{width:56px;height:56px;background:var(--accent-light);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:24px}
 .login-title{font-size:24px;font-weight:700;margin-bottom:8px}
 .login-sub{color:var(--muted);font-size:12px;line-height:1.6;margin-bottom:24px}
-.ms-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;background:#0078d4;color:white;border:none;border-radius:4px;font-family:"Aptos",sans-serif;font-size:13px;cursor:pointer}
+.ms-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;background:#0078d4;color:white;border:none;border-radius:4px;font-family:"Source Sans 3",sans-serif;font-size:13px;cursor:pointer}
 .ms-logo{display:grid;grid-template-columns:1fr 1fr;gap:2px;width:16px;height:16px;flex-shrink:0}
 .ms-logo div{border-radius:1px}
 .ms-logo div:nth-child(1){background:#f25022}.ms-logo div:nth-child(2){background:#7fba00}
@@ -57,10 +61,10 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 .api-key-section{margin-top:20px;text-align:left}
 .api-key-section label{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
 .api-key-row{display:flex;gap:8px}
-.api-key-row input{flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:4px;font-family:"Aptos",sans-serif;font-size:12px;background:var(--bg);color:var(--ink);outline:none}
-.api-key-row button{padding:9px 14px;background:var(--accent);color:white;border:none;border-radius:4px;font-family:"Aptos",sans-serif;font-size:12px;cursor:pointer}
+.api-key-row input{flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:4px;font-family:"Source Sans 3",sans-serif;font-size:12px;background:var(--bg);color:var(--ink);outline:none}
+.api-key-row button{padding:9px 14px;background:var(--accent);color:white;border:none;border-radius:4px;font-family:"Source Sans 3",sans-serif;font-size:12px;cursor:pointer}
 .api-note{font-size:10px;color:var(--muted);margin-top:6px;line-height:1.5}
-.test-btn{margin-top:10px;width:100%;padding:9px;background:transparent;border:1px solid var(--border);border-radius:4px;font-family:"Aptos",sans-serif;font-size:12px;cursor:pointer;color:var(--muted)}
+.test-btn{margin-top:10px;width:100%;padding:9px;background:transparent;border:1px solid var(--border);border-radius:4px;font-family:"Source Sans 3",sans-serif;font-size:12px;cursor:pointer;color:var(--muted)}
 #api-test-result{font-size:11px;margin-top:6px;min-height:16px}
 
 /* ── APP WRAPPER ── */
@@ -85,7 +89,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 
   /* Desktop top nav */
   .desktop-nav{display:flex;align-items:center;background:var(--surface);border-bottom:1px solid var(--border);padding:0 16px;height:40px;flex-shrink:0}
-  .desktop-navbtn{padding:0 16px;height:40px;border:none;background:none;font-family:"Aptos",sans-serif;font-size:13px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s}
+  .desktop-navbtn{padding:0 16px;height:40px;border:none;background:none;font-family:"Source Sans 3",sans-serif;font-size:13px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s}
   .desktop-navbtn:hover{color:var(--ink)}
   .desktop-navbtn.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:500}
   .desktop-nav-right{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:11px;color:var(--muted)}
@@ -94,7 +98,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
   .sync-dot.saving{background:var(--gold);animation:pulse 1s infinite}
   .sync-dot.error{background:var(--danger)}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-  .refresh-btn{padding:4px 10px;border:1px solid var(--border);border-radius:4px;background:none;font-family:"Aptos",sans-serif;font-size:11px;cursor:pointer;color:var(--muted)}
+  .refresh-btn{padding:4px 10px;border:1px solid var(--border);border-radius:4px;background:none;font-family:"Source Sans 3",sans-serif;font-size:11px;cursor:pointer;color:var(--muted)}
   .refresh-btn:hover{color:var(--accent);border-color:var(--accent)}
 
   /* Desktop content area */
@@ -108,7 +112,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
   /* ── SPREADSHEET ── */
   .dt-toolbar{display:flex;align-items:center;gap:8px;padding:6px 14px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
   .dt-rec-count{font-size:11px;color:var(--muted);margin-left:auto}
-  .dt-clear-btn{padding:4px 10px;border:1px solid var(--border);border-radius:3px;background:none;font-family:"Aptos",sans-serif;font-size:11px;cursor:pointer;color:var(--muted)}
+  .dt-clear-btn{padding:4px 10px;border:1px solid var(--border);border-radius:3px;background:none;font-family:"Source Sans 3",sans-serif;font-size:11px;cursor:pointer;color:var(--muted)}
   .dt-clear-btn:hover{color:var(--danger);border-color:var(--danger)}
   .dt-wrap{flex:1;overflow:auto;background:white;min-height:0}
   table.dt{border-collapse:collapse;font-size:12px;white-space:nowrap;width:max-content}
@@ -132,14 +136,14 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
   /* ── COLUMN FILTER POPUP ── */
   .cf-popup{position:absolute;background:var(--surface);border:1px solid var(--border);border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,0.12);z-index:100;min-width:200px;max-height:300px;display:flex;flex-direction:column;overflow:hidden}
   .cf-header{padding:8px 12px;border-bottom:1px solid var(--border);font-size:11px;font-weight:600;color:var(--ink);display:flex;align-items:center;justify-content:space-between;background:var(--surface2);flex-shrink:0}
-  .cf-search{margin:8px;padding:5px 10px;border:1px solid var(--border);border-radius:4px;font-family:"Aptos",sans-serif;font-size:12px;outline:none;width:calc(100% - 16px);flex-shrink:0}
+  .cf-search{margin:8px;padding:5px 10px;border:1px solid var(--border);border-radius:4px;font-family:"Source Sans 3",sans-serif;font-size:12px;outline:none;width:calc(100% - 16px);flex-shrink:0}
   .cf-search:focus{border-color:var(--accent)}
   .cf-list{overflow-y:auto;flex:1}
   .cf-item{display:flex;align-items:center;gap:8px;padding:5px 12px;cursor:pointer;font-size:12px;color:var(--ink)}
   .cf-item:hover{background:var(--accent-light)}
   .cf-item input{cursor:pointer;accent-color:var(--accent)}
   .cf-actions{padding:8px;border-top:1px solid var(--border);display:flex;gap:6px;flex-shrink:0}
-  .cf-actions button{flex:1;padding:6px;border-radius:4px;font-family:"Aptos",sans-serif;font-size:11px;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--ink)}
+  .cf-actions button{flex:1;padding:6px;border-radius:4px;font-family:"Source Sans 3",sans-serif;font-size:11px;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--ink)}
   .cf-actions button.primary{background:var(--accent);color:white;border-color:var(--accent)}
 
   /* ── DESKTOP SIDE PANEL ── */
@@ -187,10 +191,10 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 /* ── PHONE DATA SCREEN ── */
 #screen-data{background:var(--bg)}
 .filter-header{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;gap:8px;flex-shrink:0}
-.search-input{flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:20px;font-family:"Aptos",sans-serif;font-size:12px;background:var(--surface2);color:var(--ink);outline:none}
-.filter-toggle-btn{display:flex;align-items:center;gap:5px;padding:8px 12px;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--ink);font-size:12px;font-family:"Aptos",sans-serif;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.search-input{flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:20px;font-family:"Source Sans 3",sans-serif;font-size:12px;background:var(--surface2);color:var(--ink);outline:none}
+.filter-toggle-btn{display:flex;align-items:center;gap:5px;padding:8px 12px;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--ink);font-size:12px;font-family:"Source Sans 3",sans-serif;cursor:pointer;white-space:nowrap;flex-shrink:0}
 .filter-toggle-btn.has-filters{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
-.dt-qf-btn{padding:5px 12px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-family:Aptos,sans-serif;cursor:pointer;background:var(--surface);color:var(--ink);white-space:nowrap}
+.dt-qf-btn{padding:5px 12px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-family:"Source Sans 3",sans-serif;cursor:pointer;background:var(--surface);color:var(--ink);white-space:nowrap}
 .dt-qf-btn.dt-qf-active{font-weight:600}
 .dt-qf-pen.dt-qf-active{background:#faeeda;color:#7a4900;border-color:#f5c842}
 .dt-qf-dep.dt-qf-active{background:#e8f0fd;color:#1a3a8b;border-color:#4a7fd4}
@@ -200,9 +204,9 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 .filter-drawer{background:var(--surface2);border-bottom:1px solid var(--border);padding:10px 14px;display:none;flex-direction:column;gap:8px;flex-shrink:0}
 .filter-drawer.open{display:flex}
 .filter-drawer-row{display:flex;gap:8px;flex-wrap:wrap}
-.filter-select{padding:7px 10px;border:1px solid var(--border);border-radius:4px;font-family:"Aptos",sans-serif;font-size:11px;background:var(--surface);color:var(--ink);outline:none;flex:1;min-width:130px}
+.filter-select{padding:7px 10px;border:1px solid var(--border);border-radius:4px;font-family:"Source Sans 3",sans-serif;font-size:11px;background:var(--surface);color:var(--ink);outline:none;flex:1;min-width:130px}
 .filter-select.active{border-color:var(--accent);background:var(--accent-light);color:var(--accent)}
-.filter-clear-btn{padding:7px 12px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--muted);font-size:11px;font-family:"Aptos",sans-serif;cursor:pointer;white-space:nowrap}
+.filter-clear-btn{padding:7px 12px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--muted);font-size:11px;font-family:"Source Sans 3",sans-serif;cursor:pointer;white-space:nowrap}
 .active-pills{display:flex;flex-wrap:wrap;gap:6px;padding:6px 14px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
 .active-pills:empty{display:none}
 .pill{display:flex;align-items:center;gap:4px;background:var(--accent-light);color:var(--accent);border-radius:99px;padding:3px 8px 3px 10px;font-size:11px}
@@ -236,7 +240,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 .badge-oth{background:#f0ebe0;color:#8a7d65}
 
 /* ── QUICK FILTER PILLS ── */
-.qf-btn{padding:3px 9px;border-radius:99px;font-size:10px;font-weight:500;cursor:pointer;border:1.5px solid transparent;white-space:nowrap;font-family:"Aptos",sans-serif;transition:all 0.15s;flex-shrink:0;opacity:0.5}
+.qf-btn{padding:3px 9px;border-radius:99px;font-size:10px;font-weight:500;cursor:pointer;border:1.5px solid transparent;white-space:nowrap;font-family:"Source Sans 3",sans-serif;transition:all 0.15s;flex-shrink:0;opacity:0.5}
 .qf-btn.qf-pen{background:#eeedfe;color:#534ab7;border-color:#534ab7}
 .qf-btn.qf-dep{background:#e8f0fd;color:#1a3a8b;border-color:#1a3a8b}
 .qf-btn.qf-exc{background:#fff0e0;color:#c45f00;border-color:#c45f00}
@@ -254,7 +258,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 .edit-row-label{font-size:11px;color:var(--muted);flex-shrink:0;width:40%}
 .edit-row-val{font-size:13px;color:var(--ink);text-align:right;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .edit-row-val.empty{color:var(--muted);font-style:italic}
-.edit-row input{font-size:13px;color:var(--ink);border:none;outline:none;text-align:right;flex:1;background:transparent;font-family:"Aptos",sans-serif;width:100%}
+.edit-row input{font-size:13px;color:var(--ink);border:none;outline:none;text-align:right;flex:1;background:transparent;font-family:"Source Sans 3",sans-serif;width:100%}
 .edit-row.editing{background:var(--accent-light)}
 .edit-row.editing .edit-row-label{color:var(--accent)}
 .edit-row.scan-filled{background:#FFFBEB;border-left:3px solid #C8860A}
@@ -266,13 +270,13 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 .form-screen{flex:1;overflow-y:auto;padding:16px;padding-bottom:0}
 .form-group{margin-bottom:14px}
 .form-group label{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px}
-.form-group input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:4px;font-family:"Aptos",sans-serif;font-size:13px;background:var(--bg);color:var(--ink);outline:none}
+.form-group input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:4px;font-family:"Source Sans 3",sans-serif;font-size:13px;background:var(--bg);color:var(--ink);outline:none}
 .form-group input:focus{border-color:var(--accent)}
 .form-actions{display:flex;gap:10px;padding:12px 16px;border-top:1px solid var(--border);background:var(--surface);position:sticky;bottom:0;flex-shrink:0}
-.btn{padding:12px 20px;border-radius:4px;font-family:"Aptos",sans-serif;font-size:13px;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--ink);flex:1}
+.btn{padding:12px 20px;border-radius:4px;font-family:"Source Sans 3",sans-serif;font-size:13px;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--ink);flex:1}
 .btn.primary{background:var(--accent);color:white;border-color:var(--accent)}
 .sub-header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 16px;height:var(--header-h);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.back-btn{background:none;border:none;color:var(--accent);font-size:13px;font-family:"Aptos",sans-serif;cursor:pointer}
+.back-btn{background:none;border:none;color:var(--accent);font-size:13px;font-family:"Source Sans 3",sans-serif;cursor:pointer}
 .sub-title{font-size:16px;font-weight:500}
 
 /* ── CHAT ── */
@@ -290,10 +294,10 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 .typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
 @keyframes blink{0%,80%,100%{opacity:.3}40%{opacity:1}}
 .suggestions{display:flex;gap:6px;flex-wrap:wrap;padding:8px 14px 0}
-.sug-btn{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:5px 10px;border-radius:12px;font-size:11px;cursor:pointer;font-family:"Aptos",sans-serif}
+.sug-btn{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:5px 10px;border-radius:12px;font-size:11px;cursor:pointer;font-family:"Source Sans 3",sans-serif}
 .chat-input-area{padding:10px 14px 14px;border-top:1px solid var(--border);background:var(--surface);flex-shrink:0}
 .chat-input-row{display:flex;gap:8px;margin-top:8px}
-.chat-textarea{flex:1;padding:10px 13px;border:1px solid var(--border);border-radius:20px;font-family:"Aptos",sans-serif;font-size:13px;background:var(--surface2);color:var(--ink);outline:none;resize:none;height:42px}
+.chat-textarea{flex:1;padding:10px 13px;border:1px solid var(--border);border-radius:20px;font-family:"Source Sans 3",sans-serif;font-size:13px;background:var(--surface2);color:var(--ink);outline:none;resize:none;height:42px}
 .chat-send{width:42px;height:42px;border-radius:50%;background:var(--accent);color:white;border:none;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 
 /* ── REPORTS (phone) ── */
@@ -316,7 +320,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 .modal-overlay.open{display:flex}
 .modal-sheet{background:var(--surface);border-radius:16px 16px 0 0;width:100%;min-height:300px;max-height:calc(100dvh - 100px);display:flex;flex-direction:column;overflow:hidden}
 .modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:10px auto 6px;flex-shrink:0}
-.modal-btn{flex:1;padding:12px;border-radius:4px;font-family:"Aptos",sans-serif;font-size:12px;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--ink)}
+.modal-btn{flex:1;padding:12px;border-radius:4px;font-family:"Source Sans 3",sans-serif;font-size:12px;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--ink)}
 .modal-btn.primary{background:var(--accent);color:white;border-color:var(--accent)}
 
 /* ───────────────────────────────────────────────────────────────────────
@@ -330,7 +334,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
   #dscreen-edit .desktop-edit-actions { display: none; }
   #dscreen-edit .desktop-edit-body { padding: 0; }
 }
-.lc-shell { background: #fff; height: 100%; display: flex; flex-direction: column; min-height: 0; font-family: "Aptos", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1e293b; }
+.lc-shell { background: #fff; height: 100%; display: flex; flex-direction: column; min-height: 0; font-family: "Source Sans 3", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1e293b; }
 .lc-hdr { background: linear-gradient(to bottom, #000d35 0%, #002675 100%); color: #fff; padding: 20px 22px; display: flex; align-items: center; gap: 18px; flex-shrink: 0; }
 .lc-hdr-tile { width: 96px; height: 96px; border-radius: 12px; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.18); display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; line-height: 1; }
 .lc-hdr-tile span { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.65); font-weight: 600; margin-bottom: 4px; }
@@ -422,7 +426,7 @@ html,body{height:100%;font-family:"Aptos",sans-serif;font-size:13px;background:#
 /* ───────────────────────────────────────────────────────────────────────
    DEPOSIT TRANSITION POPUP (.lcm-) — opens when user clicks Deposit stage
    ─────────────────────────────────────────────────────────────────────── */
-.lcm-overlay { position: fixed; inset: 0; z-index: 100; background: rgba(15,23,42,0.55); display: none; align-items: center; justify-content: center; padding: 20px; font-family: "Aptos", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.lcm-overlay { position: fixed; inset: 0; z-index: 100; background: rgba(15,23,42,0.55); display: none; align-items: center; justify-content: center; padding: 20px; font-family: "Source Sans 3", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 .lcm-overlay.show { display: flex; }
 .lcm { background: #fff; border-radius: 12px; box-shadow: 0 16px 48px rgba(0,0,0,0.35); width: 100%; max-width: 540px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; color: #1e293b; }
 .lcm-hdr { background: linear-gradient(to bottom, #000d35 0%, #002675 100%); color: #fff; padding: 18px 22px; flex-shrink: 0; position: relative; }
@@ -561,7 +565,7 @@ select.lcm-input { appearance: none; background-image: url("data:image/svg+xml,%
 .pp-tile-num { font-size: 15px; font-weight: 700; color: #002675; font-variant-numeric: tabular-nums; }
 .pp-tile-stage { font-size: 10px; color: #8a7d65; font-weight: 500; letter-spacing: 0.4px; text-transform: uppercase; }
 .pp-tile-addr { font-size: 12px; color: #1a1408; margin-top: 3px; line-height: 1.3; }
-.pp-tile-comment { font-size: 12px; color: #475569; line-height: 1.4; font-style: italic; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.pp-tile-comment { font-size: 12px; color: #475569; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .pp-tile-comment.empty { color: #94a3b8; }
 .pp-tile-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 7px; }
 .pp-tile-val { font-size: 12.5px; font-weight: 600; color: #1a1408; font-variant-numeric: tabular-nums; }
@@ -1013,7 +1017,7 @@ table.aap-lb tfoot td.lcell { text-align: left; }
       <div class="ms-logo"><div></div><div></div><div></div><div></div></div>
       Sign in with Microsoft
     </button>
-    <button type="button" onclick="loadDemoData()" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:10px;margin-top:10px;background:#fff;color:var(--accent);border:1px solid var(--accent);border-radius:4px;font-family:'Aptos',sans-serif;font-size:12px;cursor:pointer">
+    <button type="button" onclick="loadDemoData()" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:10px;margin-top:10px;background:#fff;color:var(--accent);border:1px solid var(--accent);border-radius:4px;font-family:'Source Sans 3',sans-serif;font-size:12px;cursor:pointer">
       🧪 Try with demo data (no sign-in)
     </button>
     <div style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.5">Loads ~20 sample lots so you can preview the UI. Edits don't save.</div>
@@ -1077,13 +1081,13 @@ table.aap-lb tfoot td.lcell { text-align: left; }
       <div class="desktop-screen" id="dscreen-data">
         <!-- Desktop filter bar -->
         <div style="background:var(--surface);border-bottom:1px solid var(--border);padding:8px 16px;display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap">
-          <input type="text" id="dt-search" placeholder="Search..." oninput="applyFilters()" style="flex:1;min-width:160px;padding:6px 12px;border:1px solid var(--border);border-radius:20px;font-family:Aptos,sans-serif;font-size:12px;background:var(--surface2);color:var(--ink);outline:none">
+          <input type="text" id="dt-search" placeholder="Search..." oninput="applyFilters()" style="flex:1;min-width:160px;padding:6px 12px;border:1px solid var(--border);border-radius:20px;font-family:"Source Sans 3",sans-serif;font-size:12px;background:var(--surface2);color:var(--ink);outline:none">
           <button id="dt-qf-pending"  onclick="deskToggleQF(this,'2. Pending SA')" class="dt-qf-btn dt-qf-pen">Pending SA</button>
           <button id="dt-qf-deposit"  onclick="deskToggleQF(this,'3. Deposit')"    class="dt-qf-btn dt-qf-dep">Deposit</button>
           <button id="dt-qf-exchange" onclick="deskToggleQF(this,'4. Exchanged')"  class="dt-qf-btn dt-qf-exc">Exchanged</button>
           <button id="dt-qf-settled"  onclick="deskToggleQF(this,'5. Settled')"    class="dt-qf-btn dt-qf-set">Settled</button>
-          <button onclick="clearFilters()" style="padding:5px 12px;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--muted);font-size:12px;cursor:pointer;font-family:Aptos,sans-serif">&#10005; Clear</button>
-          <button onclick="exportData()" title="Export currently filtered rows to .xlsx" style="padding:5px 14px;border:1px solid var(--accent);border-radius:20px;background:var(--accent);color:#fff;font-size:12px;cursor:pointer;font-family:Aptos,sans-serif;font-weight:500">⬇ Export</button>
+          <button onclick="clearFilters()" style="padding:5px 12px;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--muted);font-size:12px;cursor:pointer;font-family:"Source Sans 3",sans-serif">&#10005; Clear</button>
+          <button onclick="exportData()" title="Export currently filtered rows to .xlsx" style="padding:5px 14px;border:1px solid var(--accent);border-radius:20px;background:var(--accent);color:#fff;font-size:12px;cursor:pointer;font-family:"Source Sans 3",sans-serif;font-weight:500">⬇ Export</button>
         </div>
         <div class="dt-toolbar">
           <span style="font-size:11px;color:var(--muted)" id="dt-active-filters"></span>
@@ -1103,7 +1107,7 @@ table.aap-lb tfoot td.lcell { text-align: left; }
         <div class="desktop-chat">
           <div class="desktop-chat-header">
             <div class="desktop-chat-title">Ask Claude</div>
-            <button onclick="clearChat()" style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:Aptos,sans-serif">Clear</button>
+            <button onclick="clearChat()" style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:"Source Sans 3",sans-serif">Clear</button>
           </div>
           <div class="chat-msgs" id="dchat-msgs">
             <div class="msg system"><div class="msg-body">Sign in to start asking questions about your sales data.</div></div>
@@ -1206,12 +1210,12 @@ table.aap-lb tfoot td.lcell { text-align: left; }
         <button class="qf-btn qf-dep" id="qf-deposit"  onclick="toggleQuickFilter(this,'3. Deposit')">Deposit</button>
         <button class="qf-btn qf-exc" id="qf-exchange" onclick="toggleQuickFilter(this,'4. Exchanged')">Exchanged</button>
         <button class="qf-btn qf-set" id="qf-settled"  onclick="toggleQuickFilter(this,'5. Settled')">Settled</button>
-        <button onclick="clearFilters()" style="padding:5px 10px;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--muted);font-size:11px;cursor:pointer;font-family:Aptos,sans-serif;white-space:nowrap;flex-shrink:0">&#10005;</button>
+        <button onclick="clearFilters()" style="padding:5px 10px;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--muted);font-size:11px;cursor:pointer;font-family:"Source Sans 3",sans-serif;white-space:nowrap;flex-shrink:0">&#10005;</button>
       </div>
       <div class="sync-bar" id="sync-bar">
         <div class="sync-dot" id="sync-dot"></div>
         <span class="sync-text" id="sync-text">Synced with OneDrive</span>
-        <span style="margin-left:auto"><button style="font-size:11px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:Aptos,sans-serif" onclick="refreshFromOneDrive()">&#8635; Refresh</button></span>
+        <span style="margin-left:auto"><button style="font-size:11px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:"Source Sans 3",sans-serif" onclick="refreshFromOneDrive()">&#8635; Refresh</button></span>
       </div>
       <div class="rec-bar">
         <span id="rec-count">&#8212; records</span>
@@ -1245,7 +1249,7 @@ table.aap-lb tfoot td.lcell { text-align: left; }
       <div class="sub-header">
         <button class="back-btn" onclick="cancelEditCheck()">&#8592; Back</button>
         <span class="sub-title">Edit record</span>
-        <button onclick="openScanPdf()" style="padding:5px 10px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-family:Aptos,sans-serif;font-size:11px;cursor:pointer">&#128196; Scan PDF</button>
+        <button onclick="openScanPdf()" style="padding:5px 10px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-family:"Source Sans 3",sans-serif;font-size:11px;cursor:pointer">&#128196; Scan PDF</button>
       </div>
       <div class="form-screen">
         <div id="edit-fields"></div>
@@ -1260,13 +1264,13 @@ table.aap-lb tfoot td.lcell { text-align: left; }
     <div id="screen-chat" class="screen" style="background:var(--bg)">
       <div class="sub-header">
         <span class="sub-title">Ask Claude</span>
-        <button onclick="clearChat()" style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:Aptos,sans-serif">Clear</button>
+        <button onclick="clearChat()" style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:"Source Sans 3",sans-serif">Clear</button>
       </div>
       <div id="chat-key-banner" style="display:none;padding:10px 16px;background:#fff8e1;border-bottom:1px solid #ffe082;font-size:12px;color:#5d4037">
         ⚠ API key missing or invalid.
         <div style="display:flex;gap:6px;margin-top:6px">
           <input id="chat-key-input" type="text" placeholder="Paste sk-ant-... key" autocorrect="off" autocapitalize="none" spellcheck="false"
-            style="flex:1;padding:6px 10px;border:1px solid #ccc;border-radius:6px;font-size:12px;font-family:Aptos,sans-serif">
+            style="flex:1;padding:6px 10px;border:1px solid #ccc;border-radius:6px;font-size:12px;font-family:"Source Sans 3",sans-serif">
           <button onclick="saveChatKey()" style="padding:6px 12px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer">Save</button>
         </div>
       </div>
@@ -1353,7 +1357,7 @@ table.aap-lb tfoot td.lcell { text-align: left; }
         <button onclick="saveSalesTargets()" style="padding:6px 16px;background:var(--accent);color:white;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600">Save to Excel</button>
         <button onclick="cancelSalesTargets()" style="padding:6px 12px;background:none;border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer;color:var(--muted)">Cancel</button>
       </div>
-      <table id="st-table" style="border-collapse:collapse;font-size:11px;font-family:Aptos,sans-serif;min-width:800px;width:100%"></table>
+      <table id="st-table" style="border-collapse:collapse;font-size:11px;font-family:"Source Sans 3",sans-serif;min-width:800px;width:100%"></table>
     </div>
     <!-- Error -->
     <div id="st-error" style="display:none;padding:32px;text-align:center">
@@ -1401,7 +1405,7 @@ table.aap-lb tfoot td.lcell { text-align: left; }
       <div>Loading CfS Track data...</div>
     </div>
     <div id="cfs-table-wrap" style="display:none;overflow-x:auto;padding:16px">
-      <table id="cfs-table" style="border-collapse:collapse;font-size:11px;font-family:Aptos,sans-serif;min-width:900px;width:100%"></table>
+      <table id="cfs-table" style="border-collapse:collapse;font-size:11px;font-family:"Source Sans 3",sans-serif;min-width:900px;width:100%"></table>
     </div>
     <div id="cfs-error" style="display:none;padding:32px;text-align:center">
       <div style="font-size:32px;margin-bottom:8px">&#9888;&#65039;</div>
@@ -1427,7 +1431,7 @@ table.aap-lb tfoot td.lcell { text-align: left; }
     </div>
     <div style="padding:16px 20px">
       <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:600">NEW NOTE (prepended with today's date)</div>
-      <textarea id="cfsnote-input" placeholder="Enter note..." style="width:100%;height:80px;padding:10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:Aptos,sans-serif;color:var(--ink);background:var(--bg);resize:vertical;box-sizing:border-box"></textarea>
+      <textarea id="cfsnote-input" placeholder="Enter note..." style="width:100%;height:80px;padding:10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:"Source Sans 3",sans-serif;color:var(--ink);background:var(--bg);resize:vertical;box-sizing:border-box"></textarea>
     </div>
     <div style="padding:0 20px 16px;display:flex;gap:10px;justify-content:flex-end">
       <button onclick="closeCfsNote()" style="padding:8px 16px;background:none;border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer;color:var(--muted)">Cancel</button>
@@ -1517,7 +1521,7 @@ table.aap-lb tfoot td.lcell { text-align: left; }
     <div class="desktop-edit-header">
       <button class="back-btn" onclick="deskCancelEditCheck()">&#8592; Back</button>
       <span class="sub-title" id="d-edit-title">Edit record</span>
-      <button onclick="openScanPdf()" style="padding:5px 14px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-family:Aptos,sans-serif;font-size:12px;cursor:pointer">&#128196; Scan PDF</button>
+      <button onclick="openScanPdf()" style="padding:5px 14px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-family:"Source Sans 3",sans-serif;font-size:12px;cursor:pointer">&#128196; Scan PDF</button>
     </div>
     <div class="desktop-edit-body" id="d-edit-fields" style="flex:1;overflow-y:auto"></div>
     <div class="desktop-edit-actions">
@@ -3192,7 +3196,7 @@ Return ONLY the JSON object, no other text.`;
           type="text"
           value="${display.replace(/"/g,'&quot;')}"
           placeholder="Not found — tap to enter manually"
-          style="width:100%;padding:8px 10px;border:1.5px solid ${border};border-radius:6px;font-size:13px;font-family:Aptos,sans-serif;background:${inputBg};color:var(--ink);outline:none"
+          style="width:100%;padding:8px 10px;border:1.5px solid ${border};border-radius:6px;font-size:13px;font-family:"Source Sans 3",sans-serif;background:${inputBg};color:var(--ink);outline:none"
         >
       </div>`;
     }).join('');
@@ -3430,7 +3434,7 @@ function renderSalesTargetTable() {
       const inp = document.createElement('input');
       inp.type = 'number';
       inp.value = txt === '—' ? '' : txt;
-      inp.style.cssText = 'width:44px;background:rgba(255,255,255,0.25);border:1px solid rgba(255,255,255,0.6);border-radius:3px;color:white;font-size:11px;text-align:center;padding:2px 4px;font-family:Aptos,sans-serif;font-weight:700';
+      inp.style.cssText = 'width:44px;background:rgba(255,255,255,0.25);border:1px solid rgba(255,255,255,0.6);border-radius:3px;color:white;font-size:11px;text-align:center;padding:2px 4px;font-family:"Source Sans 3",sans-serif;font-weight:700';
       inp.addEventListener('change', onChange);
       el.appendChild(inp);
     } else {
@@ -3532,7 +3536,7 @@ function renderSalesTargetTable() {
         });
         // Fix editable input style to match new colours
         if (cell.firstChild && cell.firstChild.tagName === 'INPUT') {
-          cell.firstChild.style.cssText = 'width:44px;background:rgba(255,255,255,0.5);border:1px solid rgba(0,0,0,0.25);border-radius:3px;color:#1A1A1A;font-size:11px;text-align:center;padding:2px 4px;font-family:Aptos,sans-serif;font-weight:700';
+          cell.firstChild.style.cssText = 'width:44px;background:rgba(255,255,255,0.5);border:1px solid rgba(0,0,0,0.25);border-radius:3px;color:#1A1A1A;font-size:11px;text-align:center;padding:2px 4px;font-family:"Source Sans 3",sans-serif;font-weight:700';
         }
         tr.appendChild(cell);
       } else {
@@ -7140,7 +7144,7 @@ function deskStartEdit(key, currentVal) {
   const rawVal = (currentVal === '&#8212;' || currentVal === '—') ? '' : currentVal;
   disp.style.background = 'var(--accent-light)';
   disp.innerHTML = '';
-  const inputStyle = 'width:100%;border:none;outline:none;font-size:13px;font-family:Aptos,sans-serif;background:transparent;padding:0;color:var(--ink)';
+  const inputStyle = 'width:100%;border:none;outline:none;font-size:13px;font-family:"Source Sans 3",sans-serif;background:transparent;padding:0;color:var(--ink)';
 
   // Percent field
   if (PERCENT_COLS.has(key) || key === sid('Deposit%')) {
